@@ -16,6 +16,58 @@ final class Machine<Input, Output, Loggable> {
     required this.onCreate,
   });
 
+  static Machine<T, T Function(T), Loggable> chamber<T, Loggable>({
+    required String id,
+    required T initial,
+    required Set<Silo<T, Loggable>> Function(T state) map,
+  }) {
+    Feature<(), T Function(T), (), T, T Function(T), Loggable> config(Set<Silo<T, Loggable>> machines) {
+      return Feature.create(
+        state: (),
+        machines: machines,
+        transit: (extras, trigger) {
+          switch (trigger) {
+            case InternalFeatureEvent<T Function(T), T>(value: final value):
+              return FeatureTransition(config(extras.machines), effects: [ExternalFeatureEvent(value)]);
+            case ExternalFeatureEvent<T Function(T), T>(value: final value):
+              return FeatureTransition(config(map(value)));
+          }
+        },
+      );
+    }
+
+    return Machine.feature(
+      id: id,
+      feature: (id, logger) {
+        return config(map(initial));
+      },
+    );
+  }
+
+  static Silo<T, Loggable> silo<Object, T, Loggable>({
+    required String id,
+    required Object Function(void Function(T Function(T) transition) callback) onStart,
+    required void Function(Object object) onStop,
+  }) {
+    return Machine.create(
+      id: id,
+      onCreate: (id, logger) {
+        return _Holder<Object>();
+      },
+      onChange: (object, callback) {
+        if (callback != null) {
+          object.object = onStart(callback);
+        } else {
+          onStop(object.object as Object);
+          object.object = null;
+        }
+      },
+      onProcess: (object, input) async {
+        // do nothing
+      },
+    );
+  }
+
   static Machine<ExtTrigger, ExtEffect, Loggable> feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>({
     required String id,
     required Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
@@ -347,3 +399,9 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
     ]);
   }
 }
+
+final class _Holder<Object> {
+  Object? object;
+}
+
+typedef Silo<T, Loggable> = Machine<(), T Function(T), Loggable>;
