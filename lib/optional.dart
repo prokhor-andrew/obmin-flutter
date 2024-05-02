@@ -51,6 +51,15 @@ sealed class Optional<T> {
     }
   }
 
+  T? valueOrNull() {
+    switch (this) {
+      case None<T>():
+        return null;
+      case Some<T>(value: final value):
+        return value;
+    }
+  }
+
   bool get isNone => switch (this) {
         None<T>() => true,
         Some<T>() => false,
