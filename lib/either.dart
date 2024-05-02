@@ -32,6 +32,24 @@ sealed class Either<L, R> {
     }
   }
 
+  Optional<L> leftOrNone() {
+    switch (this) {
+      case Left(value: final value):
+        return Some(value);
+      case Right():
+        return None();
+    }
+  }
+
+  Optional<R> rightOrNone() {
+    switch (this) {
+      case Left():
+        return None();
+      case Right(value: final value):
+        return Some(value);
+    }
+  }
+
   @override
   String toString() {
     switch (this) {
