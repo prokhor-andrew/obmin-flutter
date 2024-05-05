@@ -20,3 +20,11 @@ extension LensOutputOnMachine<Input, T, Loggable> on Machine<Input, T Function(T
     });
   }
 }
+
+extension SetMachineLensOutput<Input, T, Loggable> on Set<Machine<Input, T Function(T), Loggable>> {
+  Set<Machine<Input, R Function(R), Loggable>> lensOutput<R>(Lens<R, T> lens) {
+    return map((machine) {
+      return machine.lensOutput(lens);
+    }).toSet();
+  }
+}
