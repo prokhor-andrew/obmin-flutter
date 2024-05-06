@@ -3,7 +3,7 @@ import 'package:obmin_concept/optional.dart';
 
 final class Prism<Whole, Part> {
   final Optional<Part> Function(Whole whole) get;
-  final Whole Function(Part part) set;
+  final Whole Function(Whole whole, Part part) set;
 
   Prism({
     required this.get,
@@ -15,7 +15,9 @@ extension PrismOutputOnMachine<Input, T, Loggable> on Machine<Input, T Function(
   Machine<Input, R Function(R), Loggable> prismOutput<R>(Prism<R, T> prism) {
     return transformOutput((transition) {
       return (whole) {
-        return prism.get(whole).map((part) => prism.set(transition(part))).valueOr(whole);
+        return prism.get(whole).map((part) {
+          return prism.set(whole, transition(part));
+        }).valueOr(whole);
       };
     });
   }
