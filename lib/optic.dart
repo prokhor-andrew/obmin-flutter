@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:obmin_concept/lens.dart';
-import 'package:obmin_concept/optional.dart';
+import 'package:obmin_concept/utils/optional.dart';
 
 final class Optic<T> {
   final (T, void Function(T Function(T))) Function(BuildContext context) _data;

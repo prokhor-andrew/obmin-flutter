@@ -1,6 +1,6 @@
-import 'package:obmin_concept/feature.dart';
-import 'package:obmin_concept/machine.dart';
-import 'package:obmin_concept/machine_logger.dart';
+import 'package:obmin_concept/b_base/feature_machine/feature.dart';
+import 'package:obmin_concept/a_foundation/machine.dart';
+import 'package:obmin_concept/a_foundation/machine_logger.dart';
 
 final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
   final State state;

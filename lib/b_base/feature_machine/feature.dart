@@ -1,6 +1,6 @@
-import 'package:obmin_concept/machine_logger.dart';
+import 'package:obmin_concept/a_foundation/machine_logger.dart';
 
-import 'machine.dart';
+import '../../a_foundation/machine.dart';
 
 final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
   final State state;

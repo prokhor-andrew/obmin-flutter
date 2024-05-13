@@ -1,6 +1,6 @@
-import 'package:obmin_concept/feature.dart';
-import 'package:obmin_concept/machine_logger.dart';
-import 'package:obmin_concept/outline.dart';
+import 'package:obmin_concept/b_base/feature_machine/feature.dart';
+import 'package:obmin_concept/a_foundation/machine_logger.dart';
+import 'package:obmin_concept/b_base/feature_machine/outline.dart';
 
 final class Scene<State, Trigger, Effect, Loggable> {
   final State state;
