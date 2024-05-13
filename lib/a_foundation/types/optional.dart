@@ -1,4 +1,4 @@
-import 'either.dart';
+import 'package:obmin_concept/a_foundation/types/either.dart';
 
 sealed class Optional<T> {
   Optional<R> map<R>(R Function(T value) function) {

@@ -1,4 +1,4 @@
-import 'package:obmin_concept/utils/optional.dart';
+import 'package:obmin_concept/a_foundation/types/optional.dart';
 
 sealed class Either<L, R> {
   Either<LeftResult, R> mapLeft<LeftResult>(LeftResult Function(L left) mapper) {
