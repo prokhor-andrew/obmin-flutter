@@ -1,8 +1,8 @@
 import 'package:obmin_concept/a_foundation/machine.dart';
 import 'package:obmin_concept/a_foundation/machine_factory.dart';
+import 'package:obmin_concept/a_foundation/machine_logger.dart';
 import 'package:obmin_concept/b_base/basic_machine/basic_machine.dart';
 import 'package:obmin_concept/b_base/feature_machine/feature.dart';
-import 'package:obmin_concept/a_foundation/machine_logger.dart';
 
 extension FeatureMachine on MachineFactory {
   Machine<ExtTrigger, ExtEffect, Loggable> feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>({
@@ -40,7 +40,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
 
   void Function(ExtEffect)? _callback;
 
-  Set<Process<IntEffect, IntTrigger, Loggable>> _processes = {};
+  Set<Process<IntEffect>> _processes = {};
 
   FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
     FeatureEvent<IntTrigger, ExtTrigger>,

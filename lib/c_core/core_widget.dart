@@ -32,7 +32,7 @@ class CoreWidget<DomainState, DomainEvent, Loggable> extends StatefulWidget {
 }
 
 class _CoreWidgetState<DomainState, DomainEvent, Loggable> extends State<CoreWidget<DomainState, DomainEvent, Loggable>> {
-  Process<void, void, Loggable>? _process;
+  Process<void>? _process;
 
   late DomainState _state;
   void Function(DomainEvent event)? _callback;

@@ -1,6 +1,5 @@
 part of 'channel.dart';
 
-
 final class Channel<T, Loggable> {
   _ChannelState<T> _state = _IdleChannelState();
 
@@ -12,8 +11,8 @@ final class Channel<T, Loggable> {
     required this.logger,
   });
 
-  Future<Optional<T>> next() {
-    final Completer<Optional<T>> completer = Completer();
+  Future<T> next() {
+    final Completer<T> completer = Completer();
 
     switch (_state) {
       case _IdleChannelState<T>():
@@ -24,7 +23,7 @@ final class Channel<T, Loggable> {
         break;
       case _AwaitingForConsumer<T>(buffer: final array):
         array[0]._completer.complete(true);
-        completer.complete(Some(array[0].data));
+        completer.complete(array[0].data);
         _handleBuffer(event: ChannelBufferRemovedEvent(isConsumed: true), currentArray: array.minusFirst());
         break;
     }
@@ -32,7 +31,7 @@ final class Channel<T, Loggable> {
     return completer.future;
   }
 
-  Future<bool> yield(T val) {
+  Future<bool> send(T val) {
     final String id = const Uuid().v4().toString();
     final Completer<bool> completer = Completer();
 
@@ -46,7 +45,7 @@ final class Channel<T, Loggable> {
       case _AwaitingForProducer<T>(cur: final cur, rest: final rest):
         _state = _IdleChannelState();
         [cur].plusMultiple(rest).forEach((element) {
-          element.comp.complete(Some(val));
+          element.comp.complete(val);
         });
         completer.complete(true);
         break;
@@ -105,7 +104,7 @@ final class _AwaitingForConsumer<T> extends _ChannelState<T> {
 }
 
 final class ChannelConsumer<T> {
-  final Completer<Optional<T>> comp;
+  final Completer<T> comp;
 
   ChannelConsumer(this.comp);
 }
