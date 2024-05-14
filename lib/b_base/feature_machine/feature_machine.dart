@@ -1,6 +1,8 @@
+import 'package:obmin_concept/a_foundation/channel/channel.dart';
 import 'package:obmin_concept/a_foundation/machine.dart';
 import 'package:obmin_concept/a_foundation/machine_factory.dart';
 import 'package:obmin_concept/a_foundation/machine_logger.dart';
+import 'package:obmin_concept/a_foundation/types/optional.dart';
 import 'package:obmin_concept/b_base/basic_machine/basic_machine.dart';
 import 'package:obmin_concept/b_base/feature_machine/feature.dart';
 
@@ -42,6 +44,8 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
 
   Set<Process<IntEffect>> _processes = {};
 
+  final Channel<FeatureEvent<IntTrigger, ExtTrigger>, Loggable> _channel;
+
   FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
     FeatureEvent<IntTrigger, ExtTrigger>,
     String,
@@ -49,14 +53,21 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
 
   _FeatureHolder({
     required String id,
+    ChannelBufferStrategy<FeatureEvent<IntTrigger, ExtTrigger>, Loggable>? bufferStrategy,
     required MachineLogger<Loggable> logger,
     required Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function() initial,
   })  : _id = id,
         _logger = logger,
-        _initial = initial;
+        _initial = initial,
+        _channel = Channel(
+          bufferStrategy: bufferStrategy ?? ChannelBufferStrategy.defaultStrategy(),
+          logger: logger.log,
+        );
 
   Future<void> onChange(void Function(ExtEffect effect)? callback) async {
     this._callback = callback;
+
+    const String channelId = "internal_channel_id";
 
     if (callback != null) {
       final state = _initial();
@@ -65,11 +76,21 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
         return machine.run(
           onLog: _logger,
           onConsume: (event) async {
-            await _handle(InternalFeatureEvent(event));
+            await _channel.send(InternalFeatureEvent(event)).future;
           },
         );
       }).toSet();
+      Future(() async {
+        while (true) {
+          final result = await _channel.next(channelId);
+          if (result is None<FeatureEvent<IntTrigger, ExtTrigger>>) {
+            break;
+          }
+          await _handle(result.force());
+        }
+      });
     } else {
+      _channel.cancel(channelId);
       _transit = null;
       for (final process in _processes) {
         process.cancel();
@@ -79,7 +100,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
   }
 
   Future<void> onProcess(ExtTrigger input) async {
-    await _handle(ExternalFeatureEvent(input));
+    await _channel.send(ExternalFeatureEvent(input)).future;
   }
 
   Future<void> _handle(FeatureEvent<IntTrigger, ExtTrigger> event) async {
@@ -129,7 +150,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
       return machine.run(
         onLog: _logger,
         onConsume: (output) async {
-          await _handle(InternalFeatureEvent(output));
+          await _channel.send(InternalFeatureEvent(output)).future;
         },
       );
     }).toSet();
