@@ -14,10 +14,10 @@ extension ChamberMachine on MachineFactory {
       return Feature.create(
         state: (),
         machines: machines,
-        transit: (extras, trigger) {
+        transit: (state, machines, trigger, machineId) {
           switch (trigger) {
             case InternalFeatureEvent<T Function(T), T>(value: final value):
-              return FeatureTransition(config(extras.machines), effects: [ExternalFeatureEvent(value)]);
+              return FeatureTransition(config(machines), effects: [ExternalFeatureEvent(value)]);
             case ExternalFeatureEvent<T Function(T), T>(value: final value):
               return FeatureTransition(config(map(value)));
           }

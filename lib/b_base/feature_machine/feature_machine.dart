@@ -45,7 +45,6 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
   FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
     FeatureEvent<IntTrigger, ExtTrigger>,
     String,
-    MachineLogger<Loggable>,
   )? _transit;
 
   _FeatureHolder({
@@ -89,7 +88,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
       return;
     }
 
-    final transition = transit(event, _id, _logger);
+    final transition = transit(event, _id);
 
     final resultingMachines = transition.feature.machines;
 
@@ -137,6 +136,10 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
 
     _processes = processesToAdd.union(processesToKeep);
     _transit = transition.feature.transit;
+
+    for (final log in transition.logs) {
+      _logger.log(log);
+    }
 
     final effects = transition.effects;
 

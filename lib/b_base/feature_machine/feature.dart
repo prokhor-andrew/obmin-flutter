@@ -1,6 +1,4 @@
-import 'package:obmin_concept/a_foundation/machine_logger.dart';
-
-import '../../a_foundation/machine.dart';
+import 'package:obmin_concept/a_foundation/machine.dart';
 
 final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
   final State state;
@@ -8,7 +6,6 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
   final FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
     FeatureEvent<IntTrigger, ExtTrigger> event,
     String machineId,
-    MachineLogger<Loggable> logger,
   ) transit;
 
   Feature._({
@@ -33,61 +30,36 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
     required State state,
     required Set<Machine<IntEffect, IntTrigger, Loggable>> machines,
     required FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
-      FeatureExtras<State, IntTrigger, IntEffect, Loggable> extras,
+      State state,
+      Set<Machine<IntEffect, IntTrigger, Loggable>> machines,
       FeatureEvent<IntTrigger, ExtTrigger> trigger,
+      String machineId,
     ) transit,
   }) {
     return Feature._(
       state: state,
       machines: machines,
-      transit: (trigger, machineId, logger) {
+      transit: (trigger, machineId) {
         return transit(
-          FeatureExtras._(
-            state: state,
-            machineId: machineId,
-            machines: machines,
-            logger: logger,
-          ),
+          state,
+          machines,
           trigger,
+          machineId,
         );
       },
     );
   }
-
-  FeatureExtras<State, IntTrigger, IntEffect, Loggable> extras({
-    required String machineId,
-    required MachineLogger<Loggable> logger,
-  }) {
-    return FeatureExtras._(
-      state: state,
-      machineId: machineId,
-      machines: machines,
-      logger: logger,
-    );
-  }
-}
-
-final class FeatureExtras<State, IntTrigger, IntEffect, Loggable> {
-  final State state;
-  final String machineId;
-  final Set<Machine<IntEffect, IntTrigger, Loggable>> machines;
-  final MachineLogger<Loggable> logger;
-
-  FeatureExtras._({
-    required this.state,
-    required this.machineId,
-    required this.machines,
-    required this.logger,
-  });
 }
 
 final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
   final Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> feature;
   final List<FeatureEvent<IntEffect, ExtEffect>> effects;
+  final List<Loggable> logs;
 
   FeatureTransition(
     this.feature, {
     this.effects = const [],
+    this.logs = const [],
   });
 
   @override
@@ -96,11 +68,12 @@ final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffec
         other is FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> &&
             runtimeType == other.runtimeType &&
             feature == other.feature &&
-            effects == other.effects;
+            effects == other.effects &&
+            logs == other.logs;
   }
 
   @override
-  int get hashCode => feature.hashCode ^ effects.hashCode;
+  int get hashCode => feature.hashCode ^ effects.hashCode ^ logs.hashCode;
 }
 
 sealed class FeatureEvent<Int, Ext> {

@@ -71,8 +71,8 @@ class _CoreWidgetState<DomainState, DomainEvent, Loggable> extends State<CoreWid
             Scene<DomainState, DomainEvent, DomainState, Loggable> scene(DomainState state) {
               return Scene.create(
                 state: state,
-                transit: (extras, trigger) {
-                  final newState = widget.reducer(extras.state, trigger);
+                transit: (state, trigger, _) {
+                  final newState = widget.reducer(state, trigger);
                   return SceneTransition(scene(newState), effects: [newState]);
                 },
               );
