@@ -9,21 +9,6 @@ final class ChannelBufferResult<T, Loggable> {
     this.logs = const [],
   });
 
-  ChannelBufferResult.fromVarArgs(
-    this.data, {
-    this.logs = const [],
-  });
-
-  ChannelBufferResult.fromDataAndVarArgs(
-    this.data, {
-    this.logs = const [],
-  });
-
-  ChannelBufferResult.fromVarArgsAndLogs(
-    this.data, {
-    this.logs = const [],
-  });
-
   @override
   String toString() {
     return 'ChannelBufferResult<$T, $Loggable> data=$data logs=$logs';
