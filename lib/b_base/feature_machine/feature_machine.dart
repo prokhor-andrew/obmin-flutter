@@ -45,6 +45,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
   Set<Process<IntEffect>> _processes = {};
 
   final Channel<FeatureEvent<IntTrigger, ExtTrigger>, Loggable> _channel;
+  ChannelTask<void>? _task;
 
   FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
     FeatureEvent<IntTrigger, ExtTrigger>,
@@ -67,8 +68,6 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
   Future<void> onChange(void Function(ExtEffect effect)? callback) async {
     this._callback = callback;
 
-    const String channelId = "internal_channel_id";
-
     if (callback != null) {
       final state = _initial();
       _transit = state.transit;
@@ -80,17 +79,20 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
           },
         );
       }).toSet();
-      Future(() async {
-        while (true) {
-          final result = await _channel.next(channelId);
-          if (result is None<FeatureEvent<IntTrigger, ExtTrigger>>) {
-            break;
+      _task = _channel.next().map((future) {
+        return Future(() async {
+          while (true) {
+            final result = await future;
+            if (result is None<FeatureEvent<IntTrigger, ExtTrigger>>) {
+              break;
+            }
+            await _handle(result.force());
           }
-          await _handle(result.force());
-        }
+        });
       });
     } else {
-      _channel.cancel(channelId);
+      _task?.cancel();
+      _task = null;
       _transit = null;
       for (final process in _processes) {
         process.cancel();

@@ -1,15 +1,5 @@
 part of 'channel.dart';
 
-final class ChannelSendTask<T> {
-  final Future<T> future;
-  final void Function() cancel;
-
-  ChannelSendTask._({
-    required this.future,
-    required this.cancel,
-  });
-}
-
 final class Channel<T, Loggable> {
   _ChannelState<T> _state = _IdleChannelState();
 
@@ -21,7 +11,7 @@ final class Channel<T, Loggable> {
     required this.logger,
   });
 
-  ChannelSendTask<bool> send(T val) {
+  ChannelTask<bool> send(T val) {
     final String id = const Uuid().v4().toString();
     final Completer<bool> completer = Completer();
 
@@ -41,7 +31,8 @@ final class Channel<T, Loggable> {
         break;
     }
 
-    return ChannelSendTask._(
+    return ChannelTask(
+      id: id,
       future: completer.future,
       cancel: () {
         switch (_state) {
@@ -63,7 +54,8 @@ final class Channel<T, Loggable> {
     );
   }
 
-  Future<Optional<T>> next(String id) {
+  ChannelTask<Optional<T>> next() {
+    final String id = const Uuid().v4().toString();
     final Completer<Optional<T>> completer = Completer();
 
     switch (_state) {
@@ -80,35 +72,37 @@ final class Channel<T, Loggable> {
         break;
     }
 
-    return completer.future;
-  }
-
-  void cancel(String id) {
-    switch (_state) {
-      case _IdleChannelState<T>() || _AwaitingForConsumer<T>():
-        break; // do nothing as there is no completer to complete
-      case _AwaitingForProducer<T>(cur: final cur, rest: final rest):
-        if (cur.id == id) {
-          if (rest.isEmpty) {
-            _state = _IdleChannelState();
-            cur.comp.complete(None());
-          } else {
-            _state = _AwaitingForProducer(cur: rest[0], rest: rest.minusFirst());
-            cur.comp.complete(None());
-          }
-        } else {
-          final newList = rest.where((item) {
-            if (item.id != id) {
-              return true;
+    return ChannelTask(
+      id: id,
+      future: completer.future,
+      cancel: () {
+        switch (_state) {
+          case _IdleChannelState<T>() || _AwaitingForConsumer<T>():
+            break; // do nothing as there is no completer to complete
+          case _AwaitingForProducer<T>(cur: final cur, rest: final rest):
+            if (cur.id == id) {
+              if (rest.isEmpty) {
+                _state = _IdleChannelState();
+                cur.comp.complete(None());
+              } else {
+                _state = _AwaitingForProducer(cur: rest[0], rest: rest.minusFirst());
+                cur.comp.complete(None());
+              }
             } else {
-              item.comp.complete(None());
-              return false;
+              final newList = rest.where((item) {
+                if (item.id != id) {
+                  return true;
+                } else {
+                  item.comp.complete(None());
+                  return false;
+                }
+              }).toList();
+              _state = _AwaitingForProducer(cur: cur, rest: newList);
             }
-          }).toList();
-          _state = _AwaitingForProducer(cur: cur, rest: newList);
+            break;
         }
-        break;
-    }
+      },
+    );
   }
 
   void _handleBuffer({

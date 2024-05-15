@@ -12,4 +12,5 @@ part 'channel_buffer_data.dart';
 part 'channel_buffer_event.dart';
 part 'channel_buffer_result.dart';
 part 'channel_buffer_strategy.dart';
+part 'channel_task.dart';
 part 'channel_type.dart';

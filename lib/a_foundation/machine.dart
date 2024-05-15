@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:obmin_concept/a_foundation/channel/channel.dart';
 import 'package:obmin_concept/a_foundation/machine_logger.dart';
 import 'package:obmin_concept/a_foundation/types/optional.dart';
-import 'package:uuid/uuid.dart';
 
 final class Machine<Input, Output, Loggable> {
   final ChannelBufferStrategy<Input, Loggable>? inputBufferStrategy;
@@ -12,7 +11,7 @@ final class Machine<Input, Output, Loggable> {
   final String id;
 
   final (
-    Future<void> Function(ChannelSendTask<bool> Function(Output output)? callback) onChange,
+    Future<void> Function(ChannelTask<bool> Function(Output output)? callback) onChange,
     Future<void> Function(Input input) onProcess,
   )
       Function(MachineLogger<Loggable> logger) onCreate;
@@ -43,87 +42,90 @@ final class Machine<Input, Output, Loggable> {
     final ChannelBufferStrategy<Input, Loggable> actualInputBufferStrategy =
         this.inputBufferStrategy ?? inputBufferStrategy ?? ChannelBufferStrategy.defaultStrategy();
 
-    final String inputChannelId = const Uuid().v4.toString();
     final Channel<Input, Loggable> inputChannel = Channel(
       bufferStrategy: actualInputBufferStrategy,
       logger: onLog.log,
     );
 
-    final String outputChannelId = const Uuid().v4.toString();
     final Channel<Output, Loggable> outputChannel = Channel(
       bufferStrategy: actualOutputBufferStrategy,
       logger: onLog.log,
     );
 
-    _task(
-      inputChannelId: inputChannelId,
+    final (onChange, onProcess) = onCreate(onLog);
+
+    final task = _task(
       inputChannel: inputChannel,
-      outputChannelId: outputChannelId,
       outputChannel: outputChannel,
       onLog: onLog,
+      onChange: onChange,
+      onProcess: onProcess,
       onConsume: onConsume,
     );
 
     return Process._(
       id: id,
       send: inputChannel.send,
-      cancel: () {
-        inputChannel.cancel(inputChannelId);
-        outputChannel.cancel(outputChannelId);
-      },
+      cancel: task.cancel,
     );
   }
 
-  Future<void> _task({
-    required String inputChannelId,
+  ChannelTask<void> _task({
     required Channel<Input, Loggable> inputChannel,
-    required String outputChannelId,
     required Channel<Output, Loggable> outputChannel,
     required MachineLogger<Loggable> onLog,
+    required Future<void> Function(ChannelTask<bool> Function(Output output)? callback) onChange,
     required Future<void> Function(Output output) onConsume,
-  }) async {
-    final (onChange, onProcess) = onCreate(onLog);
-
-    await onChange(outputChannel.send);
-
-    await Future.wait([
-      Future(() async {
-        while (true) {
-          final value = await inputChannel.next(inputChannelId);
-          if (value is None<Input>) {
-            break;
+    required Future<void> Function(Input input) onProcess,
+  }) {
+    return ChannelTask.combine<void>([
+      inputChannel.next().map<void>((future) {
+        return Future(() async {
+          while (true) {
+            final value = await future;
+            if (value is None<Input>) {
+              break;
+            }
+            await onProcess(value.force());
           }
-          await onProcess(value.force());
-        }
+        });
       }),
-      Future(() async {
-        while (true) {
-          final value = await outputChannel.next(outputChannelId);
-          if (value is None<Output>) {
-            break;
+      outputChannel.next().map<void>((future) {
+        return Future(() async {
+          while (true) {
+            final value = await future;
+            if (value is None<Output>) {
+              break;
+            }
+            await onConsume(value.force());
           }
-          await onConsume(value.force());
-        }
-      }),
-    ]);
+        });
+      })
+    ]).map<void>((future) {
+      return Future(() async {
+        await onChange(outputChannel.send);
 
-    await onChange(null);
+        await future;
+
+        await onChange(null);
+      });
+    });
   }
 }
 
 final class Process<Input> {
   final String id;
-  final ChannelSendTask<bool> Function(Input) _send;
+  final ChannelTask<bool> Function(Input) _send;
   final void Function() _cancel;
 
   Process._({
     required this.id,
-    required ChannelSendTask<bool> Function(Input) send,
+    required ChannelTask<bool> Function(Input) send,
     required void Function() cancel,
   })  : _send = send,
         _cancel = cancel;
 
-  ChannelSendTask<bool> send(Input input) {
+  ChannelTask<bool> send(Input input) {
     return _send(input);
   }
 
