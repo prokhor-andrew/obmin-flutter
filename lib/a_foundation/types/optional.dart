@@ -75,8 +75,8 @@ sealed class Optional<T> {
   @override
   String toString() {
     return switch (this) {
-      None<T>() => "None",
-      Some<T>(value: final value) => "Some value=$value",
+      None<T>() => "None<$T>",
+      Some<T>(value: final value) => "Some<$T> value=$value",
     };
   }
 
