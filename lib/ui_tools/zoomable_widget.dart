@@ -1,14 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:obmin_concept/lens.dart';
+import 'package:obmin_concept/a_foundation/types/lens.dart';
 import 'package:obmin_concept/a_foundation/types/optional.dart';
 
-final class Optic<T> {
+class ZoomableWidget<T> extends InheritedWidget {
+  final T state;
+  final void Function(T Function(T state) transition) setState;
+
+  ZoomableWidget({
+    super.key,
+    required this.state,
+    required this.setState,
+    required Widget Function(BuildContext context, Zoomable<T> zoomable) builder,
+  }) : super(child: _ZoomableStatelessWidget<T>(builder: builder));
+
+  static ZoomableWidget<T> _of<T>(BuildContext context) {
+    final ZoomableWidget<T>? result = context.dependOnInheritedWidgetOfExactType<ZoomableWidget<T>>();
+    return result!;
+  }
+
+  @override
+  bool updateShouldNotify(ZoomableWidget<T> oldWidget) {
+    return state != oldWidget.state;
+  }
+}
+
+class _ZoomableStatelessWidget<T> extends StatelessWidget {
+  final Widget Function(BuildContext context, Zoomable<T> zoomable) builder;
+
+  const _ZoomableStatelessWidget({
+    super.key,
+    required this.builder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final zoomable = Zoomable<T>._((context) {
+      final widget = ZoomableWidget._of<T>(context);
+      final state = widget.state;
+      final setState = widget.setState;
+
+      return (state, setState);
+    });
+
+    return builder(context, zoomable);
+  }
+}
+
+final class Zoomable<T> {
   final (T, void Function(T Function(T))) Function(BuildContext context) _data;
 
-  Optic._(this._data);
+  Zoomable._(this._data);
 
-  Optic<V> zoom<V>(Lens<T, V> lens) {
-    return Optic._(
+  Zoomable<V> zoom<V>(Lens<T, V> lens) {
+    return Zoomable._(
       (context) {
         final (state, setState) = _data(context);
 
@@ -57,7 +101,7 @@ final class Optic<T> {
   }) {
     return _CalculateWidget(
       key: key,
-      optic: this,
+      zoomable: this,
       calculate: calculate,
       child: child,
     );
@@ -65,7 +109,7 @@ final class Optic<T> {
 }
 
 class _CalculateWidget<T> extends StatefulWidget {
-  final Optic<T> optic;
+  final Zoomable<T> zoomable;
   final void Function(
     BuildContext context,
     Optional<T> oldState,
@@ -76,7 +120,7 @@ class _CalculateWidget<T> extends StatefulWidget {
 
   const _CalculateWidget({
     super.key,
-    required this.optic,
+    required this.zoomable,
     required this.calculate,
     required this.child,
   });
@@ -96,12 +140,12 @@ class _CalculateWidgetState<T> extends State<_CalculateWidget<T>> {
     super.didChangeDependencies();
     if (_isInitial) {
       _old = None();
-      final (data, _) = widget.optic._data(context);
+      final (data, _) = widget.zoomable._data(context);
       _state = data;
       _isInitial = false;
     } else {
       _old = Some(_state);
-      final (data, setData) = widget.optic._data(context);
+      final (data, setData) = widget.zoomable._data(context);
       _state = data;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -114,49 +158,5 @@ class _CalculateWidgetState<T> extends State<_CalculateWidget<T>> {
   @override
   Widget build(BuildContext context) {
     return widget.child;
-  }
-}
-
-class OpticWidget<T> extends InheritedWidget {
-  final T state;
-  final void Function(T Function(T state) transition) setState;
-
-  OpticWidget({
-    super.key,
-    required this.state,
-    required this.setState,
-    required Widget Function(BuildContext context, Optic<T> optic) builder,
-  }) : super(child: _OpticStatelessWidget<T>(builder: builder));
-
-  static OpticWidget<T> _of<T>(BuildContext context) {
-    final OpticWidget<T>? result = context.dependOnInheritedWidgetOfExactType<OpticWidget<T>>();
-    return result!;
-  }
-
-  @override
-  bool updateShouldNotify(OpticWidget<T> oldWidget) {
-    return state != oldWidget.state;
-  }
-}
-
-class _OpticStatelessWidget<T> extends StatelessWidget {
-  final Widget Function(BuildContext context, Optic<T> optic) builder;
-
-  const _OpticStatelessWidget({
-    super.key,
-    required this.builder,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final optic = Optic<T>._((context) {
-      final widget = OpticWidget._of<T>(context);
-      final state = widget.state;
-      final setState = widget.setState;
-
-      return (state, setState);
-    });
-
-    return builder(context, optic);
   }
 }
