@@ -1,9 +1,10 @@
+import 'package:obmin_concept/a_foundation/types/writer.dart';
 import 'package:obmin_concept/b_base/feature_machine/feature.dart';
 import 'package:obmin_concept/b_base/feature_machine/outline.dart';
 
 final class Scene<State, Trigger, Effect, Loggable> {
   final State state;
-  final SceneTransition<State, Trigger, Effect, Loggable> Function(
+  final Writer<SceneTransition<State, Trigger, Effect, Loggable>, Loggable> Function(
     Trigger,
     String,
   ) transit;
@@ -15,7 +16,7 @@ final class Scene<State, Trigger, Effect, Loggable> {
 
   static Scene<State, Trigger, Effect, Loggable> create<State, Trigger, Effect, Loggable>({
     required State state,
-    required SceneTransition<State, Trigger, Effect, Loggable> Function(
+    required Writer<SceneTransition<State, Trigger, Effect, Loggable>, Loggable> Function(
       State state,
       Trigger trigger,
       String machineId,
@@ -45,26 +46,20 @@ final class Scene<State, Trigger, Effect, Loggable> {
 final class SceneTransition<State, Trigger, Effect, Loggable> {
   final Scene<State, Trigger, Effect, Loggable> scene;
   final List<Effect> effects;
-  final List<Loggable> logs;
 
   SceneTransition(
     this.scene, {
     this.effects = const [],
-    this.logs = const [],
   });
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        other is SceneTransition<State, Trigger, Effect, Loggable> &&
-            runtimeType == other.runtimeType &&
-            scene == other.scene &&
-            effects == other.effects &&
-            logs == other.logs;
+        other is SceneTransition<State, Trigger, Effect, Loggable> && runtimeType == other.runtimeType && scene == other.scene && effects == other.effects;
   }
 
   @override
-  int get hashCode => scene.hashCode ^ effects.hashCode ^ logs.hashCode;
+  int get hashCode => scene.hashCode ^ effects.hashCode;
 }
 
 extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<State, Trigger, Effect, Loggable> {
@@ -74,17 +69,17 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent():
-            return OutlineTransition(asExtTriggerExtEffect());
+            return Writer(value: OutlineTransition(asExtTriggerExtEffect()));
           case ExternalFeatureEvent(value: final value):
-            final transition = transit(value, machineId);
-            return OutlineTransition(
-              transition.scene.asExtTriggerExtEffect(),
-              effects: transition.effects.map(
-                (effect) {
-                  return ExternalFeatureEvent<IntEffect, Effect>(effect);
-                },
-              ).toList(),
-              logs: transition.logs,
+            return transit(value, machineId).map(
+              (transition) {
+                return OutlineTransition(transition.scene.asExtTriggerExtEffect(),
+                    effects: transition.effects.map(
+                      (effect) {
+                        return ExternalFeatureEvent<IntEffect, Effect>(effect);
+                      },
+                    ).toList());
+              },
             );
         }
       },
@@ -97,17 +92,19 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent():
-            return OutlineTransition(asIntEffectExtTrigger());
+            return Writer(value: OutlineTransition(asIntEffectExtTrigger()));
           case ExternalFeatureEvent(value: final value):
-            final transition = transit(value, machineId);
-            return OutlineTransition(
-              transition.scene.asIntEffectExtTrigger(),
-              effects: transition.effects.map(
-                (effect) {
-                  return InternalFeatureEvent<Effect, ExtEffect>(effect);
-                },
-              ).toList(),
-              logs: transition.logs,
+            return transit(value, machineId).map(
+              (transition) {
+                return OutlineTransition(
+                  transition.scene.asIntEffectExtTrigger(),
+                  effects: transition.effects.map(
+                    (effect) {
+                      return InternalFeatureEvent<Effect, ExtEffect>(effect);
+                    },
+                  ).toList(),
+                );
+              },
             );
         }
       },
@@ -120,18 +117,20 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value):
-            final transition = transit(value, machineId);
-            return OutlineTransition(
-              transition.scene.asIntTriggerExtEffect(),
-              effects: transition.effects.map(
-                (effect) {
-                  return ExternalFeatureEvent<IntEffect, Effect>(effect);
-                },
-              ).toList(),
-              logs: transition.logs,
+            return transit(value, machineId).map(
+              (transition) {
+                return OutlineTransition(
+                  transition.scene.asIntTriggerExtEffect(),
+                  effects: transition.effects.map(
+                    (effect) {
+                      return ExternalFeatureEvent<IntEffect, Effect>(effect);
+                    },
+                  ).toList(),
+                );
+              },
             );
           case ExternalFeatureEvent():
-            return OutlineTransition(asIntTriggerExtEffect());
+            return Writer(value: OutlineTransition(asIntTriggerExtEffect()));
         }
       },
     );
@@ -143,18 +142,20 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value):
-            final transition = transit(value, machineId);
-            return OutlineTransition(
-              transition.scene.asIntTriggerIntEffect(),
-              effects: transition.effects.map(
-                (effect) {
-                  return InternalFeatureEvent<Effect, ExtEffect>(effect);
-                },
-              ).toList(),
-              logs: transition.logs,
+            return transit(value, machineId).map(
+              (transition) {
+                return OutlineTransition(
+                  transition.scene.asIntTriggerIntEffect(),
+                  effects: transition.effects.map(
+                    (effect) {
+                      return InternalFeatureEvent<Effect, ExtEffect>(effect);
+                    },
+                  ).toList(),
+                );
+              },
             );
           case ExternalFeatureEvent():
-            return OutlineTransition(asIntTriggerIntEffect());
+            return Writer(value: OutlineTransition(asIntTriggerIntEffect()));
         }
       },
     );
@@ -166,20 +167,24 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent():
-            return OutlineTransition(asIntEffectExtTriggerExtEffect());
+            return Writer(
+              value: OutlineTransition(asIntEffectExtTriggerExtEffect()),
+            );
           case ExternalFeatureEvent(value: final value):
-            final transition = transit(value, machineId);
-            return OutlineTransition(
-              transition.scene.asIntEffectExtTriggerExtEffect(),
-              effects: transition.effects.expand(
-                (effect) {
-                  return [
-                    InternalFeatureEvent<Effect, Effect>(effect),
-                    ExternalFeatureEvent<Effect, Effect>(effect),
-                  ];
-                },
-              ).toList(),
-              logs: transition.logs,
+            return transit(value, machineId).map(
+              (transition) {
+                return OutlineTransition(
+                  transition.scene.asIntEffectExtTriggerExtEffect(),
+                  effects: transition.effects.expand(
+                    (effect) {
+                      return [
+                        InternalFeatureEvent<Effect, Effect>(effect),
+                        ExternalFeatureEvent<Effect, Effect>(effect),
+                      ];
+                    },
+                  ).toList(),
+                );
+              },
             );
         }
       },
@@ -192,21 +197,23 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value):
-            final transition = transit(value, machineId);
-            return OutlineTransition(
-              transition.scene.asIntTriggerIntEffectExtEffect(),
-              effects: transition.effects.expand(
-                (effect) {
-                  return [
-                    InternalFeatureEvent<Effect, Effect>(effect),
-                    ExternalFeatureEvent<Effect, Effect>(effect),
-                  ];
-                },
-              ).toList(),
-              logs: transition.logs,
+            return transit(value, machineId).map(
+              (transition) {
+                return OutlineTransition(
+                  transition.scene.asIntTriggerIntEffectExtEffect(),
+                  effects: transition.effects.expand(
+                    (effect) {
+                      return [
+                        InternalFeatureEvent<Effect, Effect>(effect),
+                        ExternalFeatureEvent<Effect, Effect>(effect),
+                      ];
+                    },
+                  ).toList(),
+                );
+              },
             );
           case ExternalFeatureEvent():
-            return OutlineTransition(asIntTriggerIntEffectExtEffect());
+            return Writer(value: OutlineTransition(asIntTriggerIntEffectExtEffect()));
         }
       },
     );
@@ -218,15 +225,17 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value) || ExternalFeatureEvent(value: final value):
-            final transition = transit(value, machineId);
-            return OutlineTransition(
-              transition.scene.asIntTriggerIntEffectExtTrigger(),
-              effects: transition.effects.map(
-                (effect) {
-                  return InternalFeatureEvent<Effect, ExtEffect>(effect);
-                },
-              ).toList(),
-              logs: transition.logs,
+            return transit(value, machineId).map(
+              (transition) {
+                return OutlineTransition(
+                  transition.scene.asIntTriggerIntEffectExtTrigger(),
+                  effects: transition.effects.map(
+                    (effect) {
+                      return InternalFeatureEvent<Effect, ExtEffect>(effect);
+                    },
+                  ).toList(),
+                );
+              },
             );
         }
       },
@@ -239,15 +248,17 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value) || ExternalFeatureEvent(value: final value):
-            final transition = transit(value, machineId);
-            return OutlineTransition(
-              transition.scene.asIntTriggerExtTriggerExtEffect(),
-              effects: transition.effects.map(
-                (effect) {
-                  return ExternalFeatureEvent<IntEffect, Effect>(effect);
-                },
-              ).toList(),
-              logs: transition.logs,
+            return transit(value, machineId).map(
+              (transition) {
+                return OutlineTransition(
+                  transition.scene.asIntTriggerExtTriggerExtEffect(),
+                  effects: transition.effects.map(
+                    (effect) {
+                      return ExternalFeatureEvent<IntEffect, Effect>(effect);
+                    },
+                  ).toList(),
+                );
+              },
             );
         }
       },
@@ -260,19 +271,20 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value) || ExternalFeatureEvent(value: final value):
-            final transition = transit(value, machineId);
-
-            return OutlineTransition(
-              transition.scene.asIntTriggerIntEffectExtTriggerExtEffect(),
-              effects: transition.effects.expand(
-                (effect) {
-                  return [
-                    InternalFeatureEvent<Effect, Effect>(effect),
-                    ExternalFeatureEvent<Effect, Effect>(effect),
-                  ];
-                },
-              ).toList(),
-              logs: transition.logs,
+            return transit(value, machineId).map(
+              (transition) {
+                return OutlineTransition(
+                  transition.scene.asIntTriggerIntEffectExtTriggerExtEffect(),
+                  effects: transition.effects.expand(
+                    (effect) {
+                      return [
+                        InternalFeatureEvent<Effect, Effect>(effect),
+                        ExternalFeatureEvent<Effect, Effect>(effect),
+                      ];
+                    },
+                  ).toList(),
+                );
+              },
             );
         }
       },

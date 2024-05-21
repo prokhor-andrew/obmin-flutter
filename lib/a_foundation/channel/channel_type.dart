@@ -111,7 +111,7 @@ final class Channel<T, Loggable> {
   }) {
     final bufferedResult = bufferStrategy.bufferReducer(currentArray.toList(), event);
 
-    final bufferedArray = bufferedResult.data.toList();
+    final bufferedArray = bufferedResult.value.toList();
     final bufferedLogs = bufferedResult.logs.toList();
 
     final List<ChannelBufferData<T>> withoutDuplicates = bufferedArray.fold<List<ChannelBufferData<T>>>([], (partialResult, element) {

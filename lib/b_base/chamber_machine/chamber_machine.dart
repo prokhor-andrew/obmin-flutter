@@ -1,5 +1,6 @@
 import 'package:obmin_concept/a_foundation/machine.dart';
 import 'package:obmin_concept/a_foundation/machine_factory.dart';
+import 'package:obmin_concept/a_foundation/types/writer.dart';
 import 'package:obmin_concept/b_base/basic_machine/silo_machine.dart';
 import 'package:obmin_concept/b_base/feature_machine/feature.dart';
 import 'package:obmin_concept/b_base/feature_machine/feature_machine.dart';
@@ -17,9 +18,9 @@ extension ChamberMachine on MachineFactory {
         transit: (state, machines, trigger, machineId) {
           switch (trigger) {
             case InternalFeatureEvent<T Function(T), T>(value: final value):
-              return FeatureTransition(config(machines), effects: [ExternalFeatureEvent(value)]);
+              return Writer(value: FeatureTransition(config(machines), effects: [ExternalFeatureEvent(value)]));
             case ExternalFeatureEvent<T Function(T), T>(value: final value):
-              return FeatureTransition(config(map(value)));
+              return Writer(value: FeatureTransition(config(map(value))));
           }
         },
       );

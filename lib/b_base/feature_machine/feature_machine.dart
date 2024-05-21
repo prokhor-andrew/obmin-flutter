@@ -3,6 +3,7 @@ import 'package:obmin_concept/a_foundation/machine.dart';
 import 'package:obmin_concept/a_foundation/machine_factory.dart';
 import 'package:obmin_concept/a_foundation/machine_logger.dart';
 import 'package:obmin_concept/a_foundation/types/optional.dart';
+import 'package:obmin_concept/a_foundation/types/writer.dart';
 import 'package:obmin_concept/b_base/basic_machine/basic_machine.dart';
 import 'package:obmin_concept/b_base/feature_machine/feature.dart';
 
@@ -47,7 +48,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
   final Channel<FeatureEvent<IntTrigger, ExtTrigger>, Loggable> _channel;
   ChannelTask<void>? _task;
 
-  FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
+  Writer<FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function(
     FeatureEvent<IntTrigger, ExtTrigger>,
     String,
   )? _transit;
@@ -111,7 +112,8 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
       return;
     }
 
-    final transition = transit(event, _id);
+    final writer = transit(event, _id);
+    final transition = writer.value;
 
     final resultingMachines = transition.feature.machines;
 
@@ -160,7 +162,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
     _processes = processesToAdd.union(processesToKeep);
     _transit = transition.feature.transit;
 
-    for (final log in transition.logs) {
+    for (final log in writer.logs) {
       _logger.log(log);
     }
 

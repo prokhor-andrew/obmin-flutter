@@ -1,9 +1,11 @@
 import 'package:obmin_concept/a_foundation/machine.dart';
+import 'package:obmin_concept/a_foundation/types/writer.dart';
 
 final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
   final State state;
   final Set<Machine<IntEffect, IntTrigger, Loggable>> machines;
-  final FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
+
+  final Writer<FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function(
     FeatureEvent<IntTrigger, ExtTrigger> event,
     String machineId,
   ) transit;
@@ -29,7 +31,7 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
   static Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> create<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>({
     required State state,
     required Set<Machine<IntEffect, IntTrigger, Loggable>> machines,
-    required FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
+    required Writer<FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function(
       State state,
       Set<Machine<IntEffect, IntTrigger, Loggable>> machines,
       FeatureEvent<IntTrigger, ExtTrigger> trigger,
@@ -54,12 +56,10 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
 final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
   final Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> feature;
   final List<FeatureEvent<IntEffect, ExtEffect>> effects;
-  final List<Loggable> logs;
 
   FeatureTransition(
     this.feature, {
     this.effects = const [],
-    this.logs = const [],
   });
 
   @override
@@ -68,12 +68,11 @@ final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffec
         other is FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> &&
             runtimeType == other.runtimeType &&
             feature == other.feature &&
-            effects == other.effects &&
-            logs == other.logs;
+            effects == other.effects;
   }
 
   @override
-  int get hashCode => feature.hashCode ^ effects.hashCode ^ logs.hashCode;
+  int get hashCode => feature.hashCode ^ effects.hashCode;
 }
 
 sealed class FeatureEvent<Int, Ext> {

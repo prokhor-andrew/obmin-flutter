@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:obmin_concept/a_foundation/machine.dart';
 import 'package:obmin_concept/a_foundation/machine_factory.dart';
 import 'package:obmin_concept/a_foundation/machine_logger.dart';
+import 'package:obmin_concept/a_foundation/types/writer.dart';
 import 'package:obmin_concept/b_base/basic_machine/basic_machine.dart';
 import 'package:obmin_concept/b_base/feature_machine/feature_machine.dart';
 import 'package:obmin_concept/b_base/feature_machine/scene.dart';
 
 class CoreWidget<DomainState, DomainEvent, Loggable> extends StatefulWidget {
   final DomainState Function() state;
-  final DomainState Function(DomainState state, DomainEvent event) reducer;
+  final Writer<DomainState, Loggable> Function(DomainState state, DomainEvent event) reducer;
   final Set<Machine<DomainState, DomainEvent, Loggable>> Function(DomainState state) machines;
   final List<MachineLogger<Loggable>> Function() loggers;
 
@@ -72,8 +73,12 @@ class _CoreWidgetState<DomainState, DomainEvent, Loggable> extends State<CoreWid
               return Scene.create(
                 state: state,
                 transit: (state, trigger, _) {
-                  final newState = widget.reducer(state, trigger);
-                  return SceneTransition(scene(newState), effects: [newState]);
+                  return widget.reducer(state, trigger).map((newState) {
+                    return SceneTransition(
+                      scene(newState),
+                      effects: [newState],
+                    );
+                  });
                 },
               );
             }

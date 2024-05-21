@@ -1,9 +1,10 @@
 import 'package:obmin_concept/a_foundation/machine.dart';
+import 'package:obmin_concept/a_foundation/types/writer.dart';
 import 'package:obmin_concept/b_base/feature_machine/feature.dart';
 
 final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
   final State state;
-  final OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
+  final Writer<OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function(
     FeatureEvent<IntTrigger, ExtTrigger>,
     String,
   ) transit;
@@ -15,7 +16,7 @@ final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
 
   static Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> create<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>({
     required State state,
-    required OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
+    required Writer<OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function(
       State state,
       FeatureEvent<IntTrigger, ExtTrigger> trigger,
       String machineId,
@@ -47,12 +48,12 @@ final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
       state: state,
       machines: machines,
       transit: (state, machines, trigger, machineId) {
-        final transition = transit(trigger, machineId);
-        return FeatureTransition(
-          transition.outline.asFeature(machines),
-          effects: transition.effects,
-          logs: transition.logs,
-        );
+        return transit(trigger, machineId).map((transition) {
+          return FeatureTransition(
+            transition.outline.asFeature(machines),
+            effects: transition.effects,
+          );
+        });
       },
     );
   }
@@ -61,12 +62,10 @@ final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
 final class OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
   final Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> outline;
   final List<FeatureEvent<IntEffect, ExtEffect>> effects;
-  final List<Loggable> logs;
 
   OutlineTransition(
     this.outline, {
     this.effects = const [],
-    this.logs = const [],
   });
 
   @override
@@ -75,10 +74,9 @@ final class OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffec
         other is OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> &&
             runtimeType == other.runtimeType &&
             outline == other.outline &&
-            effects == other.effects &&
-            logs == other.logs;
+            effects == other.effects;
   }
 
   @override
-  int get hashCode => outline.hashCode ^ effects.hashCode ^ logs.hashCode;
+  int get hashCode => outline.hashCode ^ effects.hashCode;
 }
