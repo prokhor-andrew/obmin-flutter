@@ -52,64 +52,66 @@ final class Machine<Input, Output, Loggable> {
       logger: onLog.log,
     );
 
-    final (onChange, onProcess) = onCreate(onLog);
+    bool isCancelled = false;
+    ChannelTask<Optional<Input>>? inputTask;
+    ChannelTask<Optional<Output>>? outputTask;
 
-    final task = _task(
-      inputChannel: inputChannel,
-      outputChannel: outputChannel,
-      onLog: onLog,
-      onChange: onChange,
-      onProcess: onProcess,
-      onConsume: onConsume,
-    );
+    Future(() async {
+      if (isCancelled) {
+        return;
+      }
+
+      final (onChange, onProcess) = onCreate(onLog);
+
+      await onChange(outputChannel.send);
+
+      if (!isCancelled) {
+        await Future.wait([
+          Future(() async {
+            while (true) {
+              if (isCancelled) {
+                break;
+              }
+              final ChannelTask<Optional<Input>> task = inputChannel.next();
+              inputTask = task;
+              final value = await task.future;
+              if (value is None<Input>) {
+                break;
+              }
+              await onProcess(value.force());
+            }
+          }),
+          Future(() async {
+            while (true) {
+              if (isCancelled) {
+                break;
+              }
+              final ChannelTask<Optional<Output>> task = outputChannel.next();
+              outputTask = task;
+              final value = await task.future;
+              if (value is None<Output>) {
+                break;
+              }
+              await onConsume(value.force());
+            }
+          }),
+        ]);
+      }
+
+      await onChange(null);
+    });
 
     return Process._(
       id: id,
       send: inputChannel.send,
-      cancel: task.cancel,
+      cancel: () {
+        isCancelled = true;
+        inputTask?.cancel();
+        inputTask = null;
+        outputTask?.cancel();
+        outputTask = null;
+      },
     );
-  }
-
-  ChannelTask<void> _task({
-    required Channel<Input, Loggable> inputChannel,
-    required Channel<Output, Loggable> outputChannel,
-    required MachineLogger<Loggable> onLog,
-    required Future<void> Function(ChannelTask<bool> Function(Output output)? callback) onChange,
-    required Future<void> Function(Output output) onConsume,
-    required Future<void> Function(Input input) onProcess,
-  }) {
-    return ChannelTask.combine<void>([
-      inputChannel.next().map<void>((future) {
-        return Future(() async {
-          while (true) {
-            final value = await future;
-            if (value is None<Input>) {
-              break;
-            }
-            await onProcess(value.force());
-          }
-        });
-      }),
-      outputChannel.next().map<void>((future) {
-        return Future(() async {
-          while (true) {
-            final value = await future;
-            if (value is None<Output>) {
-              break;
-            }
-            await onConsume(value.force());
-          }
-        });
-      })
-    ]).map<void>((future) {
-      return Future(() async {
-        await onChange(outputChannel.send);
-
-        await future;
-
-        await onChange(null);
-      });
-    });
   }
 }
 
