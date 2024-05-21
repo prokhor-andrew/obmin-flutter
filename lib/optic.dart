@@ -29,6 +29,7 @@ final class Optic<T> {
   }
 
   Widget build({
+    Key? key,
     required Widget Function(
       BuildContext context,
       T state,
@@ -36,6 +37,7 @@ final class Optic<T> {
     ) builder,
   }) {
     return Builder(
+      key: key,
       builder: (context) {
         final (state, setState) = _data(context);
         return builder(context, state, setState);
@@ -44,6 +46,7 @@ final class Optic<T> {
   }
 
   Widget calculate({
+    Key? key,
     required void Function(
       BuildContext context,
       Optional<T> oldState,
@@ -53,6 +56,7 @@ final class Optic<T> {
     required Widget child,
   }) {
     return _CalculateWidget(
+      key: key,
       optic: this,
       calculate: calculate,
       child: child,
