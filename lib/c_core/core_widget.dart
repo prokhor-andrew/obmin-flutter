@@ -1,105 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:obmin_concept/a_foundation/machine.dart';
 import 'package:obmin_concept/a_foundation/machine_factory.dart';
-import 'package:obmin_concept/a_foundation/machine_logger.dart';
-import 'package:obmin_concept/a_foundation/types/writer.dart';
 import 'package:obmin_concept/b_base/basic_machine/basic_machine.dart';
-import 'package:obmin_concept/b_base/feature_machine/feature_machine.dart';
-import 'package:obmin_concept/b_base/feature_machine/scene.dart';
+import 'package:obmin_concept/c_core/core.dart';
+import 'package:obmin_concept/utils/list_plus.dart';
 
-class CoreWidget<DomainState, DomainEvent, Loggable> extends StatefulWidget {
-  final DomainState Function() state;
-  final Writer<DomainState, Loggable> Function(DomainState state, DomainEvent event) reducer;
-  final Set<Machine<DomainState, DomainEvent, Loggable>> Function(DomainState state) machines;
-  final List<MachineLogger<Loggable>> Function() loggers;
+extension CoreWidget<State, Input, Output, Loggable> on Core<State, Input, Output, Loggable> {
+  Widget build({
+    Key? key,
+    required Widget Function(
+      BuildContext context,
+      Input input,
+      void Function(Output event)? update,
+    ) builder,
+  }) {
+    return _CoreWidget(
+      key: key,
+      core: this,
+      builder: builder,
+    );
+  }
+}
+
+class _CoreWidget<DomainState, Input, Output, Loggable> extends StatefulWidget {
+  final Core<DomainState, Input, Output, Loggable> _initialCore;
 
   final Widget Function(
     BuildContext context,
-    DomainState state,
-    void Function(DomainEvent event)? update,
+    Input input,
+    void Function(Output event)? update,
   ) builder;
 
-  const CoreWidget({
+  const _CoreWidget({
     super.key,
-    required this.state,
-    required this.reducer,
-    required this.machines,
-    required this.loggers,
+    required Core<DomainState, Input, Output, Loggable> core,
     required this.builder,
-  });
+  }) : _initialCore = core;
 
   @override
-  State<CoreWidget<DomainState, DomainEvent, Loggable>> createState() => _CoreWidgetState<DomainState, DomainEvent, Loggable>();
+  State<_CoreWidget<DomainState, Input, Output, Loggable>> createState() => _CoreWidgetState<DomainState, Input, Output, Loggable>();
 }
 
-class _CoreWidgetState<DomainState, DomainEvent, Loggable> extends State<CoreWidget<DomainState, DomainEvent, Loggable>> {
-  Process<void>? _process;
+class _CoreWidgetState<DomainState, Input, Output, Loggable> extends State<_CoreWidget<DomainState, Input, Output, Loggable>> {
+  Core<DomainState, Input, Output, Loggable>? _core;
 
-  late DomainState _state;
-  void Function(DomainEvent event)? _callback;
+  late Input _state;
+
+  void Function(Output event)? _callback;
 
   @override
   void initState() {
     super.initState();
-    final loggers = widget.loggers();
-    final domainState = widget.state();
-    _state = domainState;
-
-    final machines = widget.machines(domainState);
-    machines.add(
-      MachineFactory.shared.create<(), DomainState, DomainEvent, Loggable>(
-        id: "ui_machine",
-        onCreate: (id, logger) {
-          return ();
-        },
-        onChange: (_, callback) async {
-          _callback = callback;
-        },
-        onProcess: (_, input) async {
-          if (mounted) {
-            setState(() {
-              _state = input;
-            });
-          }
-        },
-      ),
-    );
-
-    _process = MachineFactory.shared
-        .feature(
-          id: "core",
-          feature: (machineId, logger) {
-            Scene<DomainState, DomainEvent, DomainState, Loggable> scene(DomainState state) {
-              return Scene.create(
-                state: state,
-                transit: (state, trigger, _) {
-                  return widget.reducer(state, trigger).map((newState) {
-                    return SceneTransition(
-                      scene(newState),
-                      effects: [newState],
-                    );
+    Set<Machine<Input, Output, Loggable>> getAllMachines(DomainState state) {
+      return widget._initialCore
+          .machines(state)
+          .toList()
+          .plus(
+            MachineFactory.shared.create<(), Input, Output, Loggable>(
+              id: "ui_machine",
+              onCreate: (id, logger) {
+                return ();
+              },
+              onChange: (_, callback) async {
+                _callback = callback;
+              },
+              onProcess: (_, input) async {
+                if (mounted) {
+                  setState(() {
+                    _state = input;
                   });
-                },
-              );
-            }
+                }
+              },
+            ),
+          )
+          .toSet();
+    }
 
-            return scene(domainState).asIntTriggerIntEffect<void, void>().asFeature(machines);
-          },
-        )
-        .run(
-          onLog: MachineLogger((loggable) {
-            for (final logger in loggers) {
-              logger.log(loggable);
-            }
-          }),
-          onConsume: (_) async {},
-        );
+    _core = Core<DomainState, Input, Output, Loggable>(
+      state: widget._initialCore.state,
+      reducer: widget._initialCore.reducer,
+      machines: getAllMachines,
+      loggers: widget._initialCore.loggers,
+    );
+    _core?.start();
   }
 
   @override
   void dispose() {
-    _process?.cancel();
-    _process = null;
+    _core?.stop();
+    _core = null;
     super.dispose();
   }
 
