@@ -1,31 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:obmin_concept/a_foundation/types/lens.dart';
-import 'package:obmin_concept/a_foundation/types/optional.dart';
 
-class ZoomableWidget<T> extends InheritedWidget {
-  final T state;
-  final void Function(T Function(T state) transition) setState;
+class ZoomableWidget<Input, Output> extends InheritedWidget {
+  final Input input;
+  final void Function(Output) update;
 
   ZoomableWidget({
     super.key,
-    required this.state,
-    required this.setState,
-    required Widget Function(BuildContext context, Zoomable<T> zoomable) builder,
-  }) : super(child: _ZoomableStatelessWidget<T>(builder: builder));
+    required this.input,
+    required this.update,
+    required Widget Function(BuildContext context, Zoomable<Input, Output> zoomable) builder,
+  }) : super(child: _ZoomableStatelessWidget<Input, Output>(builder: builder));
 
-  static ZoomableWidget<T> _of<T>(BuildContext context) {
-    final ZoomableWidget<T>? result = context.dependOnInheritedWidgetOfExactType<ZoomableWidget<T>>();
-    return result!;
+  static ZoomableWidget<Input, Output> _of<Input, Output>(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<ZoomableWidget<Input, Output>>()!;
   }
 
   @override
-  bool updateShouldNotify(ZoomableWidget<T> oldWidget) {
-    return state != oldWidget.state;
+  bool updateShouldNotify(ZoomableWidget<Input, Output> oldWidget) {
+    return input != oldWidget.input;
   }
 }
 
-class _ZoomableStatelessWidget<T> extends StatelessWidget {
-  final Widget Function(BuildContext context, Zoomable<T> zoomable) builder;
+class _ZoomableStatelessWidget<Input, Output> extends StatelessWidget {
+  final Widget Function(BuildContext context, Zoomable<Input, Output> zoomable) builder;
 
   const _ZoomableStatelessWidget({
     super.key,
@@ -34,38 +31,45 @@ class _ZoomableStatelessWidget<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final zoomable = Zoomable<T>._((context) {
-      final widget = ZoomableWidget._of<T>(context);
-      final state = widget.state;
-      final setState = widget.setState;
+    final zoomable = Zoomable<Input, Output>._((context) {
+      final widget = ZoomableWidget._of<Input, Output>(context);
+      final input = widget.input;
+      final update = widget.update;
 
-      return (state, setState);
+      return (input, update);
     });
 
     return builder(context, zoomable);
   }
 }
 
-final class Zoomable<T> {
-  final (T, void Function(T Function(T))) Function(BuildContext context) _data;
+final class Zoomable<Input, Output> {
+  final (Input input, void Function(Output) update) Function(BuildContext context) _data;
 
   Zoomable._(this._data);
 
-  Zoomable<V> zoom<V>(Lens<T, V> lens) {
+  Zoomable<R, Output> mapInput<R>(R Function(Input value) function) {
     return Zoomable._(
       (context) {
-        final (state, setState) = _data(context);
-
-        final newState = lens.get(state);
+        final (input, send) = _data(context);
 
         return (
-          newState,
-          (transition) {
-            setState((whole) {
-              final part = transition(lens.get(whole));
+          function(input),
+          send,
+        );
+      },
+    );
+  }
 
-              return lens.put(whole, part);
-            });
+  Zoomable<Input, R> mapOutput<R>(Output Function(R value) function) {
+    return Zoomable._(
+      (context) {
+        final (input, update) = _data(context);
+
+        return (
+          input,
+          (event) {
+            update(function(event));
           },
         );
       },
@@ -76,87 +80,29 @@ final class Zoomable<T> {
     Key? key,
     required Widget Function(
       BuildContext context,
-      T state,
-      void Function(T Function(T state) transition) setState,
+      Input input,
+      void Function(Output event) update,
     ) builder,
   }) {
     return Builder(
       key: key,
       builder: (context) {
-        final (state, setState) = _data(context);
-        return builder(context, state, setState);
+        final (input, update) = _data(context);
+        return builder(context, input, update);
       },
     );
   }
+}
 
-  Widget calculate({
-    Key? key,
-    required void Function(
-      BuildContext context,
-      Optional<T> oldState,
-      T newState,
-      void Function(T Function(T state) transition) setState,
-    ) calculate,
-    required Widget child,
+extension ValueZoomable<T> on Zoomable<T, T Function(T value)> {
+  Zoomable<V, V Function(V)> zoom<V>({
+    required V Function(T part) get,
+    required T Function(T whole, V part) put,
   }) {
-    return _CalculateWidget(
-      key: key,
-      zoomable: this,
-      calculate: calculate,
-      child: child,
-    );
-  }
-}
-
-class _CalculateWidget<T> extends StatefulWidget {
-  final Zoomable<T> zoomable;
-  final void Function(
-    BuildContext context,
-    Optional<T> oldState,
-    T newState,
-    void Function(T Function(T state) transition) setState,
-  ) calculate;
-  final Widget child;
-
-  const _CalculateWidget({
-    super.key,
-    required this.zoomable,
-    required this.calculate,
-    required this.child,
-  });
-
-  @override
-  State<_CalculateWidget<T>> createState() => _CalculateWidgetState<T>();
-}
-
-class _CalculateWidgetState<T> extends State<_CalculateWidget<T>> {
-  late Optional<T> _old;
-  late T _state;
-
-  bool _isInitial = true;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_isInitial) {
-      _old = None();
-      final (data, _) = widget.zoomable._data(context);
-      _state = data;
-      _isInitial = false;
-    } else {
-      _old = Some(_state);
-      final (data, setData) = widget.zoomable._data(context);
-      _state = data;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          widget.calculate(context, _old, data, setData);
-        }
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
+    return mapInput(get).mapOutput((update) {
+      return (whole) {
+        return put(whole, update(get(whole)));
+      };
+    });
   }
 }
