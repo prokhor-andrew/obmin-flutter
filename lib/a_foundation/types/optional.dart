@@ -8,6 +8,13 @@ sealed class Optional<T> {
     };
   }
 
+  Optional<R> bind<R>(Optional<R> Function(T value) function) {
+    return switch (this) {
+      None<T>() => None<R>(),
+      Some<T>(value: final value) => function(value),
+    };
+  }
+
   T valueOr(T replacement) {
     return switch (this) {
       None<T>() => replacement,
