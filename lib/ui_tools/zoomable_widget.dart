@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:obmin_concept/a_foundation/types/lens.dart';
+import 'package:obmin_concept/a_foundation/types/optional.dart';
 
 class ZoomableWidget<Input, Output> extends InheritedWidget {
   final Input input;
@@ -76,33 +78,72 @@ final class Zoomable<Input, Output> {
     );
   }
 
-  Widget build({
+  Widget build<S>({
     Key? key,
-    required Widget Function(
-      BuildContext context,
-      Input input,
-      void Function(Output event) update,
-    ) builder,
+    required S Function(BuildContext context, bool Function() isMounted, Optional<S> state, Input input, void Function(Output output) update) processor,
+    void Function(S state)? onDispose,
+    required Widget Function(BuildContext context, S state) builder,
   }) {
-    return Builder(
+    return _ConsumerWidget<S, Input, Output>(
       key: key,
-      builder: (context) {
-        final (input, update) = _data(context);
-        return builder(context, input, update);
-      },
+      zoomable: this,
+      processor: processor,
+      onDispose: onDispose,
+      builder: builder,
     );
   }
 }
 
 extension ValueZoomable<T> on Zoomable<T, T Function(T value)> {
-  Zoomable<V, V Function(V)> zoom<V>({
-    required V Function(T part) get,
-    required T Function(T whole, V part) put,
-  }) {
-    return mapInput(get).mapOutput((update) {
+  Zoomable<V, V Function(V)> zoom<V>(Lens<T, V> lens) {
+    return mapInput(lens.get).mapOutput((update) {
       return (whole) {
-        return put(whole, update(get(whole)));
+        return lens.put(whole, update(lens.get(whole)));
       };
     });
+  }
+}
+
+class _ConsumerWidget<S, Input, Output> extends StatefulWidget {
+  final Zoomable<Input, Output> zoomable;
+  final S Function(BuildContext context, bool Function() isMounted, Optional<S> state, Input input, void Function(Output output) update) processor;
+  final void Function(S state)? onDispose;
+  final Widget Function(BuildContext context, S state) builder;
+
+  const _ConsumerWidget({
+    super.key,
+    required this.zoomable,
+    required this.processor,
+    required this.onDispose,
+    required this.builder,
+  });
+
+  @override
+  State<_ConsumerWidget<S, Input, Output>> createState() => _ConsumerWidgetState<S, Input, Output>();
+}
+
+class _ConsumerWidgetState<S, Input, Output> extends State<_ConsumerWidget<S, Input, Output>> {
+  Optional<S> _state = None();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final (input, update) = widget.zoomable._data(context);
+
+    _state = Some(widget.processor(context, () => mounted, _state, input, update));
+  }
+
+  @override
+  void dispose() {
+    final onDispose = widget.onDispose;
+    if (onDispose != null) {
+      onDispose(_state.force());
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, _state.force());
   }
 }
