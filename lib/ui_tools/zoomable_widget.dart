@@ -81,14 +81,14 @@ final class Zoomable<Input, Output> {
   Widget build<S>({
     Key? key,
     required S Function(BuildContext? Function() context, Optional<S> state, Input input, void Function(Output output) update) processor,
-    void Function(S state)? onDispose,
+    void Function(S state)? dispose,
     required Widget Function(BuildContext context, S state) builder,
   }) {
     return ConsumerZoomableWidget<S, Input, Output>(
       key: key,
       zoomable: this,
       processor: processor,
-      onDispose: onDispose,
+      dispose: dispose,
       builder: builder,
     );
   }
@@ -107,14 +107,14 @@ extension ValueZoomable<T> on Zoomable<T, T Function(T value)> {
 class ConsumerZoomableWidget<S, Input, Output> extends StatefulWidget {
   final Zoomable<Input, Output> zoomable;
   final S Function(BuildContext? Function() context, Optional<S> state, Input input, void Function(Output output) update) processor;
-  final void Function(S state)? onDispose;
+  final void Function(S state)? dispose;
   final Widget Function(BuildContext context, S state) builder;
 
   const ConsumerZoomableWidget({
     super.key,
     required this.zoomable,
     required this.processor,
-    required this.onDispose,
+    required this.dispose,
     required this.builder,
   });
 
@@ -135,7 +135,7 @@ class _ConsumerZoomableWidgetState<S, Input, Output> extends State<ConsumerZooma
 
   @override
   void dispose() {
-    final onDispose = widget.onDispose;
+    final onDispose = widget.dispose;
     if (onDispose != null) {
       onDispose(_state.force());
     }
