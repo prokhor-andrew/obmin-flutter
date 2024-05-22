@@ -84,7 +84,7 @@ final class Zoomable<Input, Output> {
     void Function(S state)? onDispose,
     required Widget Function(BuildContext context, S state) builder,
   }) {
-    return _ConsumerWidget<S, Input, Output>(
+    return ConsumerZoomableWidget<S, Input, Output>(
       key: key,
       zoomable: this,
       processor: processor,
@@ -104,13 +104,13 @@ extension ValueZoomable<T> on Zoomable<T, T Function(T value)> {
   }
 }
 
-class _ConsumerWidget<S, Input, Output> extends StatefulWidget {
+class ConsumerZoomableWidget<S, Input, Output> extends StatefulWidget {
   final Zoomable<Input, Output> zoomable;
   final S Function(BuildContext? Function() context, Optional<S> state, Input input, void Function(Output output) update) processor;
   final void Function(S state)? onDispose;
   final Widget Function(BuildContext context, S state) builder;
 
-  const _ConsumerWidget({
+  const ConsumerZoomableWidget({
     super.key,
     required this.zoomable,
     required this.processor,
@@ -119,10 +119,10 @@ class _ConsumerWidget<S, Input, Output> extends StatefulWidget {
   });
 
   @override
-  State<_ConsumerWidget<S, Input, Output>> createState() => _ConsumerWidgetState<S, Input, Output>();
+  State<ConsumerZoomableWidget<S, Input, Output>> createState() => _ConsumerZoomableWidgetState<S, Input, Output>();
 }
 
-class _ConsumerWidgetState<S, Input, Output> extends State<_ConsumerWidget<S, Input, Output>> {
+class _ConsumerZoomableWidgetState<S, Input, Output> extends State<ConsumerZoomableWidget<S, Input, Output>> {
   Optional<S> _state = None();
 
   @override
