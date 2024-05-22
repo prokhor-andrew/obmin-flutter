@@ -80,7 +80,7 @@ final class Zoomable<Input, Output> {
 
   Widget build<S>({
     Key? key,
-    required S Function(BuildContext context, bool Function() isMounted, Optional<S> state, Input input, void Function(Output output) update) processor,
+    required S Function(BuildContext? Function() context, Optional<S> state, Input input, void Function(Output output) update) processor,
     void Function(S state)? onDispose,
     required Widget Function(BuildContext context, S state) builder,
   }) {
@@ -106,7 +106,7 @@ extension ValueZoomable<T> on Zoomable<T, T Function(T value)> {
 
 class _ConsumerWidget<S, Input, Output> extends StatefulWidget {
   final Zoomable<Input, Output> zoomable;
-  final S Function(BuildContext context, bool Function() isMounted, Optional<S> state, Input input, void Function(Output output) update) processor;
+  final S Function(BuildContext? Function() context, Optional<S> state, Input input, void Function(Output output) update) processor;
   final void Function(S state)? onDispose;
   final Widget Function(BuildContext context, S state) builder;
 
@@ -130,7 +130,7 @@ class _ConsumerWidgetState<S, Input, Output> extends State<_ConsumerWidget<S, In
     super.didChangeDependencies();
     final (input, update) = widget.zoomable._data(context);
 
-    _state = Some(widget.processor(context, () => mounted, _state, input, update));
+    _state = Some(widget.processor(() => mounted ? context : null, _state, input, update));
   }
 
   @override
