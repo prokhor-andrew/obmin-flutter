@@ -20,9 +20,11 @@ final class Core<State, Input, Output, Loggable> {
     required this.loggers,
   });
 
-  void start() {
+  bool get isStarted => _process != null;
+
+  bool start() {
     if (_process != null) {
-      return;
+      return false;
     }
 
     final aState = state();
@@ -55,10 +57,18 @@ final class Core<State, Input, Output, Loggable> {
           }),
           onConsume: (_) async {},
         );
+
+    return true;
   }
 
-  void stop() {
+  bool stop() {
+    if (_process == null) {
+      return false;
+    }
+
     _process?.cancel();
     _process = null;
+
+    return true;
   }
 }
