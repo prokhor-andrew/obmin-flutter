@@ -33,4 +33,15 @@ final class ChannelTask<T> {
       cancel: cancel,
     );
   }
+
+  @override
+  String toString() {
+    return "$ChannelTask<$T> id=$id";
+  }
+
+  @override
+  bool operator ==(Object other) => identical(this, other) || other is ChannelTask<T> && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

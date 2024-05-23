@@ -16,4 +16,9 @@ final class Writer<T, Loggable> {
     final newLogs = logs + writer.logs;
     return Writer(value: writer.value, logs: newLogs);
   }
+
+  @override
+  String toString() {
+    return "$Writer<$T, $Loggable> value=$value _ logs=$logs";
+  }
 }

@@ -8,4 +8,9 @@ final class Prism<Whole, Part> {
     required this.get,
     required this.put,
   });
+
+  @override
+  String toString() {
+    return "$Prism<$Whole, $Part>";
+  }
 }

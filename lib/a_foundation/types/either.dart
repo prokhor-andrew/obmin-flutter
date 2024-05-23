@@ -61,9 +61,9 @@ sealed class Either<L, R> {
   String toString() {
     switch (this) {
       case Left<L, R>(value: var value):
-        return "Either<$L, $R> left=$value";
+        return "Either<$L, $R> Left=$value";
       case Right<L, R>(value: var value):
-        return "Either<$L, $R> right=$value";
+        return "Either<$L, $R> Right=$value";
     }
   }
 

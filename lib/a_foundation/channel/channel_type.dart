@@ -60,10 +60,10 @@ final class Channel<T, Loggable> {
 
     switch (_state) {
       case _IdleChannelState<T>():
-        _state = _AwaitingForProducer(cur: ChannelConsumer(id, completer), rest: []);
+        _state = _AwaitingForProducer(cur: _ChannelConsumer(id, completer), rest: []);
         break;
       case _AwaitingForProducer<T>(cur: final cur, rest: final rest):
-        _state = _AwaitingForProducer(cur: cur, rest: rest.plus(ChannelConsumer(id, completer)));
+        _state = _AwaitingForProducer(cur: cur, rest: rest.plus(_ChannelConsumer(id, completer)));
         break;
       case _AwaitingForConsumer<T>(buffer: final array):
         array[0]._completer.complete(true);
@@ -139,8 +139,8 @@ sealed class _ChannelState<T> {}
 final class _IdleChannelState<T> extends _ChannelState<T> {}
 
 final class _AwaitingForProducer<T> extends _ChannelState<T> {
-  final ChannelConsumer<T> cur;
-  final List<ChannelConsumer<T>> rest;
+  final _ChannelConsumer<T> cur;
+  final List<_ChannelConsumer<T>> rest;
 
   _AwaitingForProducer({
     required this.cur,
@@ -154,9 +154,9 @@ final class _AwaitingForConsumer<T> extends _ChannelState<T> {
   _AwaitingForConsumer(this.buffer);
 }
 
-final class ChannelConsumer<T> {
+final class _ChannelConsumer<T> {
   final String id;
   final Completer<Optional<T>> comp;
 
-  ChannelConsumer(this.id, this.comp);
+  _ChannelConsumer(this.id, this.comp);
 }

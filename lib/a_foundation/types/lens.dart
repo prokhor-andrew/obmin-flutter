@@ -6,4 +6,9 @@ final class Lens<Whole, Part> {
     required this.get,
     required this.put,
   });
+
+  @override
+  String toString() {
+    return "$Lens<$Whole, $Part>";
+  }
 }
