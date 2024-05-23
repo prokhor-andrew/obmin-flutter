@@ -21,6 +21,10 @@ final class Core<State, Input, Output, Loggable> {
   });
 
   void start() {
+    if (_process != null) {
+      return;
+    }
+
     final aState = state();
     final aLoggers = loggers();
     final aMachines = machines(aState);
