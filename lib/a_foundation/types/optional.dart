@@ -101,10 +101,28 @@ sealed class Optional<T> {
   }
 }
 
-final class None<T> extends Optional<T> {}
+final class None<T> extends Optional<T> {
+
+  @override
+  bool operator ==(Object other) {
+    return other is None<T>;
+  }
+
+  @override
+  int get hashCode => 0;
+}
 
 final class Some<T> extends Optional<T> {
   final T value;
 
   Some(this.value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Some<T> && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 }
