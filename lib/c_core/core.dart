@@ -9,7 +9,7 @@ final class Core<State, Input, Output, Loggable> {
   final State Function() state;
   final Writer<(State state, List<Input> effects), Loggable> Function(State state, Output trigger) reducer;
   final Set<Machine<Input, Output, Loggable>> Function(State state) machines;
-  final List<MachineLogger<Loggable>> Function() loggers;
+  final Set<MachineLogger<Loggable>> Function() loggers;
 
   Process<void>? _process;
 
@@ -34,7 +34,7 @@ final class Core<State, Input, Output, Loggable> {
     _process = MachineFactory.shared
         .feature(
           id: "core",
-          feature: (id, logger) {
+          feature: () {
             Scene<State, Output, Input, Loggable> scene(State state) {
               return Scene.create(
                 state: state,
@@ -46,15 +46,18 @@ final class Core<State, Input, Output, Loggable> {
               );
             }
 
-            return scene(aState).asIntTriggerIntEffect().asFeature(aMachines);
+            return Writer(scene(aState).asIntTriggerIntEffect().asFeature(aMachines));
           },
         )
         .run(
-          onLog: MachineLogger((loggable) {
-            for (final logger in aLoggers) {
-              logger.log(loggable);
-            }
-          }),
+          onLog: MachineLogger(
+            id: "merged",
+            log: (loggable) {
+              for (final logger in aLoggers) {
+                logger.log(loggable);
+              }
+            },
+          ),
           onConsume: (_) async {},
         );
 

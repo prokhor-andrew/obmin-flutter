@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:obmin_concept/a_foundation/machine.dart';
 import 'package:obmin_concept/a_foundation/types/writer.dart';
 
@@ -18,15 +19,23 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
 
   @override
   bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> &&
-            runtimeType == other.runtimeType &&
-            state == other.state &&
-            machines == other.machines;
+    if (identical(this, other)) return true;
+
+    return other is Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> &&
+        other.state == state &&
+        const SetEquality().equals(other.machines, machines);
   }
 
   @override
-  int get hashCode => state.hashCode ^ machines.hashCode;
+  int get hashCode => Object.hash(
+        state,
+        const SetEquality().hash(machines),
+      );
+
+  @override
+  String toString() {
+    return "Feature<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect, $Loggable>{ state=$state _ machines=$machines }";
+  }
 
   static Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> create<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>({
     required State state,
@@ -64,15 +73,20 @@ final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffec
 
   @override
   bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> &&
-            runtimeType == other.runtimeType &&
-            feature == other.feature &&
-            effects == other.effects;
+    if (identical(this, other)) return true;
+
+    return other is FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> &&
+        other.feature == feature &&
+        const ListEquality().equals(other.effects, effects);
   }
 
   @override
-  int get hashCode => feature.hashCode ^ effects.hashCode;
+  int get hashCode => feature.hashCode ^ const ListEquality().hash(effects);
+
+  @override
+  String toString() {
+    return "FeatureTransition<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect, $Loggable>{ feature=$feature _ effects=$effects }";
+  }
 }
 
 sealed class FeatureEvent<Int, Ext> {
@@ -96,6 +110,11 @@ final class InternalFeatureEvent<Int, Ext> extends FeatureEvent<Int, Ext> {
 
   @override
   int get hashCode => value.hashCode;
+
+  @override
+  String toString() {
+    return "InternalFeatureEvent<$Int, $Ext> { value=$value }";
+  }
 }
 
 final class ExternalFeatureEvent<Int, Ext> extends FeatureEvent<Int, Ext> {
@@ -110,4 +129,9 @@ final class ExternalFeatureEvent<Int, Ext> extends FeatureEvent<Int, Ext> {
 
   @override
   int get hashCode => value.hashCode;
+
+  @override
+  String toString() {
+    return "ExternalFeatureEvent<$Int, $Ext> { value=$value }";
+  }
 }

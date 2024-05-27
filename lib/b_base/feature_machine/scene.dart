@@ -41,6 +41,11 @@ final class Scene<State, Trigger, Effect, Loggable> {
 
   @override
   int get hashCode => state.hashCode;
+
+  @override
+  String toString() {
+    return "Scene<$State, $Trigger, $Effect, $Loggable>{ state=$state }";
+  }
 }
 
 final class SceneTransition<State, Trigger, Effect, Loggable> {
@@ -69,7 +74,7 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent():
-            return Writer(value: OutlineTransition(asExtTriggerExtEffect()));
+            return Writer(OutlineTransition(asExtTriggerExtEffect()));
           case ExternalFeatureEvent(value: final value):
             return transit(value, machineId).map(
               (transition) {
@@ -92,7 +97,7 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent():
-            return Writer(value: OutlineTransition(asIntEffectExtTrigger()));
+            return Writer(OutlineTransition(asIntEffectExtTrigger()));
           case ExternalFeatureEvent(value: final value):
             return transit(value, machineId).map(
               (transition) {
@@ -130,7 +135,7 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
               },
             );
           case ExternalFeatureEvent():
-            return Writer(value: OutlineTransition(asIntTriggerExtEffect()));
+            return Writer(OutlineTransition(asIntTriggerExtEffect()));
         }
       },
     );
@@ -155,7 +160,7 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
               },
             );
           case ExternalFeatureEvent():
-            return Writer(value: OutlineTransition(asIntTriggerIntEffect()));
+            return Writer(OutlineTransition(asIntTriggerIntEffect()));
         }
       },
     );
@@ -168,7 +173,7 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
         switch (trigger) {
           case InternalFeatureEvent():
             return Writer(
-              value: OutlineTransition(asIntEffectExtTriggerExtEffect()),
+              OutlineTransition(asIntEffectExtTriggerExtEffect()),
             );
           case ExternalFeatureEvent(value: final value):
             return transit(value, machineId).map(
@@ -213,7 +218,7 @@ extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<Sta
               },
             );
           case ExternalFeatureEvent():
-            return Writer(value: OutlineTransition(asIntTriggerIntEffectExtEffect()));
+            return Writer(OutlineTransition(asIntTriggerIntEffectExtEffect()));
         }
       },
     );

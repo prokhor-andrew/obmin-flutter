@@ -35,6 +35,11 @@ final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
   }
 
   @override
+  String toString() {
+    return "Outline<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect, $Loggable>{ state=$state }";
+  }
+
+  @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         other is Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> && runtimeType == other.runtimeType && state == other.state;

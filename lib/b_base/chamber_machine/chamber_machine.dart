@@ -9,7 +9,7 @@ extension ChamberMachine on MachineFactory {
   Machine<T, T Function(T), Loggable> chamber<T, Loggable>({
     required String id,
     required T initial,
-    required Set<Silo<T, Loggable>> Function(T state) map,
+    required Writer<Set<Silo<T, Loggable>>, Loggable> Function(T state) map,
   }) {
     Feature<(), T Function(T), (), T, T Function(T), Loggable> config(Set<Silo<T, Loggable>> machines) {
       return Feature.create(
@@ -18,9 +18,16 @@ extension ChamberMachine on MachineFactory {
         transit: (state, machines, trigger, machineId) {
           switch (trigger) {
             case InternalFeatureEvent<T Function(T), T>(value: final value):
-              return Writer(value: FeatureTransition(config(machines), effects: [ExternalFeatureEvent(value)]));
+              return Writer(
+                FeatureTransition(
+                  config(machines),
+                  effects: [ExternalFeatureEvent(value)],
+                ),
+              );
             case ExternalFeatureEvent<T Function(T), T>(value: final value):
-              return Writer(value: FeatureTransition(config(map(value))));
+              return map(value).map((value) {
+                return FeatureTransition(config(value));
+              });
           }
         },
       );
@@ -28,8 +35,10 @@ extension ChamberMachine on MachineFactory {
 
     return MachineFactory.shared.feature(
       id: id,
-      feature: (id, logger) {
-        return config(map(initial));
+      feature: () {
+        return map(initial).map((value) {
+          return config(value);
+        });
       },
     );
   }

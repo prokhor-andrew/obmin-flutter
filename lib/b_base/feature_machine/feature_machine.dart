@@ -10,10 +10,7 @@ import 'package:obmin_concept/b_base/feature_machine/feature.dart';
 extension FeatureMachine on MachineFactory {
   Machine<ExtTrigger, ExtEffect, Loggable> feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>({
     required String id,
-    required Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function(
-      String,
-      MachineLogger<Loggable>,
-    ) feature,
+    required Writer<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function() feature,
   }) {
     return MachineFactory.shared.create(
       id: id,
@@ -21,7 +18,13 @@ extension FeatureMachine on MachineFactory {
         return _FeatureHolder(
           id: id,
           initial: () {
-            return feature(id, logger);
+            final writer = feature();
+
+            for (final loggable in writer.logs) {
+              logger.log(loggable);
+            }
+
+            return writer.value;
           },
           logger: logger,
         );
@@ -62,7 +65,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
         _logger = logger,
         _initial = initial,
         _channel = Channel(
-          bufferStrategy: bufferStrategy ?? ChannelBufferStrategy.defaultStrategy(),
+          bufferStrategy: bufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default"),
           logger: logger.log,
         );
 

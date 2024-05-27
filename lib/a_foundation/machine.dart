@@ -38,9 +38,9 @@ final class Machine<Input, Output, Loggable> {
     required Future<void> Function(Output output) onConsume,
   }) {
     final ChannelBufferStrategy<Output, Loggable> actualOutputBufferStrategy =
-        this.outputBufferStrategy ?? outputBufferStrategy ?? ChannelBufferStrategy.defaultStrategy();
+        this.outputBufferStrategy ?? outputBufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default");
     final ChannelBufferStrategy<Input, Loggable> actualInputBufferStrategy =
-        this.inputBufferStrategy ?? inputBufferStrategy ?? ChannelBufferStrategy.defaultStrategy();
+        this.inputBufferStrategy ?? inputBufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default");
 
     final Channel<Input, Loggable> inputChannel = Channel(
       bufferStrategy: actualInputBufferStrategy,
@@ -142,4 +142,9 @@ final class Process<Input> {
 
   @override
   int get hashCode => id.hashCode;
+
+  @override
+  String toString() {
+    return "Process<$Input>{ id=$id }";
+  }
 }

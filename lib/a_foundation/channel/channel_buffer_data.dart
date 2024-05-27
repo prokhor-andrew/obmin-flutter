@@ -19,6 +19,6 @@ final class ChannelBufferData<T> {
 
   @override
   String toString() {
-    return 'ChannelBufferData<$T> id=$id _ data=$data';
+    return 'ChannelBufferData<$T>{ id=$id _ data=$data }';
   }
 }

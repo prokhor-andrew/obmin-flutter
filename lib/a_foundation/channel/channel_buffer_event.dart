@@ -14,7 +14,7 @@ sealed class ChannelBufferEvent {
       case ChannelBufferAddedEvent():
         return "ChannelBufferAddedEvent";
       case ChannelBufferRemovedEvent(isConsumed: final isConsumed):
-        return "ChannelBufferRemovedEvent ${isConsumed ? "consumed" : "cancelled"}";
+        return "ChannelBufferRemovedEvent{ ${isConsumed ? "consumed" : "cancelled"} }";
     }
   }
 
@@ -36,7 +36,8 @@ final class ChannelBufferRemovedEvent extends ChannelBufferEvent {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || super == other && other is ChannelBufferRemovedEvent && runtimeType == other.runtimeType && isConsumed == other.isConsumed;
+      identical(this, other) ||
+      super == other && other is ChannelBufferRemovedEvent && runtimeType == other.runtimeType && isAdded == other.isAdded && isConsumed == other.isConsumed;
 
   @override
   int get hashCode => super.hashCode ^ isConsumed.hashCode;
