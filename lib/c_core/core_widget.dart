@@ -50,12 +50,11 @@ class _CoreWidgetState<UiState, DomainState, Input, Output, Loggable> extends St
   @override
   void initState() {
     super.initState();
-    final coreState = widget._initialCore.state();
-    final coreReducer = widget._initialCore.reducer;
-    final coreMachines = widget._initialCore.machines(coreState);
+    final coreScene = widget._initialCore.scene();
+    final coreMachines = widget._initialCore.machines(coreScene.state);
     final coreLoggers = widget._initialCore.loggers;
 
-    _state = widget.init(coreState);
+    _state = widget.init(coreScene.state);
 
     final Machine<Input, Output, Loggable> uiMachine = MachineFactory.shared.create<(), Input, Output, Loggable>(
       id: "ui_machine",
@@ -81,8 +80,7 @@ class _CoreWidgetState<UiState, DomainState, Input, Output, Loggable> extends St
     );
 
     _core = Core<DomainState, Input, Output, Loggable>(
-      state: () => coreState,
-      reducer: coreReducer,
+      scene: () => coreScene,
       machines: (state) => coreMachines.union({uiMachine}),
       loggers: coreLoggers,
     );

@@ -6,16 +6,14 @@ import 'package:obmin_concept/b_base/feature_machine/feature_machine.dart';
 import 'package:obmin_concept/b_base/feature_machine/scene.dart';
 
 final class Core<State, Input, Output, Loggable> {
-  final State Function() state;
-  final Writer<(State state, List<Input> effects), Loggable> Function(State state, Output trigger) reducer;
+  final Scene<State, Output, Input, Loggable> Function() scene;
   final Set<Machine<Input, Output, Loggable>> Function(State state) machines;
   final Set<MachineLogger<Loggable>> Function() loggers;
 
   Process<void>? _process;
 
   Core({
-    required this.state,
-    required this.reducer,
+    required this.scene,
     required this.machines,
     required this.loggers,
   });
@@ -27,26 +25,15 @@ final class Core<State, Input, Output, Loggable> {
       return false;
     }
 
-    final aState = state();
+    final aScene = scene();
     final aLoggers = loggers();
-    final aMachines = machines(aState);
+    final aMachines = machines(aScene.state);
 
     _process = MachineFactory.shared
         .feature(
           id: "core",
           feature: () {
-            Scene<State, Output, Input, Loggable> scene(State state) {
-              return Scene.create(
-                state: state,
-                transit: (payload, trigger, machineId) {
-                  return reducer(payload, trigger).map((pair) {
-                    return SceneTransition(scene(pair.$1), effects: pair.$2);
-                  });
-                },
-              );
-            }
-
-            return Writer(scene(aState).asIntTriggerIntEffect().asFeature(aMachines));
+            return Writer(aScene.asIntTriggerIntEffect().asFeature(aMachines));
           },
         )
         .run(

@@ -1,6 +1,7 @@
 import 'package:obmin_concept/a_foundation/machine.dart';
 import 'package:obmin_concept/a_foundation/machine_logger.dart';
 import 'package:obmin_concept/a_foundation/types/writer.dart';
+import 'package:obmin_concept/b_base/feature_machine/scene.dart';
 import 'package:obmin_concept/c_core/core.dart';
 
 Core<State, State, Event, Loggable> CoreX<State, Event, Loggable>({
@@ -10,14 +11,22 @@ Core<State, State, Event, Loggable> CoreX<State, Event, Loggable>({
   required Set<MachineLogger<Loggable>> Function() loggers,
 }) {
   return Core(
-    state: state,
-    reducer: (state, trigger) {
-      return reducer(state, trigger).map((value) {
-        return (
-          value,
-          [value],
+    scene: () {
+      Scene<State, Event, State, Loggable> scene(State state) {
+        return Scene.create(
+          state: state,
+          transit: (state, trigger, machineId) {
+            return reducer(state, trigger).map((value) {
+              return SceneTransition(
+                scene(value),
+                effects: [value],
+              );
+            });
+          },
         );
-      });
+      }
+
+      return scene(state());
     },
     machines: machines,
     loggers: loggers,
