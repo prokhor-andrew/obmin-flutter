@@ -1,10 +1,17 @@
-import '../either.dart';
+import 'package:obmin_concept/a_foundation/types/either.dart';
 
 sealed class Optional<T> {
   Optional<R> map<R>(R Function(T value) function) {
     return switch (this) {
       None<T>() => None<R>(),
       Some<T>(value: final value) => Some<R>(function(value)),
+    };
+  }
+
+  Optional<R> bind<R>(Optional<R> Function(T value) function) {
+    return switch (this) {
+      None<T>() => None<R>(),
+      Some<T>(value: final value) => function(value),
     };
   }
 
@@ -68,8 +75,8 @@ sealed class Optional<T> {
   @override
   String toString() {
     return switch (this) {
-      None<T>() => "None",
-      Some<T>(value: final value) => "Some value=$value",
+      None<T>() => "None<$T>",
+      Some<T>(value: final value) => "Some<$T> value=$value",
     };
   }
 
@@ -94,10 +101,28 @@ sealed class Optional<T> {
   }
 }
 
-final class None<T> extends Optional<T> {}
+final class None<T> extends Optional<T> {
+
+  @override
+  bool operator ==(Object other) {
+    return other is None<T>;
+  }
+
+  @override
+  int get hashCode => 0;
+}
 
 final class Some<T> extends Optional<T> {
   final T value;
 
   Some(this.value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Some<T> && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 }

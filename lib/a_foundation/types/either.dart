@@ -1,4 +1,4 @@
-import 'package:obmin_concept/optional.dart';
+import 'package:obmin_concept/a_foundation/types/optional.dart';
 
 sealed class Either<L, R> {
   Either<LeftResult, R> mapLeft<LeftResult>(LeftResult Function(L left) mapper) {
@@ -22,6 +22,13 @@ sealed class Either<L, R> {
   }
 
   Either<L, RightResult> mapRightTo<RightResult>(RightResult value) => mapRight((_) => value);
+
+  Either<L, C> bind<C>(Either<L, C> Function(R value) function) {
+    return switch (this) {
+      Left<L, R>(value: final value) => Left(value),
+      Right<L, R>(value: final value) => function(value),
+    };
+  }
 
   Either<R, L> swapped() {
     switch (this) {
@@ -54,9 +61,9 @@ sealed class Either<L, R> {
   String toString() {
     switch (this) {
       case Left<L, R>(value: var value):
-        return "Either<$L, $R> left=$value";
+        return "Either<$L, $R> Left=$value";
       case Right<L, R>(value: var value):
-        return "Either<$L, $R> right=$value";
+        return "Either<$L, $R> Right=$value";
     }
   }
 
@@ -85,12 +92,30 @@ final class Left<L, R> extends Either<L, R> {
   final L value;
 
   Left(this.value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Left<L, R> && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 final class Right<L, R> extends Either<L, R> {
   final R value;
 
   Right(this.value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Right<L, R> && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 extension EitherValue<T> on Either<T, T> {
