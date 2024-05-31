@@ -34,7 +34,7 @@ final class Machine<Input, Output, Loggable> {
   Process<Input> run({
     ChannelBufferStrategy<Input, Loggable>? inputBufferStrategy,
     ChannelBufferStrategy<Output, Loggable>? outputBufferStrategy,
-    required MachineLogger<Loggable> onLog,
+    required MachineLogger<Loggable> logger,
     required Future<void> Function(Output output) onConsume,
   }) {
     final ChannelBufferStrategy<Output, Loggable> actualOutputBufferStrategy =
@@ -44,12 +44,12 @@ final class Machine<Input, Output, Loggable> {
 
     final Channel<Input, Loggable> inputChannel = Channel(
       bufferStrategy: actualInputBufferStrategy,
-      logger: onLog.log,
+      logger: logger.log,
     );
 
     final Channel<Output, Loggable> outputChannel = Channel(
       bufferStrategy: actualOutputBufferStrategy,
-      logger: onLog.log,
+      logger: logger.log,
     );
 
     bool isCancelled = false;
@@ -61,7 +61,7 @@ final class Machine<Input, Output, Loggable> {
         return;
       }
 
-      final (onChange, onProcess) = onCreate(onLog);
+      final (onChange, onProcess) = onCreate(logger);
 
       await onChange(outputChannel.send);
 

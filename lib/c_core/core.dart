@@ -37,7 +37,7 @@ final class Core<State, Input, Output, Loggable> {
           },
         )
         .run(
-          onLog: MachineLogger(
+          logger: MachineLogger(
             id: "merged",
             log: (loggable) {
               for (final logger in aLoggers) {
