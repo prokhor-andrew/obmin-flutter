@@ -6,6 +6,7 @@ import 'package:obmin/a_foundation/machine.dart';
 import 'package:obmin/a_foundation/machine_factory.dart';
 import 'package:obmin/a_foundation/machine_logger.dart';
 import 'package:obmin/a_foundation/types/writer.dart';
+import 'package:obmin/b_base/feature_machine/feature.dart';
 import 'package:obmin/b_base/feature_machine/feature_machine.dart';
 import 'package:obmin/b_base/feature_machine/scene.dart';
 
@@ -37,7 +38,7 @@ final class Core<State, Input, Output, Loggable> {
         .feature(
           id: "core",
           feature: () {
-            return Writer(aScene.asIntTriggerIntEffect().asFeature(aMachines));
+            return Writer<Feature<State, Output, Input, void, void, Loggable>, Loggable>(aScene.asIntTriggerIntEffect().asFeature(aMachines));
           },
         )
         .run(
