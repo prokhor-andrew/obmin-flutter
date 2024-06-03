@@ -5,18 +5,6 @@ final class Launched<Req, Err, Res> extends Call<Req, Err, Res> {
 
   Launched(this.req);
 
-  Failure<Req, Err, Res> fail(Err err) {
-    return Failure(err);
-  }
-
-  Success<Req, Err, Res> succeed(Res res) {
-    return Success(res);
-  }
-
-  Launched<Req, Err, Res> restart(Req req) {
-    return Launched(req);
-  }
-
   @override
   String toString() {
     return "Launched<$Req, $Err, $Res> { req=$req }";
