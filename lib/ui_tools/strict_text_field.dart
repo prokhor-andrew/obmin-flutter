@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Andrii Prokhorenko
+// This file is part of Obmin, licensed under the MIT License.
+// See the LICENSE file in the project root for license information.
+
 import 'package:flutter/material.dart';
 import 'package:obmin_concept/ui_tools/stateless_text_field.dart';
 
@@ -53,10 +57,10 @@ class _StrictTextFieldState extends State<StrictTextField> {
       keyboardType: widget.keyboardType,
       autocorrect: widget.autocorrect,
       onChanged: widget.onChanged,
-      style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
+      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
       decoration: InputDecoration(
         labelText: widget.hint,
-        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onBackground),
+        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         errorText: widget.error,
         floatingLabelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
         focusedBorder: focusedBorder(),
@@ -65,8 +69,8 @@ class _StrictTextFieldState extends State<StrictTextField> {
         enabledBorder: border(),
         border: border(),
         enabled: widget.enabled,
-        suffixIconColor: MaterialStateColor.resolveWith((states) =>
-            states.contains(MaterialState.focused) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primary.withOpacity(0.5)),
+        suffixIconColor: WidgetStateColor.resolveWith((states) =>
+            states.contains(WidgetState.focused) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primary.withOpacity(0.5)),
         suffixIcon: widget.action ??
             (widget.isSecure
                 ? IconButton(

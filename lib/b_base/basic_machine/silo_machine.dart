@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Andrii Prokhorenko
+// This file is part of Obmin, licensed under the MIT License.
+// See the LICENSE file in the project root for license information.
+
 import 'package:obmin_concept/a_foundation/machine.dart';
 import 'package:obmin_concept/a_foundation/machine_factory.dart';
 import 'package:obmin_concept/b_base/basic_machine/basic_machine.dart';
