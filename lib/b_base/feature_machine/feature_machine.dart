@@ -16,7 +16,7 @@ extension FeatureMachine on MachineFactory {
     required String id,
     required Writer<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function() feature,
   }) {
-    return MachineFactory.shared.create(
+    return MachineFactory.shared.create<_FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, ExtTrigger, ExtEffect, Loggable>(
       id: id,
       onCreate: (id, logger) {
         return _FeatureHolder(

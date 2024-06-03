@@ -13,10 +13,10 @@ extension BasicMachine on MachineFactory {
     required Future<void> Function(Object object, void Function(Output output)? callback) onChange,
     required Future<void> Function(Object object, Input input) onProcess,
   }) {
-    return Machine(
+    return Machine<Input, Output, Loggable>(
       id: id,
       onCreate: (logger) {
-        final object = onCreate(id, logger);
+        final Object object = onCreate(id, logger);
 
         return (
           (callback) async {
