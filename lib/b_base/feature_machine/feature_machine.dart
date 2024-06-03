@@ -80,16 +80,14 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
       final state = _initial();
       _transit = state.transit;
 
-      final processes = state.machines.map((machine) {
+      _processes = state.machines.map((machine) {
         return machine.run(
           logger: _logger,
           onConsume: (event) async {
             await _channel.send(InternalFeatureEvent(event)).future;
           },
         );
-      });
-
-      _processes = processes.toSet();
+      }).toSet();
 
       _task = _channel.next().map((future) {
         return Future(() async {
