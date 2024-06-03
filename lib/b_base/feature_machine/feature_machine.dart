@@ -77,7 +77,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
       _transit = state.transit;
       _processes = state.machines.map((machine) {
         return machine.run(
-          onLog: _logger,
+          logger: _logger,
           onConsume: (event) async {
             await _channel.send(InternalFeatureEvent(event)).future;
           },
@@ -155,7 +155,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
 
     final processesToAdd = machinesToAdd.map((machine) {
       return machine.run(
-        onLog: _logger,
+        logger: _logger,
         onConsume: (output) async {
           await _channel.send(InternalFeatureEvent(output)).future;
         },
