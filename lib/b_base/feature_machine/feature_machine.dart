@@ -2,14 +2,14 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin_concept/a_foundation/channel/channel.dart';
-import 'package:obmin_concept/a_foundation/machine.dart';
-import 'package:obmin_concept/a_foundation/machine_factory.dart';
-import 'package:obmin_concept/a_foundation/machine_logger.dart';
-import 'package:obmin_concept/a_foundation/types/optional.dart';
-import 'package:obmin_concept/a_foundation/types/writer.dart';
-import 'package:obmin_concept/b_base/basic_machine/basic_machine.dart';
-import 'package:obmin_concept/b_base/feature_machine/feature.dart';
+import 'package:obmin/a_foundation/channel/channel.dart';
+import 'package:obmin/a_foundation/machine.dart';
+import 'package:obmin/a_foundation/machine_factory.dart';
+import 'package:obmin/a_foundation/machine_logger.dart';
+import 'package:obmin/a_foundation/types/optional.dart';
+import 'package:obmin/a_foundation/types/writer.dart';
+import 'package:obmin/b_base/basic_machine/basic_machine.dart';
+import 'package:obmin/b_base/feature_machine/feature.dart';
 
 extension FeatureMachine on MachineFactory {
   Machine<ExtTrigger, ExtEffect, Loggable> feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>({

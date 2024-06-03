@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:flutter/material.dart';
-import 'package:obmin_concept/a_foundation/types/optional.dart';
-import 'package:obmin_concept/ui_tools/zoomable/zoomable_widget.dart';
+import 'package:obmin/a_foundation/types/optional.dart';
+import 'package:obmin/ui_tools/zoomable/zoomable_widget.dart';
 
 extension CalculatorWidgetExtension<State, Event> on Zoomable<State, Event> {
   Widget calculator({

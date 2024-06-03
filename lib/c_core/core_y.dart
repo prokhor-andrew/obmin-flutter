@@ -2,11 +2,11 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin_concept/a_foundation/machine.dart';
-import 'package:obmin_concept/a_foundation/machine_logger.dart';
-import 'package:obmin_concept/a_foundation/types/writer.dart';
-import 'package:obmin_concept/c_core/core.dart';
-import 'package:obmin_concept/c_core/core_x.dart';
+import 'package:obmin/a_foundation/machine.dart';
+import 'package:obmin/a_foundation/machine_logger.dart';
+import 'package:obmin/a_foundation/types/writer.dart';
+import 'package:obmin/c_core/core.dart';
+import 'package:obmin/c_core/core_x.dart';
 
 Core<State, State, Writer<State, Loggable> Function(State state), Loggable> CoreY<State, Loggable>({
   required State Function() state,

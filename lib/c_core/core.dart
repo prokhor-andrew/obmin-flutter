@@ -2,12 +2,12 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin_concept/a_foundation/machine.dart';
-import 'package:obmin_concept/a_foundation/machine_factory.dart';
-import 'package:obmin_concept/a_foundation/machine_logger.dart';
-import 'package:obmin_concept/a_foundation/types/writer.dart';
-import 'package:obmin_concept/b_base/feature_machine/feature_machine.dart';
-import 'package:obmin_concept/b_base/feature_machine/scene.dart';
+import 'package:obmin/a_foundation/machine.dart';
+import 'package:obmin/a_foundation/machine_factory.dart';
+import 'package:obmin/a_foundation/machine_logger.dart';
+import 'package:obmin/a_foundation/types/writer.dart';
+import 'package:obmin/b_base/feature_machine/feature_machine.dart';
+import 'package:obmin/b_base/feature_machine/scene.dart';
 
 final class Core<State, Input, Output, Loggable> {
   final Scene<State, Output, Input, Loggable> Function() scene;

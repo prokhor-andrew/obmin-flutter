@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:flutter/material.dart';
-import 'package:obmin_concept/a_foundation/types/lens.dart';
-import 'package:obmin_concept/a_foundation/types/optional.dart';
+import 'package:obmin/a_foundation/types/lens.dart';
+import 'package:obmin/a_foundation/types/optional.dart';
 
 class ZoomableWidget<Input, Output> extends InheritedWidget {
   final Input input;

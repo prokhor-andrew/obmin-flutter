@@ -2,9 +2,9 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin_concept/a_foundation/machine.dart';
-import 'package:obmin_concept/a_foundation/types/writer.dart';
-import 'package:obmin_concept/b_base/feature_machine/feature.dart';
+import 'package:obmin/a_foundation/machine.dart';
+import 'package:obmin/a_foundation/types/writer.dart';
+import 'package:obmin/b_base/feature_machine/feature.dart';
 
 final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
   final State state;

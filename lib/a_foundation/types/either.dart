@@ -2,7 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin_concept/a_foundation/types/optional.dart';
+import 'package:obmin/a_foundation/types/optional.dart';
 
 sealed class Either<L, R> {
   Either<LeftResult, R> mapLeft<LeftResult>(LeftResult Function(L left) mapper) {

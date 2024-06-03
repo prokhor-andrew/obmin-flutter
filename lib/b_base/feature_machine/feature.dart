@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:collection/collection.dart';
-import 'package:obmin_concept/a_foundation/machine.dart';
-import 'package:obmin_concept/a_foundation/types/writer.dart';
+import 'package:obmin/a_foundation/machine.dart';
+import 'package:obmin/a_foundation/types/writer.dart';
 
 final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
   final State state;

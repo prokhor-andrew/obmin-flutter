@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:flutter/material.dart';
-import 'package:obmin_concept/ui_tools/stateless_text_field.dart';
+import 'package:obmin/ui_tools/stateless_text_field.dart';
 
 class StrictTextField extends StatefulWidget {
   final String text;

@@ -2,12 +2,12 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin_concept/a_foundation/machine.dart';
-import 'package:obmin_concept/a_foundation/machine_factory.dart';
-import 'package:obmin_concept/a_foundation/types/writer.dart';
-import 'package:obmin_concept/b_base/basic_machine/silo_machine.dart';
-import 'package:obmin_concept/b_base/feature_machine/feature.dart';
-import 'package:obmin_concept/b_base/feature_machine/feature_machine.dart';
+import 'package:obmin/a_foundation/machine.dart';
+import 'package:obmin/a_foundation/machine_factory.dart';
+import 'package:obmin/a_foundation/types/writer.dart';
+import 'package:obmin/b_base/basic_machine/silo_machine.dart';
+import 'package:obmin/b_base/feature_machine/feature.dart';
+import 'package:obmin/b_base/feature_machine/feature_machine.dart';
 
 extension ChamberMachine on MachineFactory {
   Machine<T, T Function(T), Loggable> chamber<T, Loggable>({

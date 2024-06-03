@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-import 'package:obmin_concept/a_foundation/channel/channel.dart';
-import 'package:obmin_concept/a_foundation/machine_logger.dart';
-import 'package:obmin_concept/a_foundation/types/optional.dart';
+import 'package:obmin/a_foundation/channel/channel.dart';
+import 'package:obmin/a_foundation/machine_logger.dart';
+import 'package:obmin/a_foundation/types/optional.dart';
 
 final class Machine<Input, Output, Loggable> {
   final ChannelBufferStrategy<Input, Loggable>? inputBufferStrategy;

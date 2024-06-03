@@ -2,7 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin_concept/a_foundation/types/either.dart';
+import 'package:obmin/a_foundation/types/either.dart';
 
 sealed class Optional<T> {
   Optional<R> map<R>(R Function(T value) function) {
