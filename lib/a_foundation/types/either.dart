@@ -24,10 +24,7 @@ sealed class Either<L, R> {
   Either<L, RightResult> mapRightTo<RightResult>(RightResult value) => mapRight((_) => value);
 
   Either<L, C> map<C>(C Function(R value) function) {
-    return switch (this) {
-      Left<L, R>(value: final value) => Left(value),
-      Right<L, R>(value: final value) => Right(function(value)),
-    };
+    return mapRight(function);
   }
 
   Either<L, C> bind<C>(Either<L, C> Function(R value) function) {
