@@ -12,7 +12,7 @@ import 'package:obmin/b_base/feature_machine/scene.dart';
 final class Core<State, Input, Output, Loggable> {
   final Scene<State, Output, Input, Loggable> Function() scene;
   final Set<Machine<Input, Output, Loggable>> Function(State state) machines;
-  final Set<MachineLogger<Loggable>> Function() loggers;
+  final List<MachineLogger<Loggable>> Function() loggers;
 
   Process<void>? _process;
 

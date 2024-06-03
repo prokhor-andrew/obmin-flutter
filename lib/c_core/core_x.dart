@@ -12,7 +12,7 @@ Core<State, State, Event, Loggable> CoreX<State, Event, Loggable>({
   required State Function() state,
   required Writer<State, Loggable> Function(State state, Event event) reducer,
   required Set<Machine<State, Event, Loggable>> Function(State state) machines,
-  required Set<MachineLogger<Loggable>> Function() loggers,
+  required List<MachineLogger<Loggable>> Function() loggers,
 }) {
   return Core(
     scene: () {
