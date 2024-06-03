@@ -1,7 +1,7 @@
-name: obmin_concept
-description: "ObminConcept"
+name: Obmin
+description: "Obmin"
 version: 0.0.1
-homepage: https://github.com/prokhor-andrew/obmin-concept-flutter.git
+homepage: https://github.com/prokhor-andrew/obmin-flutter.git
 
 environment:
   sdk: '>=3.3.3 <4.0.0'
