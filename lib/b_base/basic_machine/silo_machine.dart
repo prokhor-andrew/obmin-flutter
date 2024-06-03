@@ -14,7 +14,7 @@ extension SiloMachine on MachineFactory {
     required Object Function(void Function(T Function(T) transition) callback) onStart,
     required void Function(Object object) onStop,
   }) {
-    return MachineFactory.shared.create(
+    return MachineFactory.shared.create<_Holder<Object>, (), T Function(T), Loggable>(
       id: id,
       onCreate: (id, logger) {
         return _Holder<Object>();

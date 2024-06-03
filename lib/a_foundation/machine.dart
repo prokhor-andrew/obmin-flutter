@@ -60,7 +60,7 @@ final class Machine<Input, Output, Loggable> {
     ChannelTask<Optional<Input>>? inputTask;
     ChannelTask<Optional<Output>>? outputTask;
 
-    Future(() async {
+    Future<void>(() async {
       if (isCancelled) {
         return;
       }
@@ -70,8 +70,8 @@ final class Machine<Input, Output, Loggable> {
       await onChange(outputChannel.send);
 
       if (!isCancelled) {
-        await Future.wait([
-          Future(() async {
+        await Future.wait<void>([
+          Future<void>(() async {
             while (true) {
               if (isCancelled) {
                 break;
@@ -85,7 +85,7 @@ final class Machine<Input, Output, Loggable> {
               await onProcess(value.force());
             }
           }),
-          Future(() async {
+          Future<void>(() async {
             while (true) {
               if (isCancelled) {
                 break;
