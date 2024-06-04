@@ -6,35 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:obmin/a_foundation/types/writer.dart';
 import 'package:obmin/c_core/core.dart';
 import 'package:obmin/c_core/core_widget.dart';
+import 'package:obmin/c_core/core_x_widget.dart';
 
-CoreWidget<(DomainState, void Function(Writer<DomainState, Loggable> Function(DomainState))?), DomainState, DomainState,
-    Writer<DomainState, Loggable> Function(DomainState), Loggable> CoreYWidget<DomainState, Loggable>({
-  required Core<DomainState, DomainState, Writer<DomainState, Loggable> Function(DomainState state), Loggable> core,
-  required Widget Function(BuildContext context, DomainState state, void Function(Writer<DomainState, Loggable> Function(DomainState state) update)?) builder,
+CoreWidget<(State, void Function(Writer<State, Loggable> Function(State))?), State, State, Writer<State, Loggable> Function(State), Loggable>
+    CoreYWidget<State, Loggable>({
+  required Core<State, State, Writer<State, Loggable> Function(State state), Loggable> core,
+  required Widget Function(BuildContext context, State state, void Function(Writer<State, Loggable> Function(State state) reducer)? update) builder,
 }) {
-  return CoreWidget<
-      (
-      DomainState,
-      void Function(Writer<DomainState, Loggable> Function(DomainState state) reducer)? update
-      ),
-      DomainState,
-      DomainState,
-      Writer<DomainState, Loggable> Function(DomainState state),
-      Loggable
-  >(
+  return CoreXWidget<State, Writer<State, Loggable> Function(State), Loggable>(
     core: core,
-    init: (state) {
-      return (state, null);
-    },
-    activate: (initial, update) {
-      return (initial.$1, update);
-    },
-    process: (cur, input) {
-      return (input, cur.$2);
-    },
-    build: (context, pack) {
-      final (state, update) = pack;
-      return builder(context, state, update);
-    },
+    builder: builder,
   );
 }
