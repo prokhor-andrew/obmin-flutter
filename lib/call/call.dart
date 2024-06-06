@@ -25,20 +25,20 @@ final class Launched<Req, Res> extends Call<Req, Res> {
   int get hashCode => req.hashCode;
 }
 
-final class Success<Req, Res> extends Call<Req, Res> {
+final class Returned<Req, Res> extends Call<Req, Res> {
   final Res res;
 
-  Success(this.res);
+  Returned(this.res);
 
   @override
   String toString() {
-    return "Success<$Req,  $Res> { res=$res }";
+    return "Returned<$Req,  $Res> { res=$res }";
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    if (other is! Success<Req, Res>) return false;
+    if (other is! Returned<Req, Res>) return false;
     return res == other.res;
   }
 
