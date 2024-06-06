@@ -18,3 +18,23 @@ final class Prism<Whole, Part> {
     return "$Prism<$Whole, $Part>";
   }
 }
+
+extension PrismCompose<Whole, Part> on Prism<Whole, Part> {
+  Prism<Whole, SubPart> compose<SubPart>(Prism<Part, SubPart> prism) {
+    Optional<SubPart> resultGet(Whole whole) {
+      return get(whole).bind((value) {
+        return prism.get(value);
+      });
+    }
+
+    Whole resultPut(Whole whole, SubPart subPart) {
+      return get(whole).map((part) {
+        return prism.put(part, subPart);
+      }).map((part) {
+        return put(whole, part);
+      }).valueOr(whole);
+    }
+
+    return Prism(get: resultGet, put: resultPut);
+  }
+}
