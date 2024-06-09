@@ -3,12 +3,11 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/a_foundation/machine.dart';
-import 'package:obmin/a_foundation/types/writer.dart';
 import 'package:obmin/b_base/feature_machine/feature.dart';
 
-final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
+final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   final State state;
-  final Writer<OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function(
+  final OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
     FeatureEvent<IntTrigger, ExtTrigger>,
     String,
   ) transit;
@@ -18,9 +17,9 @@ final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
     required this.transit,
   });
 
-  static Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> create<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>({
+  static Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> create<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({
     required State state,
-    required Writer<OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function(
+    required OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
       State state,
       FeatureEvent<IntTrigger, ExtTrigger> trigger,
       String machineId,
@@ -40,36 +39,35 @@ final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
 
   @override
   String toString() {
-    return "Outline<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect, $Loggable>{ state=$state }";
+    return "Outline<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect>{ state=$state }";
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        other is Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> && runtimeType == other.runtimeType && state == other.state;
+        other is Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> && runtimeType == other.runtimeType && state == other.state;
   }
 
   @override
   int get hashCode => state.hashCode;
 
-  Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> asFeature(Set<Machine<IntEffect, IntTrigger, Loggable>> machines) {
+  Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> asFeature(Set<Machine<IntEffect, IntTrigger>> machines) {
     return Feature.create(
       state: state,
       machines: machines,
       transit: (state, machines, trigger, machineId) {
-        return transit(trigger, machineId).map((transition) {
-          return FeatureTransition(
-            transition.outline.asFeature(machines),
-            effects: transition.effects,
-          );
-        });
+        final transition = transit(trigger, machineId);
+        return FeatureTransition(
+          transition.outline.asFeature(machines),
+          effects: transition.effects,
+        );
       },
     );
   }
 }
 
-final class OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
-  final Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> outline;
+final class OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
+  final Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> outline;
   final List<FeatureEvent<IntEffect, ExtEffect>> effects;
 
   OutlineTransition(
@@ -80,7 +78,7 @@ final class OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffec
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        other is OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> &&
+        other is OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> &&
             runtimeType == other.runtimeType &&
             outline == other.outline &&
             effects == other.effects;
@@ -88,4 +86,9 @@ final class OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffec
 
   @override
   int get hashCode => outline.hashCode ^ effects.hashCode;
+
+  @override
+  String toString() {
+    return "OutlineTransition<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect>{ outline=$outline _ effects=$effects }";
+  }
 }

@@ -4,15 +4,13 @@
 
 part of 'channel.dart';
 
-final class Channel<T, Loggable> {
+final class Channel<T> {
   _ChannelState<T> _state = _IdleChannelState();
 
-  final ChannelBufferStrategy<T, Loggable> bufferStrategy;
-  final void Function(Loggable loggable) logger;
+  final ChannelBufferStrategy<T> bufferStrategy;
 
   Channel({
     required this.bufferStrategy,
-    required this.logger,
   });
 
   ChannelTask<bool> send(T val) {
@@ -113,10 +111,7 @@ final class Channel<T, Loggable> {
     required ChannelBufferEvent event,
     required List<ChannelBufferData<T>> currentArray,
   }) {
-    final bufferedResult = bufferStrategy.bufferReducer(currentArray.toList(), event);
-
-    final bufferedArray = bufferedResult.value.toList();
-    final bufferedLogs = bufferedResult.logs.toList();
+    final bufferedArray = bufferStrategy.bufferReducer(currentArray.toList(), event).toList();
 
     final List<ChannelBufferData<T>> withoutDuplicates = bufferedArray.fold<List<ChannelBufferData<T>>>([], (partialResult, element) {
       return partialResult.contains(element) ? partialResult : partialResult.plus(element);
@@ -127,10 +122,6 @@ final class Channel<T, Loggable> {
 
     final difference = set1.union(set2).difference(set1.intersection(set2));
     _state = withoutDuplicates.isEmpty ? _IdleChannelState() : _AwaitingForConsumer(withoutDuplicates);
-
-    for (final log in bufferedLogs) {
-      logger(log);
-    }
 
     for (final element in difference) {
       element._completer.complete(false);

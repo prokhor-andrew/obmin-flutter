@@ -2,13 +2,12 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/a_foundation/types/writer.dart';
 import 'package:obmin/b_base/feature_machine/feature.dart';
 import 'package:obmin/b_base/feature_machine/outline.dart';
 
-final class Scene<State, Trigger, Effect, Loggable> {
+final class Scene<State, Trigger, Effect> {
   final State state;
-  final Writer<SceneTransition<State, Trigger, Effect, Loggable>, Loggable> Function(
+  final SceneTransition<State, Trigger, Effect> Function(
     Trigger,
     String,
   ) transit;
@@ -18,9 +17,9 @@ final class Scene<State, Trigger, Effect, Loggable> {
     required this.transit,
   });
 
-  static Scene<State, Trigger, Effect, Loggable> create<State, Trigger, Effect, Loggable>({
+  static Scene<State, Trigger, Effect> create<State, Trigger, Effect>({
     required State state,
-    required Writer<SceneTransition<State, Trigger, Effect, Loggable>, Loggable> Function(
+    required SceneTransition<State, Trigger, Effect> Function(
       State state,
       Trigger trigger,
       String machineId,
@@ -40,7 +39,7 @@ final class Scene<State, Trigger, Effect, Loggable> {
 
   @override
   bool operator ==(Object other) {
-    return identical(this, other) || other is Scene<State, Trigger, Effect, Loggable> && runtimeType == other.runtimeType && state == other.state;
+    return identical(this, other) || other is Scene<State, Trigger, Effect> && runtimeType == other.runtimeType && state == other.state;
   }
 
   @override
@@ -48,12 +47,12 @@ final class Scene<State, Trigger, Effect, Loggable> {
 
   @override
   String toString() {
-    return "Scene<$State, $Trigger, $Effect, $Loggable>{ state=$state }";
+    return "Scene<$State, $Trigger, $Effect>{ state=$state }";
   }
 }
 
-final class SceneTransition<State, Trigger, Effect, Loggable> {
-  final Scene<State, Trigger, Effect, Loggable> scene;
+final class SceneTransition<State, Trigger, Effect> {
+  final Scene<State, Trigger, Effect> scene;
   final List<Effect> effects;
 
   SceneTransition(
@@ -64,236 +63,214 @@ final class SceneTransition<State, Trigger, Effect, Loggable> {
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        other is SceneTransition<State, Trigger, Effect, Loggable> && runtimeType == other.runtimeType && scene == other.scene && effects == other.effects;
+        other is SceneTransition<State, Trigger, Effect> && runtimeType == other.runtimeType && scene == other.scene && effects == other.effects;
   }
 
   @override
   int get hashCode => scene.hashCode ^ effects.hashCode;
+
+  @override
+  String toString() {
+    return "SceneTransition<$State, $Trigger, $Effect>{ scene=$scene _ effects=$effects }";
+  }
 }
 
-extension SceneToOutlineConverter<State, Trigger, Effect, Loggable> on Scene<State, Trigger, Effect, Loggable> {
-  Outline<State, IntTrigger, IntEffect, Trigger, Effect, Loggable> asExtTriggerExtEffect<IntTrigger, IntEffect>() {
+extension SceneToOutlineConverter<State, Trigger, Effect> on Scene<State, Trigger, Effect> {
+  Outline<State, IntTrigger, IntEffect, Trigger, Effect> asExtTriggerExtEffect<IntTrigger, IntEffect>() {
     return Outline.create(
       state: state,
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent():
-            return Writer(OutlineTransition(asExtTriggerExtEffect()));
+            return OutlineTransition(asExtTriggerExtEffect());
           case ExternalFeatureEvent(value: final value):
-            return transit(value, machineId).map(
-              (transition) {
-                return OutlineTransition(transition.scene.asExtTriggerExtEffect(),
-                    effects: transition.effects.map(
-                      (effect) {
-                        return ExternalFeatureEvent<IntEffect, Effect>(effect);
-                      },
-                    ).toList());
-              },
+            final transition = transit(value, machineId);
+            return OutlineTransition(
+              transition.scene.asExtTriggerExtEffect(),
+              effects: transition.effects.map(
+                (effect) {
+                  return ExternalFeatureEvent<IntEffect, Effect>(effect);
+                },
+              ).toList(),
             );
         }
       },
     );
   }
 
-  Outline<State, IntTrigger, Effect, Trigger, ExtEffect, Loggable> asIntEffectExtTrigger<IntTrigger, ExtEffect>() {
+  Outline<State, IntTrigger, Effect, Trigger, ExtEffect> asIntEffectExtTrigger<IntTrigger, ExtEffect>() {
     return Outline.create(
       state: state,
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent():
-            return Writer(OutlineTransition(asIntEffectExtTrigger()));
+            return OutlineTransition(asIntEffectExtTrigger());
           case ExternalFeatureEvent(value: final value):
-            return transit(value, machineId).map(
-              (transition) {
-                return OutlineTransition(
-                  transition.scene.asIntEffectExtTrigger(),
-                  effects: transition.effects.map(
-                    (effect) {
-                      return InternalFeatureEvent<Effect, ExtEffect>(effect);
-                    },
-                  ).toList(),
-                );
-              },
+            final transition = transit(value, machineId);
+            return OutlineTransition(
+              transition.scene.asIntEffectExtTrigger(),
+              effects: transition.effects.map(
+                (effect) {
+                  return InternalFeatureEvent<Effect, ExtEffect>(effect);
+                },
+              ).toList(),
             );
         }
       },
     );
   }
 
-  Outline<State, Trigger, IntEffect, ExtTrigger, Effect, Loggable> asIntTriggerExtEffect<IntEffect, ExtTrigger>() {
+  Outline<State, Trigger, IntEffect, ExtTrigger, Effect> asIntTriggerExtEffect<IntEffect, ExtTrigger>() {
     return Outline.create(
       state: state,
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value):
-            return transit(value, machineId).map(
-              (transition) {
-                return OutlineTransition(
-                  transition.scene.asIntTriggerExtEffect(),
-                  effects: transition.effects.map(
-                    (effect) {
-                      return ExternalFeatureEvent<IntEffect, Effect>(effect);
-                    },
-                  ).toList(),
-                );
-              },
+            final transition = transit(value, machineId);
+            return OutlineTransition(
+              transition.scene.asIntTriggerExtEffect(),
+              effects: transition.effects.map(
+                (effect) {
+                  return ExternalFeatureEvent<IntEffect, Effect>(effect);
+                },
+              ).toList(),
             );
           case ExternalFeatureEvent():
-            return Writer(OutlineTransition(asIntTriggerExtEffect()));
+            return OutlineTransition(asIntTriggerExtEffect());
         }
       },
     );
   }
 
-  Outline<State, Trigger, Effect, ExtTrigger, ExtEffect, Loggable> asIntTriggerIntEffect<ExtTrigger, ExtEffect>() {
+  Outline<State, Trigger, Effect, ExtTrigger, ExtEffect> asIntTriggerIntEffect<ExtTrigger, ExtEffect>() {
     return Outline.create(
       state: state,
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value):
-            return transit(value, machineId).map(
-              (transition) {
-                return OutlineTransition(
-                  transition.scene.asIntTriggerIntEffect(),
-                  effects: transition.effects.map(
-                    (effect) {
-                      return InternalFeatureEvent<Effect, ExtEffect>(effect);
-                    },
-                  ).toList(),
-                );
-              },
+            final transition = transit(value, machineId);
+            return OutlineTransition(
+              transition.scene.asIntTriggerIntEffect(),
+              effects: transition.effects.map(
+                (effect) {
+                  return InternalFeatureEvent<Effect, ExtEffect>(effect);
+                },
+              ).toList(),
             );
           case ExternalFeatureEvent():
-            return Writer(OutlineTransition(asIntTriggerIntEffect()));
+            return OutlineTransition(asIntTriggerIntEffect());
         }
       },
     );
   }
 
-  Outline<State, IntTrigger, Effect, Trigger, Effect, Loggable> asIntEffectExtTriggerExtEffect<IntTrigger>() {
+  Outline<State, IntTrigger, Effect, Trigger, Effect> asIntEffectExtTriggerExtEffect<IntTrigger>() {
     return Outline.create(
       state: state,
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent():
-            return Writer(
-              OutlineTransition(asIntEffectExtTriggerExtEffect()),
-            );
+            return OutlineTransition(asIntEffectExtTriggerExtEffect());
           case ExternalFeatureEvent(value: final value):
-            return transit(value, machineId).map(
-              (transition) {
-                return OutlineTransition(
-                  transition.scene.asIntEffectExtTriggerExtEffect(),
-                  effects: transition.effects.expand(
-                    (effect) {
-                      return [
-                        InternalFeatureEvent<Effect, Effect>(effect),
-                        ExternalFeatureEvent<Effect, Effect>(effect),
-                      ];
-                    },
-                  ).toList(),
-                );
-              },
+            final transition = transit(value, machineId);
+            return OutlineTransition(
+              transition.scene.asIntEffectExtTriggerExtEffect(),
+              effects: transition.effects.expand(
+                (effect) {
+                  return [
+                    InternalFeatureEvent<Effect, Effect>(effect),
+                    ExternalFeatureEvent<Effect, Effect>(effect),
+                  ];
+                },
+              ).toList(),
             );
         }
       },
     );
   }
 
-  Outline<State, Trigger, Effect, ExtTrigger, Effect, Loggable> asIntTriggerIntEffectExtEffect<ExtTrigger>() {
+  Outline<State, Trigger, Effect, ExtTrigger, Effect> asIntTriggerIntEffectExtEffect<ExtTrigger>() {
     return Outline.create(
       state: state,
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value):
-            return transit(value, machineId).map(
-              (transition) {
-                return OutlineTransition(
-                  transition.scene.asIntTriggerIntEffectExtEffect(),
-                  effects: transition.effects.expand(
-                    (effect) {
-                      return [
-                        InternalFeatureEvent<Effect, Effect>(effect),
-                        ExternalFeatureEvent<Effect, Effect>(effect),
-                      ];
-                    },
-                  ).toList(),
-                );
-              },
+            final transition = transit(value, machineId);
+            return OutlineTransition(
+              transition.scene.asIntTriggerIntEffectExtEffect(),
+              effects: transition.effects.expand(
+                (effect) {
+                  return [
+                    InternalFeatureEvent<Effect, Effect>(effect),
+                    ExternalFeatureEvent<Effect, Effect>(effect),
+                  ];
+                },
+              ).toList(),
             );
           case ExternalFeatureEvent():
-            return Writer(OutlineTransition(asIntTriggerIntEffectExtEffect()));
+            return OutlineTransition(asIntTriggerIntEffectExtEffect());
         }
       },
     );
   }
 
-  Outline<State, Trigger, Effect, Trigger, ExtEffect, Loggable> asIntTriggerIntEffectExtTrigger<ExtEffect>() {
+  Outline<State, Trigger, Effect, Trigger, ExtEffect> asIntTriggerIntEffectExtTrigger<ExtEffect>() {
     return Outline.create(
       state: state,
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value) || ExternalFeatureEvent(value: final value):
-            return transit(value, machineId).map(
-              (transition) {
-                return OutlineTransition(
-                  transition.scene.asIntTriggerIntEffectExtTrigger(),
-                  effects: transition.effects.map(
-                    (effect) {
-                      return InternalFeatureEvent<Effect, ExtEffect>(effect);
-                    },
-                  ).toList(),
-                );
-              },
+            final transition = transit(value, machineId);
+            return OutlineTransition(
+              transition.scene.asIntTriggerIntEffectExtTrigger(),
+              effects: transition.effects.map(
+                (effect) {
+                  return InternalFeatureEvent<Effect, ExtEffect>(effect);
+                },
+              ).toList(),
             );
         }
       },
     );
   }
 
-  Outline<State, Trigger, IntEffect, Trigger, Effect, Loggable> asIntTriggerExtTriggerExtEffect<IntEffect>() {
+  Outline<State, Trigger, IntEffect, Trigger, Effect> asIntTriggerExtTriggerExtEffect<IntEffect>() {
     return Outline.create(
       state: state,
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value) || ExternalFeatureEvent(value: final value):
-            return transit(value, machineId).map(
-              (transition) {
-                return OutlineTransition(
-                  transition.scene.asIntTriggerExtTriggerExtEffect(),
-                  effects: transition.effects.map(
-                    (effect) {
-                      return ExternalFeatureEvent<IntEffect, Effect>(effect);
-                    },
-                  ).toList(),
-                );
-              },
+            final transition = transit(value, machineId);
+            return OutlineTransition(
+              transition.scene.asIntTriggerExtTriggerExtEffect(),
+              effects: transition.effects.map(
+                (effect) {
+                  return ExternalFeatureEvent<IntEffect, Effect>(effect);
+                },
+              ).toList(),
             );
         }
       },
     );
   }
 
-  Outline<State, Trigger, Effect, Trigger, Effect, Loggable> asIntTriggerIntEffectExtTriggerExtEffect() {
+  Outline<State, Trigger, Effect, Trigger, Effect> asIntTriggerIntEffectExtTriggerExtEffect() {
     return Outline.create(
       state: state,
       transit: (state, trigger, machineId) {
         switch (trigger) {
           case InternalFeatureEvent(value: final value) || ExternalFeatureEvent(value: final value):
-            return transit(value, machineId).map(
-              (transition) {
-                return OutlineTransition(
-                  transition.scene.asIntTriggerIntEffectExtTriggerExtEffect(),
-                  effects: transition.effects.expand(
-                    (effect) {
-                      return [
-                        InternalFeatureEvent<Effect, Effect>(effect),
-                        ExternalFeatureEvent<Effect, Effect>(effect),
-                      ];
-                    },
-                  ).toList(),
-                );
-              },
+            final transition = transit(value, machineId);
+            return OutlineTransition(
+              transition.scene.asIntTriggerIntEffectExtTriggerExtEffect(),
+              effects: transition.effects.expand(
+                (effect) {
+                  return [
+                    InternalFeatureEvent<Effect, Effect>(effect),
+                    ExternalFeatureEvent<Effect, Effect>(effect),
+                  ];
+                },
+              ).toList(),
             );
         }
       },

@@ -4,23 +4,18 @@
 
 import 'package:obmin/a_foundation/machine.dart';
 import 'package:obmin/a_foundation/machine_factory.dart';
-import 'package:obmin/a_foundation/machine_logger.dart';
-import 'package:obmin/a_foundation/types/writer.dart';
-import 'package:obmin/b_base/feature_machine/feature.dart';
 import 'package:obmin/b_base/feature_machine/feature_machine.dart';
 import 'package:obmin/b_base/feature_machine/scene.dart';
 
-final class Core<State, Input, Output, Loggable> {
-  final Scene<State, Output, Input, Loggable> Function() scene;
-  final Set<Machine<Input, Output, Loggable>> Function(State state) machines;
-  final Set<MachineLogger<Loggable>> Function() loggers;
+final class Core<State, Input, Output> {
+  final Scene<State, Output, Input> Function() scene;
+  final Set<Machine<Input, Output>> Function(State state) machines;
 
   Process<void>? _process;
 
   Core({
     required this.scene,
     required this.machines,
-    required this.loggers,
   });
 
   bool get isStarted => _process != null;
@@ -31,25 +26,16 @@ final class Core<State, Input, Output, Loggable> {
     }
 
     final aScene = scene();
-    final aLoggers = loggers();
     final aMachines = machines(aScene.state);
 
     _process = MachineFactory.shared
         .feature(
           id: "core",
           feature: () {
-            return Writer<Feature<State, Output, Input, void, void, Loggable>, Loggable>(aScene.asIntTriggerIntEffect().asFeature(aMachines));
+            return aScene.asIntTriggerIntEffect<void, void>().asFeature(aMachines);
           },
         )
         .run(
-          logger: MachineLogger(
-            id: "merged",
-            log: (loggable) {
-              for (final logger in aLoggers) {
-                logger.log(loggable);
-              }
-            },
-          ),
           onConsume: (_) async {},
         );
 

@@ -5,12 +5,11 @@
 import 'dart:async';
 
 import 'package:obmin/a_foundation/channel/channel.dart';
-import 'package:obmin/a_foundation/machine_logger.dart';
 import 'package:obmin/a_foundation/types/optional.dart';
 
-final class Machine<Input, Output, Loggable> {
-  final ChannelBufferStrategy<Input, Loggable>? inputBufferStrategy;
-  final ChannelBufferStrategy<Output, Loggable>? outputBufferStrategy;
+final class Machine<Input, Output> {
+  final ChannelBufferStrategy<Input>? inputBufferStrategy;
+  final ChannelBufferStrategy<Output>? outputBufferStrategy;
 
   final String id;
 
@@ -18,7 +17,7 @@ final class Machine<Input, Output, Loggable> {
     Future<void> Function(ChannelTask<bool> Function(Output output)? callback) onChange,
     Future<void> Function(Input input) onProcess,
   )
-      Function(MachineLogger<Loggable> logger) onCreate;
+      Function() onCreate;
 
   Machine({
     required this.id,
@@ -29,31 +28,28 @@ final class Machine<Input, Output, Loggable> {
 
   @override
   bool operator ==(Object other) {
-    return identical(this, other) || other is Machine<Input, Output, Loggable> && runtimeType == other.runtimeType && id == other.id;
+    return identical(this, other) || other is Machine<Input, Output> && runtimeType == other.runtimeType && id == other.id;
   }
 
   @override
   int get hashCode => id.hashCode;
 
   Process<Input> run({
-    ChannelBufferStrategy<Input, Loggable>? inputBufferStrategy,
-    ChannelBufferStrategy<Output, Loggable>? outputBufferStrategy,
-    required MachineLogger<Loggable> logger,
+    ChannelBufferStrategy<Input>? inputBufferStrategy,
+    ChannelBufferStrategy<Output>? outputBufferStrategy,
     required Future<void> Function(Output output) onConsume,
   }) {
-    final ChannelBufferStrategy<Output, Loggable> actualOutputBufferStrategy =
+    final ChannelBufferStrategy<Output> actualOutputBufferStrategy =
         this.outputBufferStrategy ?? outputBufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default");
-    final ChannelBufferStrategy<Input, Loggable> actualInputBufferStrategy =
+    final ChannelBufferStrategy<Input> actualInputBufferStrategy =
         this.inputBufferStrategy ?? inputBufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default");
 
-    final Channel<Input, Loggable> inputChannel = Channel(
+    final Channel<Input> inputChannel = Channel(
       bufferStrategy: actualInputBufferStrategy,
-      logger: logger.log,
     );
 
-    final Channel<Output, Loggable> outputChannel = Channel(
+    final Channel<Output> outputChannel = Channel(
       bufferStrategy: actualOutputBufferStrategy,
-      logger: logger.log,
     );
 
     bool isCancelled = false;
@@ -65,7 +61,7 @@ final class Machine<Input, Output, Loggable> {
         return;
       }
 
-      final (onChange, onProcess) = onCreate(logger);
+      final (onChange, onProcess) = onCreate();
 
       await onChange(outputChannel.send);
 

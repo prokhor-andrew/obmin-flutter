@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:obmin/a_foundation/types/lens.dart';
 import 'package:obmin/a_foundation/types/optional.dart';
-import 'package:obmin/a_foundation/types/writer.dart';
 
 class ZoomableWidget<Input, Output> extends InheritedWidget {
   final Input input;
@@ -97,13 +96,11 @@ final class Zoomable<Input, Output> {
   }
 }
 
-extension ValueZoomable<T, Loggable> on Zoomable<T, Writer<T, Loggable> Function(T value)> {
-  Zoomable<V, Writer<V, Loggable> Function(V)> zoom<V>(Lens<T, V> lens) {
+extension ValueZoomable<T> on Zoomable<T, T Function(T value)> {
+  Zoomable<V, V Function(V)> zoom<V>(Lens<T, V> lens) {
     return mapInput(lens.get).mapOutput((update) {
       return (whole) {
-        return update(lens.get(whole)).map((part) {
-          return lens.put(whole, part);
-        });
+        return lens.put(whole, update(lens.get(whole)));
       };
     });
   }

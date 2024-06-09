@@ -5,32 +5,29 @@
 import 'package:obmin/a_foundation/channel/channel.dart';
 import 'package:obmin/a_foundation/machine.dart';
 import 'package:obmin/a_foundation/machine_factory.dart';
-import 'package:obmin/a_foundation/machine_logger.dart';
 import 'package:obmin/a_foundation/types/optional.dart';
-import 'package:obmin/a_foundation/types/writer.dart';
 import 'package:obmin/b_base/basic_machine/basic_machine.dart';
 import 'package:obmin/b_base/feature_machine/feature.dart';
 
 extension FeatureMachine on MachineFactory {
-  Machine<ExtTrigger, ExtEffect, Loggable> feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>({
+  Machine<ExtTrigger, ExtEffect> feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({
     required String id,
-    required Writer<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function() feature,
+    required Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function() feature,
+    ChannelBufferStrategy<ExtTrigger>? inputBufferStrategy,
+    ChannelBufferStrategy<ExtEffect>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<IntTrigger, ExtTrigger>>? internalBufferStrategy,
   }) {
-    return MachineFactory.shared.create<_FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, ExtTrigger, ExtEffect, Loggable>(
+    return MachineFactory.shared.create<_FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>, ExtTrigger, ExtEffect>(
       id: id,
-      onCreate: (id, logger) {
+      inputBufferStrategy: inputBufferStrategy,
+      outputBufferStrategy: outputBufferStrategy,
+      onCreate: (id) {
         return _FeatureHolder(
           id: id,
+          bufferStrategy: internalBufferStrategy,
           initial: () {
-            final writer = feature();
-
-            for (final loggable in writer.logs) {
-              logger.log(loggable);
-            }
-
-            return writer.value;
+            return feature();
           },
-          logger: logger,
         );
       },
       onChange: (object, callback) async {
@@ -43,34 +40,30 @@ extension FeatureMachine on MachineFactory {
   }
 }
 
-final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
+final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   final String _id;
-  final MachineLogger<Loggable> _logger;
-  final Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function() _initial;
+  final Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function() _initial;
 
   void Function(ExtEffect)? _callback;
 
   Set<Process<IntEffect>> _processes = {};
 
-  final Channel<FeatureEvent<IntTrigger, ExtTrigger>, Loggable> _channel;
+  final Channel<FeatureEvent<IntTrigger, ExtTrigger>> _channel;
   ChannelTask<void>? _task;
 
-  Writer<FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function(
+  FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
     FeatureEvent<IntTrigger, ExtTrigger>,
     String,
   )? _transit;
 
   _FeatureHolder({
     required String id,
-    ChannelBufferStrategy<FeatureEvent<IntTrigger, ExtTrigger>, Loggable>? bufferStrategy,
-    required MachineLogger<Loggable> logger,
-    required Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> Function() initial,
+    ChannelBufferStrategy<FeatureEvent<IntTrigger, ExtTrigger>>? bufferStrategy,
+    required Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function() initial,
   })  : _id = id,
-        _logger = logger,
         _initial = initial,
         _channel = Channel(
           bufferStrategy: bufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default"),
-          logger: logger.log,
         );
 
   Future<void> onChange(void Function(ExtEffect effect)? callback) async {
@@ -82,7 +75,6 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
 
       _processes = state.machines.map((machine) {
         return machine.run(
-          logger: _logger,
           onConsume: (event) async {
             await _channel.send(InternalFeatureEvent(event)).future;
           },
@@ -120,9 +112,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
     if (transit == null) {
       return;
     }
-
-    final writer = transit(event, _id);
-    final transition = writer.value;
+    final transition = transit(event, _id);
 
     final resultingMachines = transition.feature.machines;
 
@@ -161,7 +151,6 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
 
     final processesToAdd = machinesToAdd.map((machine) {
       return machine.run(
-        logger: _logger,
         onConsume: (output) async {
           await _channel.send(InternalFeatureEvent(output)).future;
         },
@@ -170,10 +159,6 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, 
 
     _processes = processesToAdd.union(processesToKeep);
     _transit = transition.feature.transit;
-
-    for (final log in writer.logs) {
-      _logger.log(log);
-    }
 
     final effects = transition.effects;
 

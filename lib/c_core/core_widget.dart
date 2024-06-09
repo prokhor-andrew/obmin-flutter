@@ -8,7 +8,7 @@ import 'package:obmin/a_foundation/machine_factory.dart';
 import 'package:obmin/b_base/basic_machine/basic_machine.dart';
 import 'package:obmin/c_core/core.dart';
 
-extension CoreWidgetExtension<State, Input, Output, Loggable> on Core<State, Input, Output, Loggable> {
+extension CoreWidgetExtension<State, Input, Output> on Core<State, Input, Output> {
   Widget build<UiState>({
     Key? key,
     required UiState Function(State state) init,
@@ -16,7 +16,7 @@ extension CoreWidgetExtension<State, Input, Output, Loggable> on Core<State, Inp
     required UiState Function(UiState state, Input input) process,
     required Widget Function(BuildContext context, UiState state) build,
   }) {
-    return CoreWidget<UiState, State, Input, Output, Loggable>(
+    return CoreWidget<UiState, State, Input, Output>(
       key: key,
       core: this,
       init: init,
@@ -27,8 +27,8 @@ extension CoreWidgetExtension<State, Input, Output, Loggable> on Core<State, Inp
   }
 }
 
-class CoreWidget<UiState, DomainState, Input, Output, Loggable> extends StatefulWidget {
-  final Core<DomainState, Input, Output, Loggable> _initialCore;
+class CoreWidget<UiState, DomainState, Input, Output> extends StatefulWidget {
+  final Core<DomainState, Input, Output> _initialCore;
   final UiState Function(DomainState state) init;
   final UiState Function(UiState state, void Function(Output output) callback) activate;
   final UiState Function(UiState state, Input input) process;
@@ -36,7 +36,7 @@ class CoreWidget<UiState, DomainState, Input, Output, Loggable> extends Stateful
 
   const CoreWidget({
     super.key,
-    required Core<DomainState, Input, Output, Loggable> core,
+    required Core<DomainState, Input, Output> core,
     required this.init,
     required this.activate,
     required this.process,
@@ -44,25 +44,24 @@ class CoreWidget<UiState, DomainState, Input, Output, Loggable> extends Stateful
   }) : _initialCore = core;
 
   @override
-  State<CoreWidget<UiState, DomainState, Input, Output, Loggable>> createState() => _CoreWidgetState<UiState, DomainState, Input, Output, Loggable>();
+  State<CoreWidget<UiState, DomainState, Input, Output>> createState() => _CoreWidgetState<UiState, DomainState, Input, Output>();
 }
 
-class _CoreWidgetState<UiState, DomainState, Input, Output, Loggable> extends State<CoreWidget<UiState, DomainState, Input, Output, Loggable>> {
+class _CoreWidgetState<UiState, DomainState, Input, Output> extends State<CoreWidget<UiState, DomainState, Input, Output>> {
   late UiState _state;
-  Core<DomainState, Input, Output, Loggable>? _core;
+  Core<DomainState, Input, Output>? _core;
 
   @override
   void initState() {
     super.initState();
     final coreScene = widget._initialCore.scene();
     final coreMachines = widget._initialCore.machines(coreScene.state);
-    final coreLoggers = widget._initialCore.loggers;
 
     _state = widget.init(coreScene.state);
 
-    final Machine<Input, Output, Loggable> uiMachine = MachineFactory.shared.create<(), Input, Output, Loggable>(
+    final Machine<Input, Output> uiMachine = MachineFactory.shared.create<(), Input, Output>(
       id: "ui_machine",
-      onCreate: (id, logger) {
+      onCreate: (id) {
         return ();
       },
       onChange: (_, callback) async {
@@ -83,10 +82,9 @@ class _CoreWidgetState<UiState, DomainState, Input, Output, Loggable> extends St
       },
     );
 
-    _core = Core<DomainState, Input, Output, Loggable>(
+    _core = Core<DomainState, Input, Output>(
       scene: () => coreScene,
       machines: (state) => coreMachines.union({uiMachine}),
-      loggers: coreLoggers,
     );
     _core?.start();
   }

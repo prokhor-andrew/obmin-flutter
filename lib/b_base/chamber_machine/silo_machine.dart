@@ -4,20 +4,20 @@
 
 import 'package:obmin/a_foundation/machine.dart';
 import 'package:obmin/a_foundation/machine_factory.dart';
-import 'package:obmin/a_foundation/types/writer.dart';
 import 'package:obmin/b_base/basic_machine/basic_machine.dart';
 
-typedef Silo<T, Loggable> = Machine<(), Writer<T, Loggable> Function(T), Loggable>;
+typedef Silo<T> = Machine<(), T Function(T)>;
 
 extension SiloMachine on MachineFactory {
-  Silo<T, Loggable> silo<Object, T, Loggable>({
+
+  Silo<T> silo<Object, T>({
     required String id,
-    required Object Function(void Function(Writer<T, Loggable> Function(T) transition) callback) onStart,
+    required Object Function(void Function(T Function(T) transition) callback) onStart,
     required void Function(Object object) onStop,
   }) {
-    return MachineFactory.shared.create<_Holder<Object>, (), Writer<T, Loggable> Function(T), Loggable>(
+    return MachineFactory.shared.create<_Holder<Object>, (), T Function(T)>(
       id: id,
-      onCreate: (id, logger) {
+      onCreate: (id) {
         return _Holder<Object>();
       },
       onChange: (object, callback) async {

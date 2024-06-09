@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:obmin/c_core/core.dart';
 import 'package:obmin/c_core/core_widget.dart';
 
-CoreWidget<(State, void Function(Event event)?), State, State, Event, Loggable> CoreXWidget<State, Event, Loggable>({
-  required Core<State, State, Event, Loggable> core,
+CoreWidget<(State, void Function(Event event)?), State, State, Event> CoreXWidget<State, Event>({
+  required Core<State, State, Event> core,
   required Widget Function(BuildContext context, State state, void Function(Event event)? update) builder,
 }) {
-  return CoreWidget<(State, void Function(Event event)? update), State, State, Event, Loggable>(
+  return CoreWidget<(State, void Function(Event event)? update), State, State, Event>(
     core: core,
     init: (state) {
       return (state, null);

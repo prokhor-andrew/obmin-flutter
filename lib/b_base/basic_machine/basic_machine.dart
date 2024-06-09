@@ -2,21 +2,25 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/a_foundation/channel/channel.dart';
 import 'package:obmin/a_foundation/machine.dart';
 import 'package:obmin/a_foundation/machine_factory.dart';
-import 'package:obmin/a_foundation/machine_logger.dart';
 
 extension BasicMachine on MachineFactory {
-  Machine<Input, Output, Loggable> create<Object, Input, Output, Loggable>({
+  Machine<Input, Output> create<Object, Input, Output>({
     required String id,
-    required Object Function(String id, MachineLogger<Loggable> logger) onCreate,
+    required Object Function(String id) onCreate,
     required Future<void> Function(Object object, void Function(Output output)? callback) onChange,
     required Future<void> Function(Object object, Input input) onProcess,
+    ChannelBufferStrategy<Input>? inputBufferStrategy,
+    ChannelBufferStrategy<Output>? outputBufferStrategy,
   }) {
-    return Machine<Input, Output, Loggable>(
+    return Machine<Input, Output>(
       id: id,
-      onCreate: (logger) {
-        final Object object = onCreate(id, logger);
+      inputBufferStrategy: inputBufferStrategy,
+      outputBufferStrategy: outputBufferStrategy,
+      onCreate: () {
+        final Object object = onCreate(id);
 
         return (
           (callback) async {

@@ -4,13 +4,12 @@
 
 import 'package:collection/collection.dart';
 import 'package:obmin/a_foundation/machine.dart';
-import 'package:obmin/a_foundation/types/writer.dart';
 
-final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
+final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   final State state;
-  final Set<Machine<IntEffect, IntTrigger, Loggable>> machines;
+  final Set<Machine<IntEffect, IntTrigger>> machines;
 
-  final Writer<FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function(
+  final FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
     FeatureEvent<IntTrigger, ExtTrigger> event,
     String machineId,
   ) transit;
@@ -25,7 +24,7 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> &&
+    return other is Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> &&
         other.state == state &&
         const SetEquality().equals(other.machines, machines);
   }
@@ -38,15 +37,15 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
 
   @override
   String toString() {
-    return "Feature<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect, $Loggable>{ state=$state _ machines=$machines }";
+    return "Feature<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect>{ state=$state _ machines=$machines }";
   }
 
-  static Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> create<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>({
+  static Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> create<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({
     required State state,
-    required Set<Machine<IntEffect, IntTrigger, Loggable>> machines,
-    required Writer<FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable>, Loggable> Function(
+    required Set<Machine<IntEffect, IntTrigger>> machines,
+    required FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
       State state,
-      Set<Machine<IntEffect, IntTrigger, Loggable>> machines,
+      Set<Machine<IntEffect, IntTrigger>> machines,
       FeatureEvent<IntTrigger, ExtTrigger> trigger,
       String machineId,
     ) transit,
@@ -66,8 +65,8 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggabl
   }
 }
 
-final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> {
-  final Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> feature;
+final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
+  final Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> feature;
   final List<FeatureEvent<IntEffect, ExtEffect>> effects;
 
   FeatureTransition(
@@ -79,7 +78,7 @@ final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffec
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect, Loggable> &&
+    return other is FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> &&
         other.feature == feature &&
         const ListEquality().equals(other.effects, effects);
   }
@@ -89,7 +88,7 @@ final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffec
 
   @override
   String toString() {
-    return "FeatureTransition<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect, $Loggable>{ feature=$feature _ effects=$effects }";
+    return "FeatureTransition<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect>{ feature=$feature _ effects=$effects }";
   }
 }
 

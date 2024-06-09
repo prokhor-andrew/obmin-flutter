@@ -2,47 +2,51 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/a_foundation/channel/channel.dart';
 import 'package:obmin/a_foundation/machine.dart';
 import 'package:obmin/a_foundation/machine_factory.dart';
-import 'package:obmin/a_foundation/types/writer.dart';
 import 'package:obmin/b_base/feature_machine/feature.dart';
 import 'package:obmin/b_base/feature_machine/feature_machine.dart';
 import 'package:obmin/b_base/feature_machine/outline.dart';
 
-extension MapOutputMachine<Input, Output, Loggable> on Machine<Input, Output, Loggable> {
-  Machine<Input, R, Loggable> mapOutput<R>(R Function(Output output) function) {
-    return MachineFactory.shared.feature<(), Output, Input, Input, R, Loggable>(
+extension MapOutputMachine<Input, Output> on Machine<Input, Output> {
+  Machine<Input, R> mapOutput<R>(
+    R Function(Output output) function, {
+    ChannelBufferStrategy<Input>? inputBufferStrategy,
+    ChannelBufferStrategy<R>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<Output, Input>>? internalBufferStrategy,
+  }) {
+    return MachineFactory.shared.feature<(), Output, Input, Input, R>(
       id: id,
+      inputBufferStrategy: inputBufferStrategy,
+      outputBufferStrategy: outputBufferStrategy,
+      internalBufferStrategy: internalBufferStrategy,
       feature: () {
-        Outline<(), Output, Input, Input, R, Loggable> outline() {
+        Outline<(), Output, Input, Input, R> outline() {
           return Outline.create(
             state: (),
             transit: (state, trigger, id) {
               switch (trigger) {
                 case InternalFeatureEvent(value: final value):
-                  return Writer(
-                    OutlineTransition(
-                      outline(),
-                      effects: [
-                        ExternalFeatureEvent<Input, R>(function(value)),
-                      ],
-                    ),
+                  return OutlineTransition(
+                    outline(),
+                    effects: [
+                      ExternalFeatureEvent<Input, R>(function(value)),
+                    ],
                   );
                 case ExternalFeatureEvent(value: final value):
-                  return Writer(
-                    OutlineTransition(
-                      outline(),
-                      effects: [
-                        InternalFeatureEvent<Input, R>(value),
-                      ],
-                    ),
+                  return OutlineTransition(
+                    outline(),
+                    effects: [
+                      InternalFeatureEvent<Input, R>(value),
+                    ],
                   );
               }
             },
           );
         }
 
-        return Writer(outline().asFeature({this}));
+        return outline().asFeature({this});
       },
     );
   }
