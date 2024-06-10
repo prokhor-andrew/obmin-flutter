@@ -7,16 +7,16 @@ import 'package:obmin/a_foundation/machine.dart';
 import 'package:obmin/a_foundation/machine_factory.dart';
 import 'package:obmin/b_base/basic_machine/basic_machine.dart';
 
-typedef Silo<T> = Machine<(), T Function(T)>;
+typedef Silo<T> = Machine<(), T>;
 
 extension SiloMachine on MachineFactory {
   Silo<T> silo<Object, T>({
     required String id,
-    required Object Function(void Function(T Function(T) transition) callback) onStart,
+    required Object Function(void Function(T response) callback) onStart,
     required void Function(Object object) onStop,
-    ChannelBufferStrategy<T Function(T)>? bufferStrategy,
+    ChannelBufferStrategy<T>? bufferStrategy,
   }) {
-    return MachineFactory.shared.create<_Holder<Object>, (), T Function(T)>(
+    return MachineFactory.shared.create<_Holder<Object>, (), T>(
       id: id,
       onCreate: (id) {
         return _Holder<Object>();
