@@ -7,7 +7,7 @@ import 'package:obmin/a_foundation/types/optional.dart';
 import 'package:obmin/a_foundation/types/prism.dart';
 
 sealed class Call<Req, Res> {
-  Prism<Call<Req, Res>, Launched<Req, Res>> launchedPrism() {
+  static Prism<Call<Req, Res>, Launched<Req, Res>> launchedPrism<Req, Res>() {
     return Prism(
       get: (whole) {
         switch (whole) {
@@ -23,7 +23,7 @@ sealed class Call<Req, Res> {
     );
   }
 
-  Prism<Call<Req, Res>, Returned<Req, Res>> returnedPrism() {
+  static Prism<Call<Req, Res>, Returned<Req, Res>> returnedPrism<Req, Res>() {
     return Prism(
       get: (whole) {
         switch (whole) {
@@ -60,7 +60,7 @@ final class Launched<Req, Res> extends Call<Req, Res> {
   @override
   int get hashCode => req.hashCode;
 
-  Lens<Launched<Req, Res>, Req> zoomInReq() {
+  static Lens<Launched<Req, Res>, Req> zoomInReq<Req, Res>() {
     return Lens(
       get: (whole) {
         return whole.req;
@@ -92,7 +92,7 @@ final class Returned<Req, Res> extends Call<Req, Res> {
   @override
   int get hashCode => res.hashCode;
 
-  Lens<Returned<Req, Res>, Res> zoomInRes() {
+  static Lens<Returned<Req, Res>, Res> zoomInRes<Req, Res>() {
     return Lens(
       get: (whole) {
         return whole.res;
