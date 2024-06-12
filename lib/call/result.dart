@@ -7,7 +7,7 @@ import 'package:obmin/a_foundation/types/optional.dart';
 import 'package:obmin/a_foundation/types/prism.dart';
 
 sealed class Result<Res, Err> {
-  static Prism<Result<Res, Err>, Success<Res, Err>> successPrism<Res, Err>() {
+  Prism<Result<Res, Err>, Success<Res, Err>> successPrism() {
     return Prism(
       get: (whole) {
         switch (whole) {
@@ -23,7 +23,7 @@ sealed class Result<Res, Err> {
     );
   }
 
-  static Prism<Result<Res, Err>, Failure<Res, Err>> failurePrism<Res, Err>() {
+  Prism<Result<Res, Err>, Failure<Res, Err>> failurePrism() {
     return Prism(
       get: (whole) {
         switch (whole) {
@@ -60,7 +60,7 @@ final class Success<Res, Err> extends Result<Res, Err> {
   @override
   int get hashCode => result.hashCode;
 
-  static Lens<Success<Res, Err>, Res> resultLens<Res, Err>() {
+  Lens<Success<Res, Err>, Res> resultLens() {
     return Lens(
       get: (whole) {
         return whole.result;
@@ -92,7 +92,7 @@ final class Failure<Res, Err> extends Result<Res, Err> {
   @override
   int get hashCode => error.hashCode;
 
-  static Lens<Failure<Res, Err>, Err> errorLens<Res, Err>() {
+  Lens<Failure<Res, Err>, Err> errorLens() {
     return Lens(
       get: (whole) {
         return whole.error;
