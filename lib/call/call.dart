@@ -2,7 +2,43 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-sealed class Call<Req, Res> {}
+import 'package:obmin/a_foundation/types/lens.dart';
+import 'package:obmin/a_foundation/types/optional.dart';
+import 'package:obmin/a_foundation/types/prism.dart';
+
+sealed class Call<Req, Res> {
+  Prism<Call<Req, Res>, Launched<Req, Res>> launchedPrism() {
+    return Prism(
+      get: (whole) {
+        switch (whole) {
+          case Launched<Req, Res>():
+            return Some(whole);
+          case Returned<Req, Res>():
+            return None();
+        }
+      },
+      put: (whole, part) {
+        return part;
+      },
+    );
+  }
+
+  Prism<Call<Req, Res>, Returned<Req, Res>> returnedPrism() {
+    return Prism(
+      get: (whole) {
+        switch (whole) {
+          case Launched<Req, Res>():
+            return None();
+          case Returned<Req, Res>():
+            return Some(whole);
+        }
+      },
+      put: (whole, part) {
+        return part;
+      },
+    );
+  }
+}
 
 final class Launched<Req, Res> extends Call<Req, Res> {
   final Req req;
@@ -23,6 +59,17 @@ final class Launched<Req, Res> extends Call<Req, Res> {
 
   @override
   int get hashCode => req.hashCode;
+
+  Lens<Launched<Req, Res>, Req> zoomInReq() {
+    return Lens(
+      get: (whole) {
+        return whole.req;
+      },
+      put: (whole, part) {
+        return Launched(part);
+      },
+    );
+  }
 }
 
 final class Returned<Req, Res> extends Call<Req, Res> {
@@ -44,4 +91,15 @@ final class Returned<Req, Res> extends Call<Req, Res> {
 
   @override
   int get hashCode => res.hashCode;
+
+  Lens<Returned<Req, Res>, Res> zoomInRes() {
+    return Lens(
+      get: (whole) {
+        return whole.res;
+      },
+      put: (whole, part) {
+        return Returned(part);
+      },
+    );
+  }
 }
