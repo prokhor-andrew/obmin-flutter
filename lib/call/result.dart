@@ -2,42 +2,10 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/a_foundation/types/lens.dart';
-import 'package:obmin/a_foundation/types/optional.dart';
-import 'package:obmin/a_foundation/types/prism.dart';
+
 
 sealed class Result<Res, Err> {
-  Prism<Result<Res, Err>, Success<Res, Err>> successPrism() {
-    return Prism(
-      get: (whole) {
-        switch (whole) {
-          case Success<Res, Err>():
-            return Some(whole);
-          case Failure<Res, Err>():
-            return None();
-        }
-      },
-      put: (whole, part) {
-        return part;
-      },
-    );
-  }
 
-  Prism<Result<Res, Err>, Failure<Res, Err>> failurePrism() {
-    return Prism(
-      get: (whole) {
-        switch (whole) {
-          case Failure<Res, Err>():
-            return Some(whole);
-          case Success<Res, Err>():
-            return None();
-        }
-      },
-      put: (whole, part) {
-        return part;
-      },
-    );
-  }
 }
 
 final class Success<Res, Err> extends Result<Res, Err> {
@@ -60,16 +28,7 @@ final class Success<Res, Err> extends Result<Res, Err> {
   @override
   int get hashCode => result.hashCode;
 
-  Lens<Success<Res, Err>, Res> resultLens() {
-    return Lens(
-      get: (whole) {
-        return whole.result;
-      },
-      put: (whole, part) {
-        return Success(part);
-      },
-    );
-  }
+
 }
 
 final class Failure<Res, Err> extends Result<Res, Err> {
@@ -92,14 +51,4 @@ final class Failure<Res, Err> extends Result<Res, Err> {
   @override
   int get hashCode => error.hashCode;
 
-  Lens<Failure<Res, Err>, Err> errorLens() {
-    return Lens(
-      get: (whole) {
-        return whole.error;
-      },
-      put: (whole, part) {
-        return Failure(part);
-      },
-    );
-  }
 }

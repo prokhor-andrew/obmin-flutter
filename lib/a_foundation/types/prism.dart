@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/a_foundation/types/lens.dart';
 import 'package:obmin/a_foundation/types/optional.dart';
 
 final class Prism<Whole, Part> {
@@ -20,7 +21,7 @@ final class Prism<Whole, Part> {
 }
 
 extension PrismCompose<Whole, Part> on Prism<Whole, Part> {
-  Prism<Whole, SubPart> compose<SubPart>(Prism<Part, SubPart> prism) {
+  Prism<Whole, SubPart> composeWithPrism<SubPart>(Prism<Part, SubPart> prism) {
     Optional<SubPart> resultGet(Whole whole) {
       return get(whole).bind((value) {
         return prism.get(value);
@@ -30,6 +31,24 @@ extension PrismCompose<Whole, Part> on Prism<Whole, Part> {
     Whole resultPut(Whole whole, SubPart subPart) {
       return get(whole).map((part) {
         return prism.put(part, subPart);
+      }).map((part) {
+        return put(whole, part);
+      }).valueOr(whole);
+    }
+
+    return Prism(get: resultGet, put: resultPut);
+  }
+
+  Prism<Whole, SubPart> composeWithLens<SubPart>(Lens<Part, SubPart> lens) {
+    Optional<SubPart> resultGet(Whole whole) {
+      return get(whole).map((value) {
+        return lens.get(value);
+      });
+    }
+
+    Whole resultPut(Whole whole, SubPart subPart) {
+      return get(whole).map((part) {
+        return lens.put(part, subPart);
       }).map((part) {
         return put(whole, part);
       }).valueOr(whole);
