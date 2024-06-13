@@ -11,3 +11,9 @@ Prism<Optional<T>, T> OptionalToValuePrism<T>() {
     },
   );
 }
+
+extension OptionalPrismExtension<Whole, T> on Prism<Whole, Optional<T>> {
+  Prism<Whole, T> zoomIntoValue() {
+    return composeWithPrism(OptionalToValuePrism<T>());
+  }
+}

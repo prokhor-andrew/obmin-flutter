@@ -64,3 +64,13 @@ Prism<Call<Req, Res>, Req> CallToReqPrism<Req, Res>() {
 Prism<Call<Req, Res>, Res> CallToResPrism<Req, Res>() {
   return CallToReturnedPrism<Req, Res>().composeWithLens(ReturnedToResLens<Req, Res>());
 }
+
+extension CallPrismExtension<Whole, Req, Res> on Prism<Whole, Call<Req, Res>> {
+  Prism<Whole, Req> zoomIntoReq() {
+    return composeWithPrism(CallToReqPrism<Req, Res>());
+  }
+
+  Prism<Whole, Res> zoomIntoRes() {
+    return composeWithPrism(CallToResPrism<Req, Res>());
+  }
+}

@@ -64,3 +64,13 @@ Prism<Result<Res, Err>, Res> ResultToResPrism<Res, Err>() {
 Prism<Result<Res, Err>, Err> ResultToErrPrism<Res, Err>() {
   return ResultToFailurePrism<Res, Err>().composeWithLens(FailureToErrLens<Res, Err>());
 }
+
+extension ResultPrismExtension<Whole, Res, Err> on Prism<Whole, Result<Res, Err>> {
+  Prism<Whole, Res> zoomIntoSuccess() {
+    return composeWithPrism(ResultToResPrism<Res, Err>());
+  }
+
+  Prism<Whole, Err> zoomIntoFailure() {
+    return composeWithPrism(ResultToErrPrism<Res, Err>());
+  }
+}

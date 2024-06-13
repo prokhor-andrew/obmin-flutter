@@ -33,3 +33,14 @@ Prism<Either<L, R>, R> EitherToRightPrism<L, R>() {
     },
   );
 }
+
+extension EitherPrismExtension<Whole, Left, Right> on Prism<Whole, Either<Left, Right>> {
+  Prism<Whole, Left> zoomIntoLeft() {
+    return composeWithPrism(EitherToLeftPrism<Left, Right>());
+  }
+
+  Prism<Whole, Right> zoomIntoRight() {
+    return composeWithPrism(EitherToRightPrism<Left, Right>());
+  }
+}
+
