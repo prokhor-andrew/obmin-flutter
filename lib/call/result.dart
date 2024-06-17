@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for license information.
 
 
-
 sealed class Result<Res, Err> {
 
 }
