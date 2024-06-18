@@ -28,7 +28,7 @@ Lens<RecursiveCall<Req, Res>, Call<Req, Res>> RecursiveCallToCallLens<Req, Res>(
           case Launched(req: final req):
             return RecursiveCall(Returned(Launched(req)));
           case Returned():
-            return whole;  // guarded, cause we cant go from "awaiting for trigger" into result state immediately
+            return whole; // guarded, cause we cant go from "awaiting for trigger" into result state immediately
         }
       case Returned(res: final res):
         switch (res) {
@@ -46,4 +46,10 @@ Lens<RecursiveCall<Req, Res>, Call<Req, Res>> RecursiveCallToCallLens<Req, Res>(
   }
 
   return Lens(get: get, put: put);
+}
+
+extension RecursiveCallLensExtension<Whole, Req, Res> on Lens<Whole, RecursiveCall<Req, Res>> {
+  Lens<Whole, Call<Req, Res>> zoomIntoCall() {
+    return composeWithLens(RecursiveCallToCallLens<Req, Res>());
+  }
 }
