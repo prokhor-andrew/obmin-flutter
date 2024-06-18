@@ -27,8 +27,8 @@ Lens<RecursiveCall<Req, Res>, Call<Req, Res>> RecursiveCallToCallLens<Req, Res>(
         switch (call) {
           case Launched(req: final req):
             return RecursiveCall(Returned(Launched(req)));
-          case Returned(res: final res):
-            return RecursiveCall(Launched(res));
+          case Returned():
+            return whole;  // guarded, cause we cant go from "awaiting for trigger" into result state immediately
         }
       case Returned(res: final res):
         switch (res) {
