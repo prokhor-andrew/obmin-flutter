@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/a_foundation/types/lens.dart';
+import 'package:obmin/a_foundation/types/prism.dart';
 import 'package:obmin/call/call.dart';
 import 'package:obmin/call/recursive_call.dart';
 
@@ -50,6 +51,12 @@ Lens<RecursiveCall<Req, Res>, Call<Req, Res>> RecursiveCallToCallLens<Req, Res>(
 
 extension RecursiveCallLensExtension<Whole, Req, Res> on Lens<Whole, RecursiveCall<Req, Res>> {
   Lens<Whole, Call<Req, Res>> zoomIntoCall() {
+    return composeWithLens(RecursiveCallToCallLens<Req, Res>());
+  }
+}
+
+extension RecursiveCallPrismExtension<Whole, Req, Res> on Prism<Whole, RecursiveCall<Req, Res>> {
+  Prism<Whole, Call<Req, Res>> zoomIntoCall() {
     return composeWithLens(RecursiveCallToCallLens<Req, Res>());
   }
 }
