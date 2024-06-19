@@ -78,3 +78,13 @@ extension CallPrismExtension<Whole, Req, Res> on Prism<Whole, Call<Req, Res>> {
     return composeWithPrism(CallToResPrism<Req, Res>());
   }
 }
+
+extension CallLensExtension<Whole, Req, Res> on Lens<Whole, Call<Req, Res>> {
+  Prism<Whole, Req> zoomIntoReq() {
+    return composeWithPrism(CallToReqPrism<Req, Res>());
+  }
+
+  Prism<Whole, Res> zoomIntoRes() {
+    return composeWithPrism(CallToResPrism<Req, Res>());
+  }
+}

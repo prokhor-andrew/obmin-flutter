@@ -78,3 +78,13 @@ extension ResultPrismExtension<Whole, Res, Err> on Prism<Whole, Result<Res, Err>
     return composeWithPrism(ResultToErrPrism<Res, Err>());
   }
 }
+
+extension ResultLensExtension<Whole, Res, Err> on Lens<Whole, Result<Res, Err>> {
+  Prism<Whole, Res> zoomIntoSuccess() {
+    return composeWithPrism(ResultToResPrism<Res, Err>());
+  }
+
+  Prism<Whole, Err> zoomIntoFailure() {
+    return composeWithPrism(ResultToErrPrism<Res, Err>());
+  }
+}
