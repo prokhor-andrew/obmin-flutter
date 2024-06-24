@@ -6,17 +6,19 @@ import 'dart:async';
 
 import 'package:obmin/a_foundation/machine_factory.dart';
 import 'package:obmin/b_base/chamber_machine/silo_machine.dart';
-import 'package:obmin/b_base/stream_machine/stream_machine.dart';
 
-extension FutureMachine on MachineFactory {
-  Silo<Res> future<Res>({
+extension StreamMachine on MachineFactory {
+  Silo<Res> stream<Res>({
     required String id,
-    required Future<Res> Function() future,
+    required Stream<Res> Function() stream,
   }) {
-    return MachineFactory.shared.stream<Res>(
+    return MachineFactory.shared.silo<StreamSubscription<Res>, Res>(
       id: id,
-      stream: () {
-        return future().asStream();
+      onStart: (callback) {
+        return stream().listen(callback);
+      },
+      onStop: (sub) {
+        sub.cancel();
       },
     );
   }
