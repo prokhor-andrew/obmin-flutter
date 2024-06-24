@@ -72,6 +72,9 @@ extension ChamberMachine on MachineFactory {
         return map(helper, initial);
       },
       map: map,
+      inputBufferStrategy: inputBufferStrategy,
+      outputBufferStrategy: outputBufferStrategy,
+      internalBufferStrategy: internalBufferStrategy,
     );
   }
 }
