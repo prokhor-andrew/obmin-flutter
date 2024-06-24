@@ -8,7 +8,7 @@ import 'package:obmin/a_foundation/types/prism.dart';
 import 'package:obmin/b_base/chamber_machine/silo_machine.dart';
 import 'package:obmin/call/call.dart';
 
-extension FeatureMachine on MachineFactory {
+extension CallMachine on MachineFactory {
   Optional<Silo<Whole Function(Whole)>> call<Whole, Req, Res>({
     required Whole state,
     required Prism<Whole, Call<Req, Res>> prism,
