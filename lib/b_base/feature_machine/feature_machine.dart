@@ -12,7 +12,8 @@ import 'package:obmin/b_base/feature_machine/feature.dart';
 extension FeatureMachine on MachineFactory {
   Machine<ExtTrigger, ExtEffect> feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({
     required String id,
-    required Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function() feature,
+    required Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() onCreateFeature,
+    required Future<void> Function(State state) onDestroyFeature,
     ChannelBufferStrategy<ExtTrigger>? inputBufferStrategy,
     ChannelBufferStrategy<ExtEffect>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<IntTrigger, ExtTrigger>>? internalBufferStrategy,
@@ -25,9 +26,8 @@ extension FeatureMachine on MachineFactory {
         return _FeatureHolder(
           id: id,
           bufferStrategy: internalBufferStrategy,
-          initial: () {
-            return feature();
-          },
+          onCreate: onCreateFeature,
+          onDestroy: onDestroyFeature,
         );
       },
       onChange: (object, callback) async {
@@ -42,7 +42,8 @@ extension FeatureMachine on MachineFactory {
 
 final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   final String _id;
-  final Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function() _initial;
+  final Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() _onCreate;
+  final Future<void> Function(State state) _onDestroy;
 
   void Function(ExtEffect)? _callback;
 
@@ -50,6 +51,8 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
 
   final Channel<FeatureEvent<IntTrigger, ExtTrigger>> _channel;
   ChannelTask<void>? _task;
+
+  late State _state;
 
   FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
     FeatureEvent<IntTrigger, ExtTrigger>,
@@ -59,9 +62,11 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
   _FeatureHolder({
     required String id,
     ChannelBufferStrategy<FeatureEvent<IntTrigger, ExtTrigger>>? bufferStrategy,
-    required Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function() initial,
+    required Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() onCreate,
+    required Future<void> Function(State state) onDestroy,
   })  : _id = id,
-        _initial = initial,
+        _onCreate = onCreate,
+        _onDestroy = onDestroy,
         _channel = Channel(
           bufferStrategy: bufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default"),
         );
@@ -70,7 +75,8 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
     this._callback = callback;
 
     if (callback != null) {
-      final state = _initial();
+      final state = await _onCreate();
+      _state = state.state;
       _transit = state.transit;
 
       _processes = state.machines.map((machine) {
@@ -100,6 +106,8 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
         process.cancel();
       }
       _processes = {};
+
+      await _onDestroy(_state);
     }
   }
 

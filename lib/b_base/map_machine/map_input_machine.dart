@@ -20,7 +20,7 @@ extension MapInputMachine<Input, Output> on Machine<Input, Output> {
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
-      feature: () {
+      onCreateFeature: () async {
         Outline<(), Output, Input, R, Output> outline() {
           return Outline.create(
             state: (),
@@ -47,6 +47,7 @@ extension MapInputMachine<Input, Output> on Machine<Input, Output> {
 
         return outline().asFeature({this});
       },
+      onDestroyFeature: (_) async {},
     );
   }
 }

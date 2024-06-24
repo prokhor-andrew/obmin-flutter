@@ -31,9 +31,10 @@ final class Core<State, Input, Output> {
     _process = MachineFactory.shared
         .feature(
           id: "core",
-          feature: () {
+          onCreateFeature: () async {
             return aScene.asIntTriggerIntEffect<void, void>().asFeature(aMachines);
           },
+          onDestroyFeature: (_) async {},
         )
         .run(
           onConsume: (_) async {},
