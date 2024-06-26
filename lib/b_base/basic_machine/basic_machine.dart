@@ -10,7 +10,7 @@ extension BasicMachine on MachineFactory {
   Machine<Input, Output> create<Object, Input, Output>({
     required String id,
     required Object Function(String id) onCreate,
-    required Future<void> Function(Object object, ChannelTask<bool> Function(Output output)? callback) onChange,
+    required Future<void> Function(Object object, void Function(Output output)? callback) onChange,
     required Future<void> Function(Object object, Input input) onProcess,
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,

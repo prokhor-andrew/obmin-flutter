@@ -14,7 +14,7 @@ final class Machine<Input, Output> {
   final String id;
 
   final (
-    Future<void> Function(ChannelTask<bool> Function(Output output)? callback) onChange,
+    Future<void> Function(void Function(Output output)? callback) onChange,
     Future<void> Function(Input input) onProcess,
   )
       Function() onCreate;
@@ -117,17 +117,17 @@ final class Machine<Input, Output> {
 
 final class Process<Input> {
   final String id;
-  final ChannelTask<bool> Function(Input) _send;
+  final void Function(Input) _send;
   final void Function() _cancel;
 
   Process._({
     required this.id,
-    required ChannelTask<bool> Function(Input) send,
+    required void Function(Input) send,
     required void Function() cancel,
   })  : _send = send,
         _cancel = cancel;
 
-  ChannelTask<bool> send(Input input) {
+  void send(Input input) {
     return _send(input);
   }
 

@@ -65,12 +65,11 @@ class _CoreWidgetState<UiState, DomainState, Input, Output> extends State<CoreWi
         return ();
       },
       onChange: (_, callback) async {
-
         if (callback != null) {
           if (mounted) {
             setState(() {
-              _state = widget.activate(_state, (output) async {
-                await callback(output).future;
+              _state = widget.activate(_state, (output) {
+                callback(output);
               });
             });
           }

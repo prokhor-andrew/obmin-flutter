@@ -23,9 +23,7 @@ extension SiloMachine on MachineFactory {
       },
       onChange: (object, callback) async {
         if (callback != null) {
-          object.object = onStart((output) async {
-            await callback(output).future;
-          });
+          object.object = onStart(callback);
         } else {
           onStop(object.object as Object);
           object.object = null;

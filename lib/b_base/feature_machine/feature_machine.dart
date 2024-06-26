@@ -45,7 +45,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
   final Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() _onCreate;
   final Future<void> Function(State state) _onDestroy;
 
-  ChannelTask<bool> Function(ExtEffect)? _callback;
+  void Function(ExtEffect)? _callback;
 
   Set<Process<IntEffect>> _processes = {};
 
@@ -71,7 +71,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
           bufferStrategy: bufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default"),
         );
 
-  Future<void> onChange(ChannelTask<bool> Function(ExtEffect effect)? callback) async {
+  Future<void> onChange(void Function(ExtEffect effect)? callback) async {
     this._callback = callback;
 
     if (callback != null) {
@@ -82,7 +82,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
       _processes = state.machines.map((machine) {
         return machine.run(
           onConsume: (event) async {
-            await _channel.send(InternalFeatureEvent(event)).future;
+            _channel.send(InternalFeatureEvent(event));
           },
         );
       }).toSet();
@@ -112,7 +112,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
   }
 
   Future<void> onProcess(ExtTrigger input) async {
-    await _channel.send(ExternalFeatureEvent(input)).future;
+    _channel.send(ExternalFeatureEvent(input));
   }
 
   Future<void> _handle(FeatureEvent<IntTrigger, ExtTrigger> event) async {
@@ -160,7 +160,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
     final processesToAdd = machinesToAdd.map((machine) {
       return machine.run(
         onConsume: (output) async {
-          await _channel.send(InternalFeatureEvent(output)).future;
+          _channel.send(InternalFeatureEvent(output));
         },
       );
     }).toSet();
@@ -179,7 +179,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
             case ExternalFeatureEvent<IntEffect, ExtEffect>(value: final value):
               final callback = _callback;
               if (callback != null) {
-                await callback(value).future;
+                callback(value);
               }
               break;
           }
