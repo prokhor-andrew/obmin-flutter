@@ -45,7 +45,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
   final Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() _onCreate;
   final Future<void> Function(State state) _onDestroy;
 
-  void Function(ExtEffect)? _callback;
+  ChannelTask<bool> Function(ExtEffect)? _callback;
 
   Set<Process<IntEffect>> _processes = {};
 
@@ -71,7 +71,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
           bufferStrategy: bufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default"),
         );
 
-  Future<void> onChange(void Function(ExtEffect effect)? callback) async {
+  Future<void> onChange(ChannelTask<bool> Function(ExtEffect effect)? callback) async {
     this._callback = callback;
 
     if (callback != null) {
@@ -171,7 +171,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
     final effects = transition.effects;
 
     await Future.wait([
-      Future(() {
+      Future(() async {
         for (final effect in effects) {
           switch (effect) {
             case InternalFeatureEvent<IntEffect, ExtEffect>():
@@ -179,7 +179,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
             case ExternalFeatureEvent<IntEffect, ExtEffect>(value: final value):
               final callback = _callback;
               if (callback != null) {
-                callback(value);
+                await callback(value).future;
               }
               break;
           }
