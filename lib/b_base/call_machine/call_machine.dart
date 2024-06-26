@@ -6,6 +6,7 @@ import 'package:obmin/a_foundation/machine_factory.dart';
 import 'package:obmin/a_foundation/types/optional.dart';
 import 'package:obmin/a_foundation/types/prism.dart';
 import 'package:obmin/b_base/chamber_machine/silo_machine.dart';
+import 'package:obmin/b_base/map_machine/map_output_machine.dart';
 import 'package:obmin/call/call.dart';
 
 extension CallMachine on MachineFactory {
@@ -14,7 +15,7 @@ extension CallMachine on MachineFactory {
     required Prism<Whole, Call<Req, Res>> prism,
     required Silo<Res> Function(Req req) machine,
   }) {
-    return prism.get(state).bind((value) {
+    return prism.get(state).bind<Silo<Res>>((value) {
       switch (value) {
         case Launched<Req, Res>(req: final req):
           return Some(machine(req));
@@ -24,9 +25,7 @@ extension CallMachine on MachineFactory {
     }).map((machine) {
       return machine.mapOutput((output) {
         return (Whole whole) {
-          return output.map((value) {
-            return prism.put(whole, Returned(value));
-          });
+          return prism.put(whole, Returned(output));
         };
       });
     });
