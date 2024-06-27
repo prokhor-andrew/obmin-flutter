@@ -32,7 +32,7 @@ final class Returned<Req, Res> extends Call<Req, Res> {
 
   @override
   String toString() {
-    return "Returned<$Req,  $Res> { res=$res }";
+    return "Returned<$Req, $Res> { res=$res }";
   }
 
   @override
