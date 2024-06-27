@@ -45,13 +45,15 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
   final Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() _onCreate;
   final Future<void> Function(State state) _onDestroy;
 
+  bool _isCancelled = false;
+
   ChannelTask<bool> Function(ExtEffect)? _callback;
 
   Set<Process<IntEffect>> _processes = {};
   final Map<String, ChannelTask<bool> Function(IntEffect)> _senders = {};
 
   final Channel<FeatureEvent<IntTrigger, ExtTrigger>> _channel;
-  ChannelTask<void>? _task;
+  ChannelTask<Optional<FeatureEvent<IntTrigger, ExtTrigger>>>? _task;
 
   late State _state;
 
@@ -95,18 +97,23 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
         );
       }).toSet();
 
-      _task = _channel.next().map((future) {
-        return Future(() async {
-          while (true) {
-            final result = await future;
-            if (result is None<FeatureEvent<IntTrigger, ExtTrigger>>) {
-              break;
-            }
-            await _handle(result.force());
+      Future(() async {
+        while (true) {
+          if (_isCancelled) {
+            break;
           }
-        });
+          final ChannelTask<Optional<FeatureEvent<IntTrigger, ExtTrigger>>> task = _channel.next();
+          _task = task;
+          final value = await task.future;
+
+          if (value is None<FeatureEvent<IntTrigger, ExtTrigger>>) {
+            break;
+          }
+          await _handle(value.force());
+        }
       });
     } else {
+      _isCancelled = true;
       _task?.cancel();
       _task = null;
       _transit = null;
