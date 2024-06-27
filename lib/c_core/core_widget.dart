@@ -8,51 +8,22 @@ import 'package:obmin/a_foundation/machine_factory.dart';
 import 'package:obmin/b_base/basic_machine/basic_machine.dart';
 import 'package:obmin/c_core/core.dart';
 
-extension CoreWidgetExtension<State, Input, Output> on Core<State, Input, Output> {
-  Widget build<UiState>({
-    Key? key,
-    required String id,
-    required UiState Function(State state) init,
-    required UiState Function(UiState state, void Function(Output output) callback) activate,
-    required UiState Function(UiState state, Input input) process,
-    required Widget Function(BuildContext context, UiState state) build,
-  }) {
-    return CoreWidget<UiState, State, Input, Output>(
-      key: key,
-      core: this,
-      id: id,
-      init: init,
-      activate: activate,
-      process: process,
-      build: build,
-    );
-  }
-}
-
-class CoreWidget<UiState, DomainState, Input, Output> extends StatefulWidget {
-  final String id;
+class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
   final Core<DomainState, Input, Output> _initialCore;
-  final UiState Function(DomainState state) init;
-  final UiState Function(UiState state, void Function(Output output) callback) activate;
-  final UiState Function(UiState state, Input input) process;
-  final Widget Function(BuildContext context, UiState state) build;
+  final UiMachine<DomainState, Input, Output> uiMachine;
 
   const CoreWidget({
     super.key,
     required Core<DomainState, Input, Output> core,
-    required this.id,
-    required this.init,
-    required this.activate,
-    required this.process,
-    required this.build,
+    required this.uiMachine,
   }) : _initialCore = core;
 
   @override
-  State<CoreWidget<UiState, DomainState, Input, Output>> createState() => _CoreWidgetState<UiState, DomainState, Input, Output>();
+  State<CoreWidget<DomainState, Input, Output>> createState() => _CoreWidgetState<DomainState, Input, Output>();
 }
 
-class _CoreWidgetState<UiState, DomainState, Input, Output> extends State<CoreWidget<UiState, DomainState, Input, Output>> {
-  late UiState _state;
+class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidget<DomainState, Input, Output>> {
+  late Object _state;
   Core<DomainState, Input, Output>? _core;
 
   @override
@@ -61,7 +32,7 @@ class _CoreWidgetState<UiState, DomainState, Input, Output> extends State<CoreWi
     final coreScene = widget._initialCore.scene();
     final coreMachines = widget._initialCore.machines(coreScene.state);
 
-    _state = widget.init(coreScene.state);
+    _state = widget.uiMachine._init(coreScene.state);
 
     _core = Core<DomainState, Input, Output>(
       scene: () {
@@ -69,7 +40,7 @@ class _CoreWidgetState<UiState, DomainState, Input, Output> extends State<CoreWi
       },
       machines: (state) {
         final Machine<Input, Output> uiMachine = MachineFactory.shared.create<(), Input, Output>(
-          id: widget.id,
+          id: widget.uiMachine._id,
           onCreate: (id) {
             return ();
           },
@@ -77,7 +48,7 @@ class _CoreWidgetState<UiState, DomainState, Input, Output> extends State<CoreWi
             if (callback != null) {
               if (mounted) {
                 setState(() {
-                  _state = widget.activate(_state, (output) async {
+                  _state = widget.uiMachine._activate(_state, (output) async {
                     await callback(output).future;
                   });
                 });
@@ -87,7 +58,7 @@ class _CoreWidgetState<UiState, DomainState, Input, Output> extends State<CoreWi
           onProcess: (_, input) async {
             if (mounted) {
               setState(() {
-                _state = widget.process(_state, input);
+                _state = widget.uiMachine._process(_state, input);
               });
             }
           },
@@ -110,6 +81,51 @@ class _CoreWidgetState<UiState, DomainState, Input, Output> extends State<CoreWi
 
   @override
   Widget build(BuildContext context) {
-    return widget.build(context, _state);
+    return widget.uiMachine._build(context, _state);
+  }
+}
+
+final class UiMachine<State, Input, Output> {
+  final String _id;
+  final Object Function(State state) _init;
+  final Object Function(Object state, void Function(Output output) callback) _activate;
+  final Object Function(Object state, Input input) _process;
+  final Widget Function(BuildContext context, Object state) _build;
+
+  UiMachine._({
+    required String id,
+    required Object Function(State state) init,
+    required Object Function(Object state, void Function(Output output) callback) activate,
+    required Object Function(Object state, Input input) process,
+    required Widget Function(BuildContext context, Object state) build,
+  })  : _id = id,
+        _init = init,
+        _activate = activate,
+        _process = process,
+        _build = build;
+
+
+  static UiMachine<State, Input, Output> create<UiState, State, Input, Output>({
+    required String id,
+    required UiState Function(State state) init,
+    required UiState Function(UiState state, void Function(Output output) callback) activate,
+    required UiState Function(UiState state, Input input) process,
+    required Widget Function(BuildContext context, UiState state) build,
+  }) {
+    return UiMachine<State, Input, Output>._(
+      id: id,
+      init: (state) {
+        return init(state) as Object;
+      },
+      activate: (state, callback) {
+        return activate(state as UiState, callback) as Object;
+      },
+      process: (state, input) {
+        return process(state as UiState, input) as Object;
+      },
+      build: (context, state) {
+        return build(context, state as UiState);
+      },
+    );
   }
 }
