@@ -13,6 +13,7 @@ Set<Element> uniteSetOptionals<Element>(Set<Optional<Element>> optionals) {
         break;
       case Some<Element>(value: final value):
         result.add(value);
+        break;
     }
   }
 
