@@ -25,13 +25,12 @@ final class Core<State, Input, Output> {
       return false;
     }
 
-    final aScene = scene();
-    final aMachines = machines(aScene.state);
-
     _process = MachineFactory.shared
         .feature(
           id: "core",
           onCreateFeature: () async {
+            final aScene = scene();
+            final aMachines = machines(aScene.state);
             return aScene.asIntTriggerIntEffect<void, void>().asFeature(aMachines);
           },
           onDestroyFeature: (_) async {},
