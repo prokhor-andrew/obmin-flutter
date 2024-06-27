@@ -8,9 +8,11 @@ import 'package:obmin/c_core/core_widget.dart';
 
 CoreWidget<(State, void Function(Event event)?), State, State, Event> CoreXWidget<State, Event>({
   required Core<State, State, Event> core,
+  required String id,
   required Widget Function(BuildContext context, State state, void Function(Event event)? update) builder,
 }) {
   return CoreWidget<(State, void Function(Event event)? update), State, State, Event>(
+    id: id,
     core: core,
     init: (state) {
       return (state, null);

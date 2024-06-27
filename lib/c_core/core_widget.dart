@@ -11,6 +11,7 @@ import 'package:obmin/c_core/core.dart';
 extension CoreWidgetExtension<State, Input, Output> on Core<State, Input, Output> {
   Widget build<UiState>({
     Key? key,
+    required String id,
     required UiState Function(State state) init,
     required UiState Function(UiState state, void Function(Output output) callback) activate,
     required UiState Function(UiState state, Input input) process,
@@ -19,6 +20,7 @@ extension CoreWidgetExtension<State, Input, Output> on Core<State, Input, Output
     return CoreWidget<UiState, State, Input, Output>(
       key: key,
       core: this,
+      id: id,
       init: init,
       activate: activate,
       process: process,
@@ -28,6 +30,7 @@ extension CoreWidgetExtension<State, Input, Output> on Core<State, Input, Output
 }
 
 class CoreWidget<UiState, DomainState, Input, Output> extends StatefulWidget {
+  final String id;
   final Core<DomainState, Input, Output> _initialCore;
   final UiState Function(DomainState state) init;
   final UiState Function(UiState state, void Function(Output output) callback) activate;
@@ -37,6 +40,7 @@ class CoreWidget<UiState, DomainState, Input, Output> extends StatefulWidget {
   const CoreWidget({
     super.key,
     required Core<DomainState, Input, Output> core,
+    required this.id,
     required this.init,
     required this.activate,
     required this.process,
@@ -59,34 +63,40 @@ class _CoreWidgetState<UiState, DomainState, Input, Output> extends State<CoreWi
 
     _state = widget.init(coreScene.state);
 
-    final Machine<Input, Output> uiMachine = MachineFactory.shared.create<(), Input, Output>(
-      id: "ui_machine",
-      onCreate: (id) {
-        return ();
-      },
-      onChange: (_, callback) async {
-        if (callback != null) {
-          if (mounted) {
-            setState(() {
-              _state = widget.activate(_state, (output) {
-                callback(output);
-              });
-            });
-          }
-        }
-      },
-      onProcess: (_, input) async {
-        if (mounted) {
-          setState(() {
-            _state = widget.process(_state, input);
-          });
-        }
-      },
-    );
-
     _core = Core<DomainState, Input, Output>(
-      scene: () => coreScene,
-      machines: (state) => coreMachines.union({uiMachine}),
+      scene: () {
+        return coreScene;
+      },
+      machines: (state) {
+        final Machine<Input, Output> uiMachine = MachineFactory.shared.create<(), Input, Output>(
+          id: widget.id,
+          onCreate: (id) {
+            return ();
+          },
+          onChange: (_, callback) async {
+            if (callback != null) {
+              if (mounted) {
+                setState(() {
+                  _state = widget.activate(_state, (output) {
+                    callback(output);
+                  });
+                });
+              }
+            }
+          },
+          onProcess: (_, input) async {
+            if (mounted) {
+              setState(() {
+                _state = widget.process(_state, input);
+              });
+            }
+          },
+        );
+
+        return coreMachines.union({
+          uiMachine,
+        });
+      },
     );
     _core?.start();
   }
