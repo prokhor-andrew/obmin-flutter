@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:obmin/a_foundation/channel/channel.dart';
+import 'package:obmin/a_foundation/channel/channel_lib.dart';
 import 'package:obmin/a_foundation/types/optional.dart';
 
 final class Machine<Input, Output> {

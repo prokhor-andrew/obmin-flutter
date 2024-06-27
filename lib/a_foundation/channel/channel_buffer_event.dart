@@ -2,7 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-part of 'channel.dart';
+part of 'channel_lib.dart';
 
 sealed class ChannelBufferEvent {
   bool get isAdded => switch (this) {

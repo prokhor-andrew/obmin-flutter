@@ -2,7 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/a_foundation/channel/channel.dart';
+import 'package:obmin/a_foundation/channel/channel_lib.dart';
 import 'package:obmin/a_foundation/machine.dart';
 import 'package:obmin/a_foundation/machine_factory.dart';
 import 'package:obmin/b_base/basic_machine/basic_machine.dart';
