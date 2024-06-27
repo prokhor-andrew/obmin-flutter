@@ -13,7 +13,7 @@ final class Channel<T> {
     required this.bufferStrategy,
   });
 
-  void send(T val) {
+  ChannelTask<bool> send(T val) {
     final String id = const Uuid().v4().toString();
     final Completer<bool> completer = Completer();
 
@@ -32,6 +32,28 @@ final class Channel<T> {
         completer.complete(true);
         break;
     }
+
+    return ChannelTask(
+      id: id,
+      future: completer.future,
+      cancel: () {
+        switch (_state) {
+          case _IdleChannelState<T>() || _AwaitingForProducer<T>():
+            break; // do nothing, as there is no completer to be completed
+          case _AwaitingForConsumer<T>(buffer: final array):
+            final currentArray = array.where((data) {
+              if (data.id != id) {
+                return true;
+              } else {
+                data._completer.complete(false);
+                return false;
+              }
+            }).toList();
+
+            _handleBuffer(event: ChannelBufferRemovedEvent(isConsumed: false), currentArray: currentArray);
+        }
+      },
+    );
   }
 
   ChannelTask<Optional<T>> next() {

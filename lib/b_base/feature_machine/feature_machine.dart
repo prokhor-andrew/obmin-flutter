@@ -45,10 +45,10 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
   final Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() _onCreate;
   final Future<void> Function(State state) _onDestroy;
 
-  void Function(ExtEffect)? _callback;
+  ChannelTask<bool> Function(ExtEffect)? _callback;
 
   Set<Process<IntEffect>> _processes = {};
-  final Map<String, void Function(IntEffect)> _senders = {};
+  final Map<String, ChannelTask<bool> Function(IntEffect)> _senders = {};
 
   final Channel<FeatureEvent<IntTrigger, ExtTrigger>> _channel;
   ChannelTask<void>? _task;
@@ -72,7 +72,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
           bufferStrategy: bufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default"),
         );
 
-  Future<void> onChange(void Function(ExtEffect effect)? callback) async {
+  Future<void> onChange(ChannelTask<bool> Function(ExtEffect effect)? callback) async {
     this._callback = callback;
 
     if (callback != null) {
@@ -90,7 +90,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
             }
           },
           onConsume: (event) async {
-            _channel.send(InternalFeatureEvent(event));
+            await _channel.send(InternalFeatureEvent(event)).future;
           },
         );
       }).toSet();
@@ -120,7 +120,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
   }
 
   Future<void> onProcess(ExtTrigger input) async {
-    _channel.send(ExternalFeatureEvent(input));
+    await _channel.send(ExternalFeatureEvent(input)).future;
   }
 
   Future<void> _handle(FeatureEvent<IntTrigger, ExtTrigger> event) async {
@@ -175,7 +175,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
           }
         },
         onConsume: (output) async {
-          _channel.send(InternalFeatureEvent(output));
+          await _channel.send(InternalFeatureEvent(output)).future;
         },
       );
     }).toSet();
@@ -194,7 +194,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
             case ExternalFeatureEvent<IntEffect, ExtEffect>(value: final value):
               final callback = _callback;
               if (callback != null) {
-                callback(value);
+                await callback(value).future;
               }
               break;
           }
@@ -202,11 +202,11 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
       }),
       Future.wait(
         _senders.values.map((sender) {
-          return Future(() {
+          return Future(() async {
             for (final effect in effects) {
               switch (effect) {
                 case InternalFeatureEvent<IntEffect, ExtEffect>(value: final value):
-                  sender(value);
+                  await sender(value).future;
                   break;
                 case ExternalFeatureEvent<IntEffect, ExtEffect>():
                   break;

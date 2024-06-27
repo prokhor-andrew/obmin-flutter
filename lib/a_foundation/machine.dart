@@ -14,7 +14,7 @@ final class Machine<Input, Output> {
   final String id;
 
   final (
-    Future<void> Function(void Function(Output output)? callback) onChange,
+    Future<void> Function(ChannelTask<bool> Function(Output output)? callback) onChange,
     Future<void> Function(Input input) onProcess,
   )
       Function() onCreate;
@@ -37,7 +37,7 @@ final class Machine<Input, Output> {
   Process<Input> run({
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,
-    required Future<void> Function(void Function(Input input)? sender) onChange,
+    required Future<void> Function(ChannelTask<bool> Function(Input input)? sender) onChange,
     required Future<void> Function(Output output) onConsume,
   }) {
     final onChangeExternal = onChange;
@@ -66,7 +66,7 @@ final class Machine<Input, Output> {
 
       final (onChangeInternal, onProcess) = onCreate();
 
-      final future = Future.wait<void>([
+      final future = Future.wait([
         Future(() async {
           while (true) {
             if (isCancelled) {
