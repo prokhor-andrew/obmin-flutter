@@ -37,8 +37,11 @@ final class Machine<Input, Output> {
   Process<Input> run({
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,
+    required Future<void> Function(void Function(Input input)? sender) onChange,
     required Future<void> Function(Output output) onConsume,
   }) {
+    final onChangeExternal = onChange;
+
     final ChannelBufferStrategy<Output> actualOutputBufferStrategy =
         this.outputBufferStrategy ?? outputBufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default");
     final ChannelBufferStrategy<Input> actualInputBufferStrategy =
@@ -56,54 +59,61 @@ final class Machine<Input, Output> {
     ChannelTask<Optional<Input>>? inputTask;
     ChannelTask<Optional<Output>>? outputTask;
 
-    Future<void>(() async {
+    Future(() async {
       if (isCancelled) {
         return;
       }
 
-      final (onChange, onProcess) = onCreate();
+      final (onChangeInternal, onProcess) = onCreate();
 
-      await onChange(outputChannel.send);
+      final future = Future.wait<void>([
+        Future(() async {
+          while (true) {
+            if (isCancelled) {
+              break;
+            }
+            final ChannelTask<Optional<Input>> task = inputChannel.next();
+            inputTask = task;
+            final value = await task.future;
+            if (value is None<Input>) {
+              break;
+            }
+            await onProcess(value.force());
+          }
+        }),
+        Future(() async {
+          while (true) {
+            if (isCancelled) {
+              break;
+            }
+            final ChannelTask<Optional<Output>> task = outputChannel.next();
+            outputTask = task;
+            final value = await task.future;
+            if (value is None<Output>) {
+              break;
+            }
+            await onConsume(value.force());
+          }
+        }),
+      ]);
+
+      await Future.wait([
+        onChangeInternal(outputChannel.send),
+        onChangeExternal(inputChannel.send),
+      ]);
 
       if (!isCancelled) {
-        await Future.wait<void>([
-          Future<void>(() async {
-            while (true) {
-              if (isCancelled) {
-                break;
-              }
-              final ChannelTask<Optional<Input>> task = inputChannel.next();
-              inputTask = task;
-              final value = await task.future;
-              if (value is None<Input>) {
-                break;
-              }
-              await onProcess(value.force());
-            }
-          }),
-          Future<void>(() async {
-            while (true) {
-              if (isCancelled) {
-                break;
-              }
-              final ChannelTask<Optional<Output>> task = outputChannel.next();
-              outputTask = task;
-              final value = await task.future;
-              if (value is None<Output>) {
-                break;
-              }
-              await onConsume(value.force());
-            }
-          }),
-        ]);
+        await future;
       }
 
-      await onChange(null);
+      await Future.wait([
+        onChangeInternal(null),
+        onChangeExternal(null),
+      ]);
     });
 
     return Process._(
       id: id,
-      send: inputChannel.send,
       cancel: () {
         isCancelled = true;
         inputTask?.cancel();
@@ -117,19 +127,12 @@ final class Machine<Input, Output> {
 
 final class Process<Input> {
   final String id;
-  final void Function(Input) _send;
   final void Function() _cancel;
 
   Process._({
     required this.id,
-    required void Function(Input) send,
     required void Function() cancel,
-  })  : _send = send,
-        _cancel = cancel;
-
-  void send(Input input) {
-    return _send(input);
-  }
+  }) : _cancel = cancel;
 
   void cancel() {
     _cancel();

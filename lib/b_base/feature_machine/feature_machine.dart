@@ -48,6 +48,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
   void Function(ExtEffect)? _callback;
 
   Set<Process<IntEffect>> _processes = {};
+  final Map<String, void Function(IntEffect)> _senders = {};
 
   final Channel<FeatureEvent<IntTrigger, ExtTrigger>> _channel;
   ChannelTask<void>? _task;
@@ -81,6 +82,13 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
 
       _processes = state.machines.map((machine) {
         return machine.run(
+          onChange: (sender) async {
+            if (sender != null) {
+              _senders[machine.id] = sender;
+            } else {
+              _senders.remove(machine.id);
+            }
+          },
           onConsume: (event) async {
             _channel.send(InternalFeatureEvent(event));
           },
@@ -159,6 +167,13 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
 
     final processesToAdd = machinesToAdd.map((machine) {
       return machine.run(
+        onChange: (sender) async {
+          if (sender != null) {
+            _senders[machine.id] = sender;
+          } else {
+            _senders.remove(machine.id);
+          }
+        },
         onConsume: (output) async {
           _channel.send(InternalFeatureEvent(output));
         },
@@ -186,12 +201,12 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
         }
       }),
       Future.wait(
-        processesToKeep.map((process) {
+        _senders.values.map((sender) {
           return Future(() {
             for (final effect in effects) {
               switch (effect) {
                 case InternalFeatureEvent<IntEffect, ExtEffect>(value: final value):
-                  process.send(value);
+                  sender(value);
                   break;
                 case ExternalFeatureEvent<IntEffect, ExtEffect>():
                   break;

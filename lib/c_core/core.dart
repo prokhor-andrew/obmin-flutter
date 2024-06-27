@@ -37,6 +37,7 @@ final class Core<State, Input, Output> {
           onDestroyFeature: (_) async {},
         )
         .run(
+          onChange: (_) async {},
           onConsume: (_) async {},
         );
 
