@@ -8,7 +8,7 @@ import 'package:obmin/c_core/core_x_widget.dart';
 
 CoreWidget<State, State, State Function(State)> CoreYWidget<State>({
   required Core<State, State, State Function(State state)> core,
-  required UiMachine<State, State, State Function(State)> uiMachine,
+  required WidgetMachine<State, State, State Function(State)> uiMachine,
 }) {
   return CoreXWidget<State, State Function(State)>(
     core: core,

@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:obmin/c_core/core_widget.dart';
 
-UiMachine<State, State, Event> UiMachineX<State, Event>({
+WidgetMachine<State, State, Event> WidgetMachineX<State, Event>({
   required String id,
   required Widget Function(BuildContext context, State state, void Function(Event event)? update) builder,
 }) {
-  return UiMachine.create<(State, void Function(Event event)?), State, State, Event>(
+  return WidgetMachine.create<(State, void Function(Event event)?), State, State, Event>(
     id: id,
     init: (state) {
       return (state, null);

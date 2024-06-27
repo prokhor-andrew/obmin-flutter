@@ -4,13 +4,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:obmin/c_core/core_widget.dart';
-import 'package:obmin/c_core/ui_machine_x.dart';
+import 'package:obmin/c_core/widget_machine_x.dart';
 
-UiMachine<State, State, State Function(State)> UiMachineY<State>({
+WidgetMachine<State, State, State Function(State)> WidgetMachineY<State>({
   required String id,
   required Widget Function(BuildContext context, State state, void Function(State Function(State state) reducer)? update) builder,
 }) {
-  return UiMachineX<State, State Function(State)>(
+  return WidgetMachineX<State, State Function(State)>(
     id: id,
     builder: builder,
   );

@@ -10,7 +10,7 @@ import 'package:obmin/c_core/core.dart';
 
 class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
   final Core<DomainState, Input, Output> _initialCore;
-  final UiMachine<DomainState, Input, Output> uiMachine;
+  final WidgetMachine<DomainState, Input, Output> uiMachine;
 
   const CoreWidget({
     super.key,
@@ -85,14 +85,14 @@ class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidget<Doma
   }
 }
 
-final class UiMachine<State, Input, Output> {
+final class WidgetMachine<State, Input, Output> {
   final String _id;
   final Object Function(State state) _init;
   final Object Function(Object state, void Function(Output output) callback) _activate;
   final Object Function(Object state, Input input) _process;
   final Widget Function(BuildContext context, Object state) _build;
 
-  UiMachine._({
+  WidgetMachine._({
     required String id,
     required Object Function(State state) init,
     required Object Function(Object state, void Function(Output output) callback) activate,
@@ -105,14 +105,14 @@ final class UiMachine<State, Input, Output> {
         _build = build;
 
 
-  static UiMachine<State, Input, Output> create<UiState, State, Input, Output>({
+  static WidgetMachine<State, Input, Output> create<UiState, State, Input, Output>({
     required String id,
     required UiState Function(State state) init,
     required UiState Function(UiState state, void Function(Output output) callback) activate,
     required UiState Function(UiState state, Input input) process,
     required Widget Function(BuildContext context, UiState state) build,
   }) {
-    return UiMachine<State, Input, Output>._(
+    return WidgetMachine<State, Input, Output>._(
       id: id,
       init: (state) {
         return init(state) as Object;
