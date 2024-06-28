@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/a_foundation/types/optional.dart';
+import 'package:obmin/call/result.dart';
 
 sealed class Either<L, R> {
   Either<LeftResult, R> mapLeft<LeftResult>(LeftResult Function(L left) mapper) {
@@ -27,14 +28,14 @@ sealed class Either<L, R> {
 
   Either<L, RightResult> mapRightTo<RightResult>(RightResult value) => mapRight((_) => value);
 
-  Either<L, C> map<C>(C Function(R value) function) {
-    return mapRight(function);
+  Either<C, R> map<C>(C Function(L value) function) {
+    return mapLeft(function);
   }
 
-  Either<L, C> bind<C>(Either<L, C> Function(R value) function) {
+  Either<C, R> bind<C>(Either<C, R> Function(L value) function) {
     return switch (this) {
-      Left<L, R>(value: final value) => Left(value),
-      Right<L, R>(value: final value) => function(value),
+      Left<L, R>(value: final value) => function(value),
+      Right<L, R>(value: final value) => Right(value),
     };
   }
 
@@ -92,6 +93,15 @@ sealed class Either<L, R> {
       case Right<L, R>(value: final value):
         function(value);
         break;
+    }
+  }
+
+  Result<L, R> asResult() {
+    switch (this) {
+      case Left<L, R>(value: final value):
+        return Success(value);
+      case Right<L, R>(value: final value):
+        return Failure(value);
     }
   }
 }
