@@ -18,6 +18,17 @@ final class Lens<Whole, Part> {
   String toString() {
     return "$Lens<$Whole, $Part>";
   }
+
+  static Lens<T, T> identity<T>() {
+    return Lens(
+      get: (whole) {
+        return whole;
+      },
+      put: (whole, part) {
+        return part;
+      },
+    );
+  }
 }
 
 extension LensCompose<Whole, Part> on Lens<Whole, Part> {
