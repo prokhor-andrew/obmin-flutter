@@ -38,7 +38,7 @@ final class Affine<Whole, Part> {
 }
 
 extension IsoToAffine<T1, T2> on Iso<T1, T2> {
-  Affine<T1, T2> toAffine() {
+  Affine<T1, T2> asAffine() {
     return Affine(
       get: (whole) {
         return Some(to(whole));
@@ -51,7 +51,7 @@ extension IsoToAffine<T1, T2> on Iso<T1, T2> {
 }
 
 extension LensToAffine<Whole, Part> on Lens<Whole, Part> {
-  Affine<Whole, Part> toAffine() {
+  Affine<Whole, Part> asAffine() {
     return Affine(
       get: (whole) {
         return Some(get(whole));
@@ -64,7 +64,7 @@ extension LensToAffine<Whole, Part> on Lens<Whole, Part> {
 }
 
 extension PrismToAffine<Whole, Part> on Prism<Whole, Part> {
-  Affine<Whole, Part> toAffine() {
+  Affine<Whole, Part> asAffine() {
     return Affine(
       get: (whole) {
         return get(whole);
