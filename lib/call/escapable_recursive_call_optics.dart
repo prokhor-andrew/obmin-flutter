@@ -41,8 +41,8 @@ Lens<EscapableRecursiveCall<Req, Res, Err>, Call<Req, Result<Res, Err>>> Escapab
         switch (res) {
           case Launched<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>():
             switch (call) {
-              case Launched<Req, Result<Res, Err>>(req: final req):
-                return EscapableRecursiveCall(Returned(Launched(req)));
+              case Launched<Req, Result<Res, Err>>():
+                return whole;
               case Returned<Req, Result<Res, Err>>(res: final res):
                 switch (res) {
                   case Success<Res, Err>(result: final result):
