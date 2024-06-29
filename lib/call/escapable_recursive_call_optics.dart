@@ -8,7 +8,7 @@ import 'package:obmin/call/call.dart';
 import 'package:obmin/call/escapable_recursive_call.dart';
 import 'package:obmin/call/result.dart';
 
-Lens<EscapableRecursiveCall<Req, Res, Err>, Call<Req, Result<Res, Err>>> EscapableRecursiveCallToCallLens<Req, Res, Err>() {
+Lens<EscapableRecursiveCall<Req, Res, Err>, Call<Req, Result<Res, Err>>> EscapableRecursiveCallToResultCallLens<Req, Res, Err>() {
   Call<Req, Result<Res, Err>> get(EscapableRecursiveCall<Req, Res, Err> rec) {
     switch (rec.call) {
       case Launched(req: final req):
@@ -67,12 +67,12 @@ Lens<EscapableRecursiveCall<Req, Res, Err>, Call<Req, Result<Res, Err>>> Escapab
 
 extension EscapableRecursiveCallLensExtension<Whole, Req, Res, Err> on Lens<Whole, EscapableRecursiveCall<Req, Res, Err>> {
   Lens<Whole, Call<Req, Result<Res, Err>>> zoomIntoCall() {
-    return composeWithLens(EscapableRecursiveCallToCallLens<Req, Res, Err>());
+    return composeWithLens(EscapableRecursiveCallToResultCallLens<Req, Res, Err>());
   }
 }
 
 extension EscapableRecursiveCallPrismExtension<Whole, Req, Res, Err> on Prism<Whole, EscapableRecursiveCall<Req, Res, Err>> {
   Prism<Whole, Call<Req, Result<Res, Err>>> zoomIntoCall() {
-    return composeWithLens(EscapableRecursiveCallToCallLens<Req, Res, Err>());
+    return composeWithLens(EscapableRecursiveCallToResultCallLens<Req, Res, Err>());
   }
 }
