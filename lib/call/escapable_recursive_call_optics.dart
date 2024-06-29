@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/a_foundation/types/lens.dart';
-import 'package:obmin/a_foundation/types/prism.dart';
 import 'package:obmin/call/call.dart';
 import 'package:obmin/call/escapable_recursive_call.dart';
 import 'package:obmin/call/result.dart';
@@ -63,16 +62,4 @@ Lens<EscapableRecursiveCall<Req, Res, Err>, Call<Req, Result<Res, Err>>> Escapab
   }
 
   return Lens(get: get, put: put);
-}
-
-extension EscapableRecursiveCallLensExtension<Whole, Req, Res, Err> on Lens<Whole, EscapableRecursiveCall<Req, Res, Err>> {
-  Lens<Whole, Call<Req, Result<Res, Err>>> zoomIntoCall() {
-    return composeWithLens(EscapableRecursiveCallToCallLens<Req, Res, Err>());
-  }
-}
-
-extension EscapableRecursiveCallPrismExtension<Whole, Req, Res, Err> on Prism<Whole, EscapableRecursiveCall<Req, Res, Err>> {
-  Prism<Whole, Call<Req, Result<Res, Err>>> zoomIntoCall() {
-    return composeWithLens(EscapableRecursiveCallToCallLens<Req, Res, Err>());
-  }
 }

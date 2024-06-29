@@ -2,7 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/a_foundation/types/lens.dart';
+import 'package:obmin/a_foundation/types/iso.dart';
 import 'package:obmin/a_foundation/types/optional.dart';
 import 'package:obmin/a_foundation/types/prism.dart';
 import 'package:obmin/call/result.dart';
@@ -17,7 +17,7 @@ Prism<Result<Res, Err>, Success<Res, Err>> ResultToSuccessPrism<Res, Err>() {
           return None();
       }
     },
-    put: (whole, part) {
+    set: (part) {
       return part;
     },
   );
@@ -33,58 +33,26 @@ Prism<Result<Res, Err>, Failure<Res, Err>> ResultToFailurePrism<Res, Err>() {
           return None();
       }
     },
-    put: (whole, part) {
+    set: (part) {
       return part;
     },
   );
 }
 
-Lens<Success<Res, Err>, Res> SuccessToResLens<Res, Err>() {
-  return Lens(
-    get: (whole) {
+Iso<Success<Res, Err>, Res> SuccessToResIso<Res, Err>() {
+  return Iso(
+    to: (whole) {
       return whole.result;
     },
-    put: (whole, part) {
-      return Success(part);
-    },
+    from: Success.new,
   );
 }
 
-Lens<Failure<Res, Err>, Err> FailureToErrLens<Res, Err>() {
-  return Lens(
-    get: (whole) {
+Iso<Failure<Res, Err>, Err> FailureToErrIso<Res, Err>() {
+  return Iso(
+    to: (whole) {
       return whole.error;
     },
-    put: (whole, part) {
-      return Failure(part);
-    },
+    from: Failure.new,
   );
-}
-
-Prism<Result<Res, Err>, Res> ResultToResPrism<Res, Err>() {
-  return ResultToSuccessPrism<Res, Err>().composeWithLens(SuccessToResLens<Res, Err>());
-}
-
-Prism<Result<Res, Err>, Err> ResultToErrPrism<Res, Err>() {
-  return ResultToFailurePrism<Res, Err>().composeWithLens(FailureToErrLens<Res, Err>());
-}
-
-extension ResultPrismExtension<Whole, Res, Err> on Prism<Whole, Result<Res, Err>> {
-  Prism<Whole, Res> zoomIntoSuccess() {
-    return composeWithPrism(ResultToResPrism<Res, Err>());
-  }
-
-  Prism<Whole, Err> zoomIntoFailure() {
-    return composeWithPrism(ResultToErrPrism<Res, Err>());
-  }
-}
-
-extension ResultLensExtension<Whole, Res, Err> on Lens<Whole, Result<Res, Err>> {
-  Prism<Whole, Res> zoomIntoSuccess() {
-    return composeWithPrism(ResultToResPrism<Res, Err>());
-  }
-
-  Prism<Whole, Err> zoomIntoFailure() {
-    return composeWithPrism(ResultToErrPrism<Res, Err>());
-  }
 }

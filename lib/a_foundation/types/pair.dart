@@ -22,4 +22,8 @@ final class Pair<T1, T2> {
 
   @override
   int get hashCode => v1.hashCode ^ v2.hashCode;
+
+  Pair<T2, T1> swapped() {
+    return Pair(v2, v1);
+  }
 }

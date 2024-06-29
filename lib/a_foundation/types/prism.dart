@@ -2,58 +2,32 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/a_foundation/types/lens.dart';
 import 'package:obmin/a_foundation/types/optional.dart';
 
 final class Prism<Whole, Part> {
   final Optional<Part> Function(Whole whole) get;
-  final Whole Function(Whole whole, Part part) put;
+  final Whole Function(Part part) set;
 
   Prism({
     required this.get,
-    required this.put,
+    required this.set,
   });
 
   @override
   String toString() {
     return "$Prism<$Whole, $Part>";
   }
-}
 
-extension PrismCompose<Whole, Part> on Prism<Whole, Part> {
-  Prism<Whole, SubPart> composeWithPrism<SubPart>(Prism<Part, SubPart> prism) {
-    Optional<SubPart> resultGet(Whole whole) {
-      return get(whole).bind((value) {
-        return prism.get(value);
-      });
-    }
-
-    Whole resultPut(Whole whole, SubPart subPart) {
-      return get(whole).map((part) {
-        return prism.put(part, subPart);
-      }).map((part) {
-        return put(whole, part);
-      }).valueOr(whole);
-    }
-
-    return Prism(get: resultGet, put: resultPut);
-  }
-
-  Prism<Whole, SubPart> composeWithLens<SubPart>(Lens<Part, SubPart> lens) {
-    Optional<SubPart> resultGet(Whole whole) {
-      return get(whole).map((value) {
-        return lens.get(value);
-      });
-    }
-
-    Whole resultPut(Whole whole, SubPart subPart) {
-      return get(whole).map((part) {
-        return lens.put(part, subPart);
-      }).map((part) {
-        return put(whole, part);
-      }).valueOr(whole);
-    }
-
-    return Prism(get: resultGet, put: resultPut);
+  Prism<Whole, SubPart> then<SubPart>(Prism<Part, SubPart> prism) {
+    return Prism(
+      get: (whole) {
+        return get(whole).bind((value) {
+          return prism.get(value);
+        });
+      },
+      set: (subPart) {
+        return set(prism.set(subPart));
+      },
+    );
   }
 }
