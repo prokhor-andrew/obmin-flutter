@@ -66,13 +66,13 @@ Lens<EscapableRecursiveCall<Req, Res, Err>, Call<Req, Result<Res, Err>>> Escapab
 }
 
 extension EscapableRecursiveCallLensExtension<Whole, Req, Res, Err> on Lens<Whole, EscapableRecursiveCall<Req, Res, Err>> {
-  Lens<Whole, Call<Req, Result<Res, Err>>> zoomIntoCall() {
+  Lens<Whole, Call<Req, Result<Res, Err>>> zoomIntoResultCall() {
     return composeWithLens(EscapableRecursiveCallToResultCallLens<Req, Res, Err>());
   }
 }
 
 extension EscapableRecursiveCallPrismExtension<Whole, Req, Res, Err> on Prism<Whole, EscapableRecursiveCall<Req, Res, Err>> {
-  Prism<Whole, Call<Req, Result<Res, Err>>> zoomIntoCall() {
+  Prism<Whole, Call<Req, Result<Res, Err>>> zoomIntoResultCall() {
     return composeWithLens(EscapableRecursiveCallToResultCallLens<Req, Res, Err>());
   }
 }
