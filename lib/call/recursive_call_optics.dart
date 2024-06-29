@@ -7,7 +7,7 @@ import 'package:obmin/a_foundation/types/prism.dart';
 import 'package:obmin/call/call.dart';
 import 'package:obmin/call/recursive_call.dart';
 
-Lens<RecursiveCall<Req, Res>, Call<Req, Res>> RecursiveCallToCallLens<Req, Res>() {
+Lens<RecursiveCall<Req, Res>, Call<Req, Res>> RecursiveCallToResultCallLens<Req, Res>() {
   Call<Req, Res> get(RecursiveCall<Req, Res> rec) {
     switch (rec.call) {
       case Launched(req: final req):
@@ -35,8 +35,8 @@ Lens<RecursiveCall<Req, Res>, Call<Req, Res>> RecursiveCallToCallLens<Req, Res>(
         switch (res) {
           case Launched():
             switch (call) {
-              case Launched(req: final req):
-                return RecursiveCall(Returned(Launched(req)));
+              case Launched():
+                return whole; // guarded
               case Returned(res: final res):
                 return RecursiveCall(Returned(Returned(RecursiveCall(Launched(res)))));
             }
@@ -49,14 +49,64 @@ Lens<RecursiveCall<Req, Res>, Call<Req, Res>> RecursiveCallToCallLens<Req, Res>(
   return Lens(get: get, put: put);
 }
 
+Lens<RecursiveCall<Req, Res>, Call<Res, Req>> RecursiveCallToTriggerCallLens<Req, Res>() {
+  Call<Res, Req> get(RecursiveCall<Req, Res> rec) {
+    switch (rec.call) {
+      case Launched(req: final req):
+        return Launched(req);
+      case Returned(res: final res):
+        switch (res) {
+          case Launched(req: final req):
+            return Returned(req);
+          case Returned(res: final res):
+            return get(res);
+        }
+    }
+  }
+
+  RecursiveCall<Req, Res> put(RecursiveCall<Req, Res> whole, Call<Res, Req> call) {
+    switch (whole.call) {
+      case Launched():
+        switch (call) {
+          case Launched():
+            return whole; // guarded
+          case Returned(res: final res):
+            return RecursiveCall(Returned(Launched(res)));
+        }
+      case Returned(res: final res):
+        switch (res) {
+          case Launched():
+            switch (call) {
+              case Launched(req: final req):
+                return RecursiveCall(Returned(Returned(RecursiveCall(Launched(req)))));
+              case Returned():
+                return whole; // guarded
+            }
+          case Returned(res: final res):
+            return RecursiveCall(Returned(Returned(put(res, call))));
+        }
+    }
+  }
+
+  return Lens(get: get, put: put);
+}
+
 extension RecursiveCallLensExtension<Whole, Req, Res> on Lens<Whole, RecursiveCall<Req, Res>> {
-  Lens<Whole, Call<Req, Res>> zoomIntoCall() {
-    return composeWithLens(RecursiveCallToCallLens<Req, Res>());
+  Lens<Whole, Call<Req, Res>> zoomIntoResultCall() {
+    return composeWithLens(RecursiveCallToResultCallLens<Req, Res>());
+  }
+
+  Lens<Whole, Call<Res, Req>> zoomIntoTriggerCall() {
+    return composeWithLens(RecursiveCallToTriggerCallLens<Req, Res>());
   }
 }
 
 extension RecursiveCallPrismExtension<Whole, Req, Res> on Prism<Whole, RecursiveCall<Req, Res>> {
-  Prism<Whole, Call<Req, Res>> zoomIntoCall() {
-    return composeWithLens(RecursiveCallToCallLens<Req, Res>());
+  Prism<Whole, Call<Req, Res>> zoomIntoResultCall() {
+    return composeWithLens(RecursiveCallToResultCallLens<Req, Res>());
+  }
+
+  Prism<Whole, Call<Res, Req>> zoomIntoTriggerCall() {
+    return composeWithLens(RecursiveCallToTriggerCallLens<Req, Res>());
   }
 }
