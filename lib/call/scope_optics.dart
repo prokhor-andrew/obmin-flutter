@@ -22,7 +22,7 @@ Prism<Either<LeftScope, RightScope>, Call<Req, Result<Res, Err>>> ScopeToCallPri
         case Left<LeftScope, RightScope>(value: final value):
           final escapableRecursiveCall = leftScopeLens.get(value);
 
-          final call = EscapableRecursiveCallToResultCallLens<Req, (), Err>().get(escapableRecursiveCall);
+          final call = EscapableRecursiveCallToCallLens<Req, (), Err>().get(escapableRecursiveCall);
 
           switch (call) {
             case Launched<Req, Result<(), Err>>(req: final req):
@@ -49,7 +49,7 @@ Prism<Either<LeftScope, RightScope>, Call<Req, Result<Res, Err>>> ScopeToCallPri
 
               final currentRecursiveCall = leftScopeLens.get(value);
 
-              final newCurrentRecursiveCall = EscapableRecursiveCallToResultCallLens<Req, (), Err>().put(currentRecursiveCall, newPart);
+              final newCurrentRecursiveCall = EscapableRecursiveCallToCallLens<Req, (), Err>().put(currentRecursiveCall, newPart);
 
               return Left(leftScopeLens.put(value, newCurrentRecursiveCall));
             case Returned<Req, Result<Res, Err>>(res: final res):
@@ -62,7 +62,7 @@ Prism<Either<LeftScope, RightScope>, Call<Req, Result<Res, Err>>> ScopeToCallPri
 
                   final currentRecursiveCall = leftScopeLens.get(value);
 
-                  final newCurrentRecursiveCall = EscapableRecursiveCallToResultCallLens<Req, (), Err>().put(currentRecursiveCall, newPart);
+                  final newCurrentRecursiveCall = EscapableRecursiveCallToCallLens<Req, (), Err>().put(currentRecursiveCall, newPart);
 
                   return Left(leftScopeLens.put(value, newCurrentRecursiveCall));
               }
