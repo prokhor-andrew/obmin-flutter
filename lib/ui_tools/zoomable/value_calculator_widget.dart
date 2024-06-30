@@ -22,24 +22,4 @@ extension ValueCalculatorWidgetExtension<T> on Zoomable<T, T Function(T)> {
   }
 }
 
-class ValueCalculatorWidget<T> extends StatelessWidget {
-  final Zoomable<T, T Function(T)> zoomable;
-  final void Function(BuildContext context, Optional<T> oldState, T newState, void Function(T Function(T value) transition) update) calculate;
-  final Widget child;
-
-  const ValueCalculatorWidget(
-    this.zoomable, {
-    super.key,
-    required this.calculate,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return zoomable.calculator(
-      key: key,
-      calculate: calculate,
-      child: child,
-    );
-  }
-}
+typedef ValueCalculatorWidget<T> = CalculatorWidget<T, T Function(T)>;
