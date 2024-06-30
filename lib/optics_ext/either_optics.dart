@@ -12,7 +12,7 @@ extension EitherOptics on OpticsFactory {
   Prism<Either<L, R>, L> eitherToLeftPrism<L, R>() {
     return Prism(
       get: (whole) {
-        return whole.leftOrNone();
+        return whole.mapRightTo(());
       },
       set: Left.new,
     );
@@ -21,7 +21,7 @@ extension EitherOptics on OpticsFactory {
   Prism<Either<L, R>, R> eitherToRightPrism<L, R>() {
     return Prism(
       get: (whole) {
-        return whole.rightOrNone();
+        return whole.mapLeftTo(()).swapped();
       },
       set: Right.new,
     );

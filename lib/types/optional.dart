@@ -4,30 +4,25 @@
 
 import 'package:obmin/types/either.dart';
 
-sealed class Optional<T> {
+typedef Optional<T> = Either<T, ()>;
+typedef Some<T> = Left<T, ()>;
+typedef None<T> = Right<T, ()>;
+
+extension OptionalFunctions<T> on Optional<T> {
   Optional<R> map<R>(R Function(T value) function) {
-    return switch (this) {
-      None<T>() => None<R>(),
-      Some<T>(value: final value) => Some<R>(function(value)),
-    };
+    return mapLeft<R>(function);
   }
 
   Optional<R> mapTo<R>(R value) {
-    return map<R>((_) => value);
+    return mapLeftTo<R>(value);
   }
 
   Optional<R> bind<R>(Optional<R> Function(T value) function) {
-    return switch (this) {
-      None<T>() => None<R>(),
-      Some<T>(value: final value) => function(value),
-    };
+    return bindLeft<R>(function);
   }
 
   T valueOr(T replacement) {
-    return switch (this) {
-      None<T>() => replacement,
-      Some<T>(value: final value) => value,
-    };
+    return mapRightTo<T>(replacement).value;
   }
 
   T force() {
@@ -40,68 +35,12 @@ sealed class Optional<T> {
   }
 
   void executeIfSome(void Function(T value) function) {
-    switch (this) {
-      case None<T>():
-        break;
-      case Some<T>(value: final value):
-        function(value);
-        break;
-    }
+    executeIfLeft(function);
   }
 
   void executeIfNone(void Function() function) {
-    switch (this) {
-      case None<T>():
-        function();
-        break;
-      case Some<T>():
-        break;
-    }
+    executeIfRight((_) {
+      function();
+    });
   }
-
-  Either<(), T> asEitherNoneLeft() {
-    switch (this) {
-      case None<T>():
-        return Left(());
-      case Some<T>(value: final value):
-        return Right(value);
-    }
-  }
-
-  Either<T, ()> asEitherNoneRight() {
-    return asEitherNoneLeft().swapped();
-  }
-
-  @override
-  String toString() {
-    return switch (this) {
-      None<T>() => "None<$T>",
-      Some<T>(value: final value) => "Some<$T> value=$value",
-    };
-  }
-}
-
-final class None<T> extends Optional<T> {
-  @override
-  bool operator ==(Object other) {
-    return other is None<T>;
-  }
-
-  @override
-  int get hashCode => 0;
-}
-
-final class Some<T> extends Optional<T> {
-  final T value;
-
-  Some(this.value);
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Some<T> && other.value == value;
-  }
-
-  @override
-  int get hashCode => value.hashCode;
 }

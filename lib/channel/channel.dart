@@ -85,17 +85,17 @@ final class Channel<T> {
             if (cur.id == id) {
               if (rest.isEmpty) {
                 _state = _IdleChannelState();
-                cur.comp.complete(None());
+                cur.comp.complete(None(()));
               } else {
                 _state = _AwaitingForProducer(cur: rest[0], rest: rest.minusFirst());
-                cur.comp.complete(None());
+                cur.comp.complete(None(()));
               }
             } else {
               final newList = rest.where((item) {
                 if (item.id != id) {
                   return true;
                 } else {
-                  item.comp.complete(None());
+                  item.comp.complete(None(()));
                   return false;
                 }
               }).toList();

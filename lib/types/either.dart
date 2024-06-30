@@ -2,7 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/types/optional.dart';
+
 
 sealed class Either<L, R> {
   Either<LeftResult, R> mapLeft<LeftResult>(LeftResult Function(L left) function) {
@@ -43,19 +43,6 @@ sealed class Either<L, R> {
       case Right<L, R>(value: final value):
         return Left(value);
     }
-  }
-
-  Optional<L> leftOrNone() {
-    switch (this) {
-      case Left(value: final value):
-        return Some(value);
-      case Right():
-        return None();
-    }
-  }
-
-  Optional<R> rightOrNone() {
-    return swapped().leftOrNone();
   }
 
   void executeIfLeft(void Function(L value) function) {

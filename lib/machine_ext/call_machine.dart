@@ -20,7 +20,7 @@ extension CallMachine on MachineFactory {
         case Launched<Req, Res>(value: final req):
           return Some(silo(req));
         case Returned<Req, Res>():
-          return None();
+          return None(());
       }
     }).map((machine) {
       return machine.mapOutput((output) {
