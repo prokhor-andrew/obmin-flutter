@@ -11,13 +11,13 @@ extension EitherToLeftPrism on OpticsFactory {
   Lens<RecursiveCall<Req, Res>, Call<Req, Res>> recursiveCallToResultCallLens<Req, Res>() {
     Call<Req, Res> get(RecursiveCall<Req, Res> rec) {
       switch (rec.call) {
-        case Launched(req: final req):
+        case Launched(value: final req):
           return Returned(req);
-        case Returned(res: final res):
+        case Returned(value: final res):
           switch (res) {
-            case Launched(req: final req):
+            case Launched(value: final req):
               return Launched(req);
-            case Returned(res: final res):
+            case Returned(value: final res):
               return get(res);
           }
       }
@@ -27,21 +27,21 @@ extension EitherToLeftPrism on OpticsFactory {
       switch (whole.call) {
         case Launched():
           switch (call) {
-            case Launched(req: final req):
+            case Launched(value: final req):
               return RecursiveCall(Returned(Launched(req)));
             case Returned():
               return whole; // guarded, cause we cant go from "awaiting for trigger" into result state immediately
           }
-        case Returned(res: final res):
+        case Returned(value: final res):
           switch (res) {
             case Launched():
               switch (call) {
                 case Launched():
                   return whole; // guarded
-                case Returned(res: final res):
+                case Returned(value: final res):
                   return RecursiveCall(Returned(Returned(RecursiveCall(Launched(res)))));
               }
-            case Returned(res: final res):
+            case Returned(value: final res):
               return RecursiveCall(Returned(Returned(put(res, call))));
           }
       }
@@ -53,13 +53,13 @@ extension EitherToLeftPrism on OpticsFactory {
   Lens<RecursiveCall<Req, Res>, Call<Res, Req>> recursiveCallToTriggerCallLens<Req, Res>() {
     Call<Res, Req> get(RecursiveCall<Req, Res> rec) {
       switch (rec.call) {
-        case Launched(req: final req):
+        case Launched(value: final req):
           return Launched(req);
-        case Returned(res: final res):
+        case Returned(value: final res):
           switch (res) {
-            case Launched(req: final req):
+            case Launched(value: final req):
               return Returned(req);
-            case Returned(res: final res):
+            case Returned(value: final res):
               return get(res);
           }
       }
@@ -71,19 +71,19 @@ extension EitherToLeftPrism on OpticsFactory {
           switch (call) {
             case Launched():
               return whole; // guarded
-            case Returned(res: final res):
+            case Returned(value: final res):
               return RecursiveCall(Returned(Launched(res)));
           }
-        case Returned(res: final res):
+        case Returned(value: final res):
           switch (res) {
             case Launched():
               switch (call) {
-                case Launched(req: final req):
+                case Launched(value: final req):
                   return RecursiveCall(Returned(Returned(RecursiveCall(Launched(req)))));
                 case Returned():
                   return whole; // guarded
               }
-            case Returned(res: final res):
+            case Returned(value: final res):
               return RecursiveCall(Returned(Returned(put(res, call))));
           }
       }

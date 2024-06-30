@@ -12,17 +12,17 @@ extension EitherToLeftPrism on OpticsFactory {
   Lens<EscapableRecursiveCall<Req, Res, Err>, Call<Req, Result<Res, Err>>> escapableRecursiveCallToCallLens<Req, Res, Err>() {
     Call<Req, Result<Res, Err>> get(EscapableRecursiveCall<Req, Res, Err> rec) {
       switch (rec.call) {
-        case Launched(req: final req):
+        case Launched(value: final req):
           return Returned(Failure(req));
-        case Returned(res: final res):
+        case Returned(value: final res):
           switch (res) {
-            case Launched(req: final req):
+            case Launched(value: final req):
               return Launched(req);
-            case Returned(res: final res):
+            case Returned(value: final res):
               switch (res) {
-                case Success(result: final result):
+                case Success(value: final result):
                   return Returned(Success(result));
-                case Failure(error: final error):
+                case Failure(value: final error):
                   return get(error);
               }
           }
@@ -33,30 +33,30 @@ extension EitherToLeftPrism on OpticsFactory {
       switch (whole.call) {
         case Launched<Err, Call<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>>():
           switch (call) {
-            case Launched<Req, Result<Res, Err>>(req: final req):
+            case Launched<Req, Result<Res, Err>>(value: final req):
               return EscapableRecursiveCall(Returned(Launched(req)));
             case Returned<Req, Result<Res, Err>>():
               return whole; // guarded, cause we cant go from "awaiting for trigger" into result state immediately
           }
-        case Returned<Err, Call<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>>(res: final res):
+        case Returned<Err, Call<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>>(value: final res):
           switch (res) {
             case Launched<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>():
               switch (call) {
                 case Launched<Req, Result<Res, Err>>():
                   return whole;
-                case Returned<Req, Result<Res, Err>>(res: final res):
+                case Returned<Req, Result<Res, Err>>(value: final res):
                   switch (res) {
-                    case Success<Res, Err>(result: final result):
+                    case Success<Res, Err>(value: final result):
                       return EscapableRecursiveCall(Returned(Returned(Success(result))));
-                    case Failure<Res, Err>(error: final error):
+                    case Failure<Res, Err>(value: final error):
                       return EscapableRecursiveCall(Returned(Returned(Failure(EscapableRecursiveCall(Launched(error))))));
                   }
               }
-            case Returned<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>(res: final res):
+            case Returned<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>(value: final res):
               switch (res) {
                 case Success<Res, EscapableRecursiveCall<Req, Res, Err>>():
                   return whole; // guarded, we cant reach any other state when we reached success cause we "escaped"
-                case Failure<Res, EscapableRecursiveCall<Req, Res, Err>>(error: final error):
+                case Failure<Res, EscapableRecursiveCall<Req, Res, Err>>(value: final error):
                   return EscapableRecursiveCall(Returned(Returned(Failure(put(error, call)))));
               }
           }

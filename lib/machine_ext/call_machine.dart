@@ -17,7 +17,7 @@ extension CallMachine on MachineFactory {
   }) {
     return affine.get(state).bind<Silo<Res>>((value) {
       switch (value) {
-        case Launched<Req, Res>(req: final req):
+        case Launched<Req, Res>(value: final req):
           return Some(silo(req));
         case Returned<Req, Res>():
           return None();
