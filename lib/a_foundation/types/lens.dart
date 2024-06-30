@@ -2,6 +2,8 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/a_foundation/types/iso.dart';
+
 final class Lens<Whole, Part> {
   final Part Function(Whole whole) get;
   final Whole Function(Whole whole, Part part) put;
@@ -23,6 +25,19 @@ final class Lens<Whole, Part> {
       },
       put: (whole, subPart) {
         return put(whole, lens.put(get(whole), subPart));
+      },
+    );
+  }
+}
+
+extension IsoAsLens<T1, T2> on Iso<T1, T2> {
+  Lens<T1, T2> asLens() {
+    return Lens(
+      get: (whole) {
+        return to(whole);
+      },
+      put: (_, part) {
+        return from(part);
       },
     );
   }
