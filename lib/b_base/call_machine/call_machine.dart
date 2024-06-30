@@ -30,4 +30,37 @@ extension CallMachine on MachineFactory {
       });
     });
   }
+
+  Set<Silo<State Function(State)>> Function(List<ChamberConfig<State, Req, Res>>) calls<State, Req, Res>(State state) {
+    return (list) {
+      final Set<Silo<State Function(State)>> result = {};
+
+      for (final config in list) {
+        final optionalMachine = MachineFactory.shared.call(
+          state: state,
+          affine: config.affine,
+          machine: config.machine,
+        );
+        switch (optionalMachine) {
+          case None<Silo<State Function(State)>>():
+            break;
+          case Some<Silo<State Function(State)>>(value: final value):
+            result.add(value);
+            break;
+        }
+      }
+
+      return result;
+    };
+  }
+}
+
+final class ChamberConfig<Whole, Req, Res> {
+  final Affine<Whole, Call<Req, Res>> affine;
+  final Silo<Res> Function(Req req) machine;
+
+  ChamberConfig({
+    required this.affine,
+    required this.machine,
+  });
 }
