@@ -2,11 +2,11 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/a_foundation/types/optics/iso.dart';
-import 'package:obmin/a_foundation/types/optics/optics_factory.dart';
-import 'package:obmin/a_foundation/types/optional.dart';
-import 'package:obmin/a_foundation/types/optics/prism.dart';
 import 'package:obmin/call/result.dart';
+import 'package:obmin/optics/iso.dart';
+import 'package:obmin/optics/optics_factory.dart';
+import 'package:obmin/optics/prism.dart';
+import 'package:obmin/types/optional.dart';
 
 extension EitherToLeftPrism on OpticsFactory {
   Prism<Result<Res, Err>, Success<Res, Err>> resultToSuccessPrism<Res, Err>() {

@@ -2,8 +2,9 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/a_foundation/types/either.dart';
-import 'package:obmin/a_foundation/types/optional.dart';
+
+import 'package:obmin/types/either.dart';
+import 'package:obmin/types/optional.dart';
 
 sealed class Result<Res, Err> {
   Result<NewRes, Err> mapRes<NewRes>(NewRes Function(Res res) mapper) {
