@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/a_foundation/types/either.dart';
-import 'package:obmin/a_foundation/types/iso.dart';
-import 'package:obmin/a_foundation/types/optics_factory.dart';
-import 'package:obmin/a_foundation/types/prism.dart';
+import 'package:obmin/a_foundation/types/optics/iso.dart';
+import 'package:obmin/a_foundation/types/optics/optics_factory.dart';
+import 'package:obmin/a_foundation/types/optics/prism.dart';
 
 extension EitherToLeftPrism on OpticsFactory {
   Prism<Either<L, R>, L> eitherToLeftPrism<L, R>() {

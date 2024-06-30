@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/a_foundation/machine_factory.dart';
-import 'package:obmin/a_foundation/types/affine.dart';
+import 'package:obmin/a_foundation/types/optics/affine.dart';
 import 'package:obmin/a_foundation/types/optional.dart';
 import 'package:obmin/b_base/chamber_machine/silo_machine.dart';
 import 'package:obmin/b_base/map_machine/map_output_machine.dart';

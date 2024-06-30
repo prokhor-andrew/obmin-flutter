@@ -2,10 +2,10 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/a_foundation/types/iso.dart';
-import 'package:obmin/a_foundation/types/lens.dart';
+import 'package:obmin/a_foundation/types/optics/iso.dart';
+import 'package:obmin/a_foundation/types/optics/lens.dart';
 import 'package:obmin/a_foundation/types/optional.dart';
-import 'package:obmin/a_foundation/types/prism.dart';
+import 'package:obmin/a_foundation/types/optics/prism.dart';
 
 final class Affine<Whole, Part> {
   final Optional<Part> Function(Whole) get;

@@ -2,9 +2,9 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/a_foundation/types/iso.dart';
-import 'package:obmin/a_foundation/types/lens.dart';
-import 'package:obmin/a_foundation/types/optics_factory.dart';
+import 'package:obmin/a_foundation/types/optics/iso.dart';
+import 'package:obmin/a_foundation/types/optics/lens.dart';
+import 'package:obmin/a_foundation/types/optics/optics_factory.dart';
 import 'package:obmin/a_foundation/types/pair.dart';
 
 extension EitherToLeftPrism on OpticsFactory {
