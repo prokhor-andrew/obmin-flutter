@@ -15,7 +15,7 @@ class StrictTextField extends StatefulWidget {
   final String hint;
 
   final bool autofocus;
-  final void Function(String) onChanged;
+  final void Function(String text) onChanged;
 
   final IconButton? action;
 
