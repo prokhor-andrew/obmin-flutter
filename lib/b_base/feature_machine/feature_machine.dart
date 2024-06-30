@@ -18,7 +18,7 @@ extension FeatureMachine on MachineFactory {
     ChannelBufferStrategy<ExtEffect>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<IntTrigger, ExtTrigger>>? internalBufferStrategy,
   }) {
-    return MachineFactory.shared.create<_FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>, ExtTrigger, ExtEffect>(
+    return MachineFactory.shared.basic<_FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>, ExtTrigger, ExtEffect>(
       id: id,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,

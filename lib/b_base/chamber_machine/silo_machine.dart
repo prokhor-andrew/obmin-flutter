@@ -16,7 +16,7 @@ extension SiloMachine on MachineFactory {
     required void Function(Object object) onStop,
     ChannelBufferStrategy<T>? bufferStrategy,
   }) {
-    return MachineFactory.shared.create<_Holder<Object>, (), T>(
+    return MachineFactory.shared.basic<_Holder<Object>, (), T>(
       id: id,
       onCreate: (id) {
         return _Holder<Object>();

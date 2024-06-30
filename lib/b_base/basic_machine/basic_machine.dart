@@ -7,7 +7,7 @@ import 'package:obmin/a_foundation/machine.dart';
 import 'package:obmin/a_foundation/machine_factory.dart';
 
 extension BasicMachine on MachineFactory {
-  Machine<Input, Output> create<Object, Input, Output>({
+  Machine<Input, Output> basic<Object, Input, Output>({
     required String id,
     required Object Function(String id) onCreate,
     required Future<void> Function(Object object, ChannelTask<bool> Function(Output output)? callback) onChange,

@@ -39,7 +39,7 @@ class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidget<Doma
         return coreScene;
       },
       machines: (state) {
-        final Machine<Input, Output> uiMachine = MachineFactory.shared.create<(), Input, Output>(
+        final Machine<Input, Output> uiMachine = MachineFactory.shared.basic<(), Input, Output>(
           id: widget.uiMachine._id,
           onCreate: (id) {
             return ();
