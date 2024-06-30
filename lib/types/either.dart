@@ -5,13 +5,23 @@
 
 
 sealed class Either<L, R> {
+  Either<LeftResult, R> bindLeft<LeftResult>(Either<LeftResult, R> Function(L left) function) {
+    return switch (this) {
+      Left<L, R>(value: final value) => function(value),
+      Right<L, R>(value: final value) => Right(value),
+    };
+  }
+
+  Either<L, RightResult> bindRight<RightResult>(Either<L, RightResult> Function(R right) function) {
+    return swapped().bindLeft<RightResult>((value) {
+      return function(value).swapped();
+    }).swapped();
+  }
+
   Either<LeftResult, R> mapLeft<LeftResult>(LeftResult Function(L left) function) {
-    switch (this) {
-      case Left<L, R>(value: var value):
-        return Left<LeftResult, R>(function(value));
-      case Right<L, R>(value: var value):
-        return Right<LeftResult, R>(value);
-    }
+    return bindLeft<LeftResult>((value) {
+      return Left(function(value));
+    });
   }
 
   Either<LeftResult, R> mapLeftTo<LeftResult>(LeftResult value) => mapLeft((_) => value);
@@ -21,20 +31,6 @@ sealed class Either<L, R> {
   }
 
   Either<L, RightResult> mapRightTo<RightResult>(RightResult value) => mapRight((_) => value);
-
-  Either<LeftResult, R> bindLeft<LeftResult>(Either<LeftResult, R> Function(L left) function) {
-    return switch (this) {
-      Left<L, R>(value: final value) => function(value),
-      Right<L, R>(value: final value) => Right(value),
-    };
-  }
-
-  Either<L, RightResult> bindRight<RightResult>(Either<L, RightResult> Function(R right) function) {
-    return switch (this) {
-      Left<L, R>(value: final value) => Left(value),
-      Right<L, R>(value: final value) => function(value),
-    };
-  }
 
   Either<R, L> swapped() {
     switch (this) {
