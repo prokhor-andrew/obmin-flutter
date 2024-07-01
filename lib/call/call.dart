@@ -57,11 +57,9 @@ final class Returned<Req, Res> extends Call<Req, Res> {
 
 extension EitherToCall<Req, Res> on Either<Req, Res> {
   Call<Req, Res> asCall() {
-    switch (this) {
-      case Left(value: final value):
-        return Launched(value);
-      case Right(value: final value):
-        return Returned(value);
-    }
+    return fold<Call<Req, Res>>(
+      Launched.new,
+      Returned.new,
+    );
   }
 }

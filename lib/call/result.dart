@@ -57,11 +57,9 @@ final class Failure<Res, Err> extends Result<Res, Err> {
 
 extension EitherToResult<Res, Err> on Either<Res, Err> {
   Result<Res, Err> asResult() {
-    switch (this) {
-      case Left(value: final value):
-        return Success(value);
-      case Right(value: final value):
-        return Failure(value);
-    }
+    return fold<Result<Res, Err>>(
+      Success.new,
+      Failure.new,
+    );
   }
 }

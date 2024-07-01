@@ -63,6 +63,13 @@ sealed class Either<L, R> {
     });
   }
 
+  T fold<T>(T Function(L left) ifLeft, T Function(R right) ifRight) {
+    return switch (this) {
+      Left<L, R>(value: final value) => ifLeft(value),
+      Right<L, R>(value: final value) => ifRight(value),
+    };
+  }
+
   @override
   String toString() {
     switch (this) {
@@ -105,16 +112,17 @@ final class Right<L, R> extends Either<L, R> {
 }
 
 extension EitherValueWhenBoth<T> on Either<T, T> {
-  T get value => switch (this) {
-        Left<T, T>(value: final value) || Right<T, T>(value: final value) => value,
-      };
+  T get value => fold<T>(
+        (val) => val,
+        (val) => val,
+      );
 }
 
 extension EitherValueWhenLeftNever<T> on Either<Never, T> {
-  T get value => switch (this) {
-        Left<Never, T>() => throw "Unreachable code is reached", // this code cannot be reached
-        Right<Never, T>(value: final value) => value,
-      };
+  T get value => fold<T>(
+        (never) => throw "Unreachable code is reached", // this code cannot be reached
+        (val) => val,
+      );
 }
 
 extension EitherValueWhenRightNever<T> on Either<T, Never> {

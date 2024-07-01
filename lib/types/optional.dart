@@ -21,17 +21,28 @@ sealed class Optional<T> {
     return map<R>((_) => value);
   }
 
+  V fold<V>(
+    V Function(T value) ifSome,
+    V Function() ifNone,
+  ) {
+    return switch (this) {
+      Some<T>(value: final value) => ifSome(value),
+      None<T>() => ifNone(),
+    };
+  }
+
   T valueOr(T replacement) {
-    return asEither().mapRightTo<T>(replacement).value;
+    return fold<T>(
+      (val) => val,
+      () => replacement,
+    );
   }
 
   T force() {
-    switch (this) {
-      case None<T>():
-        throw "None<$T> is being forcefully unwrapped";
-      case Some<T>(value: final value):
-        return value;
-    }
+    return fold<T>(
+      (val) => val,
+      () => throw "None<$T> is being forcefully unwrapped",
+    );
   }
 
   void executeIfSome(void Function(T value) function) {
