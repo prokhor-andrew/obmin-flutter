@@ -6,10 +6,7 @@ import 'package:obmin/types/product.dart';
 
 sealed class Either<L, R> {
   Either<LeftResult, R> bindLeft<LeftResult>(Either<LeftResult, R> Function(L left) function) {
-    return switch (this) {
-      Left<L, R>(value: final value) => function(value),
-      Right<L, R>(value: final value) => Right(value),
-    };
+    return fold<Either<LeftResult, R>>(function, Right.new);
   }
 
   Either<L, RightResult> bindRight<RightResult>(Either<L, RightResult> Function(R right) function) {
