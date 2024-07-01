@@ -2,7 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-
+import 'package:obmin/types/product.dart';
 
 sealed class Either<L, R> {
   Either<LeftResult, R> bindLeft<LeftResult>(Either<LeftResult, R> Function(L left) function) {
@@ -53,6 +53,14 @@ sealed class Either<L, R> {
 
   void executeIfRight(void Function(R value) function) {
     swapped().executeIfLeft(function);
+  }
+
+  Either<Product<L, T>, Product<R, T>> attach<T>(T value) {
+    return mapLeft((left) {
+      return Product(left, value);
+    }).mapRight((right) {
+      return Product(right, value);
+    });
   }
 
   @override
