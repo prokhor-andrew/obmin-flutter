@@ -4,6 +4,64 @@
 
 import 'package:obmin/types/either.dart';
 
-typedef Result<Res, Err> = Either<Res, Err>;
-typedef Success<Res, Err> = Left<Res, Err>;
-typedef Failure<Res, Err> = Right<Res, Err>;
+sealed class Result<Res, Err> {
+  Either<Res, Err> asEither() {
+    switch (this) {
+      case Success<Res, Err>(value: final value):
+        return Left(value);
+      case Failure<Res, Err>(value: final value):
+        return Right(value);
+    }
+  }
+
+  @override
+  String toString() {
+    switch (this) {
+      case Success<Res, Err>(value: var value):
+        return "$Success<$Res, $Err> { value=$value }";
+      case Failure<Res, Err>(value: var value):
+        return "$Failure<$Res, $Err> { value=$value }";
+    }
+  }
+}
+
+final class Success<Res, Err> extends Result<Res, Err> {
+  final Res value;
+
+  Success(this.value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Success<Res, Err> && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
+}
+
+final class Failure<Res, Err> extends Result<Res, Err> {
+  final Err value;
+
+  Failure(this.value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Failure<Res, Err> && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
+}
+
+extension EitherToResult<Res, Err> on Either<Res, Err> {
+  Result<Res, Err> asResult() {
+    switch (this) {
+      case Left(value: final value):
+        return Success(value);
+      case Right(value: final value):
+        return Failure(value);
+    }
+  }
+}
