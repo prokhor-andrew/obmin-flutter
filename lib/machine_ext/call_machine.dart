@@ -15,13 +15,8 @@ extension CallMachine on MachineFactory {
     required Affine<Whole, Call<Req, Res>> affine,
     required Silo<Res> Function(Req req) silo,
   }) {
-    return affine.get(state).bind<Silo<Res>>((value) {
-      switch (value) {
-        case Launched<Req, Res>(value: final req):
-          return Some(silo(req));
-        case Returned<Req, Res>():
-          return None();
-      }
+    return affine.get(state).bind<Silo<Res>>((call) {
+      return call.asEither().mapRightTo(()).asOptional().map(silo);
     }).map((machine) {
       return machine.mapOutput((output) {
         return (Whole whole) {
