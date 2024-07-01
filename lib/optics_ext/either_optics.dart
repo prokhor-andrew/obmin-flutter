@@ -7,12 +7,13 @@ import 'package:obmin/types/either.dart';
 import 'package:obmin/optics/iso.dart';
 import 'package:obmin/optics/optics_factory.dart';
 import 'package:obmin/optics/prism.dart';
+import 'package:obmin/types/optional.dart';
 
 extension EitherOptics on OpticsFactory {
   Prism<Either<L, R>, L> eitherToLeftPrism<L, R>() {
     return Prism(
       get: (whole) {
-        return whole.mapRightTo(());
+        return whole.mapRightTo(()).asOptional();
       },
       set: Left.new,
     );
@@ -21,7 +22,7 @@ extension EitherOptics on OpticsFactory {
   Prism<Either<L, R>, R> eitherToRightPrism<L, R>() {
     return Prism(
       get: (whole) {
-        return whole.mapLeftTo(()).swapped();
+        return whole.mapLeftTo(()).swapped().asOptional();
       },
       set: Right.new,
     );

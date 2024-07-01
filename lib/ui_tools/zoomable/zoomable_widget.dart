@@ -123,7 +123,7 @@ class ConsumerZoomableWidget<S, Input, Output> extends StatefulWidget {
 }
 
 class _ConsumerZoomableWidgetState<S, Input, Output> extends State<ConsumerZoomableWidget<S, Input, Output>> {
-  Optional<S> _state = None(());
+  Optional<S> _state = None();
 
   @override
   void didChangeDependencies() {
