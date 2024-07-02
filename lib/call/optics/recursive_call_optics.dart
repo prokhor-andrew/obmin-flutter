@@ -4,91 +4,96 @@
 
 import 'package:obmin/call/call.dart';
 import 'package:obmin/call/recursive_call.dart';
-import 'package:obmin/optics/lens.dart';
+import 'package:obmin/optics/affine.dart';
 import 'package:obmin/optics/optics_factory.dart';
+import 'package:obmin/types/optional.dart';
 
 extension EitherToLeftPrism on OpticsFactory {
-  Lens<RecursiveCall<Req, Res>, Call<Req, Res>> recursiveCallToResultCallLens<Req, Res>() {
-    Call<Req, Res> get(RecursiveCall<Req, Res> rec) {
+  Affine<RecursiveCall<Req, Res>, Call<Req, Res>> recursiveCallToResultCallLens<Req, Res>() {
+    Optional<Call<Req, Res>> get(RecursiveCall<Req, Res> rec) {
       switch (rec.call) {
         case Launched(value: final req):
-          return Returned(req);
+          return Some(Returned(req));
         case Returned(value: final res):
           switch (res) {
             case Launched(value: final req):
-              return Launched(req);
+              return Some(Launched(req));
             case Returned(value: final res):
               return get(res);
           }
       }
     }
 
-    RecursiveCall<Req, Res> put(RecursiveCall<Req, Res> whole, Call<Req, Res> call) {
+    Optional<RecursiveCall<Req, Res>> put(RecursiveCall<Req, Res> whole, Call<Req, Res> call) {
       switch (whole.call) {
         case Launched():
           switch (call) {
             case Launched(value: final req):
-              return RecursiveCall(Returned(Launched(req)));
+              return Some(RecursiveCall(Returned(Launched(req))));
             case Returned():
-              return whole; // guarded, cause we cant go from "awaiting for trigger" into result state immediately
+              return None();
           }
         case Returned(value: final res):
           switch (res) {
             case Launched():
               switch (call) {
                 case Launched():
-                  return whole; // guarded
+                  return None();
                 case Returned(value: final res):
-                  return RecursiveCall(Returned(Returned(RecursiveCall(Launched(res)))));
+                  return Some(RecursiveCall(Returned(Returned(RecursiveCall(Launched(res))))));
               }
             case Returned(value: final res):
-              return RecursiveCall(Returned(Returned(put(res, call))));
+              return put(res, call).map((value) {
+                return RecursiveCall(Returned(Returned(value)));
+              });
           }
       }
     }
 
-    return Lens(get: get, put: put);
+    return Affine(get: get, put: put);
   }
 
-  Lens<RecursiveCall<Req, Res>, Call<Res, Req>> recursiveCallToTriggerCallLens<Req, Res>() {
-    Call<Res, Req> get(RecursiveCall<Req, Res> rec) {
+  Affine<RecursiveCall<Req, Res>, Call<Res, Req>> recursiveCallToTriggerCallLens<Req, Res>() {
+    Optional<Call<Res, Req>> get(RecursiveCall<Req, Res> rec) {
       switch (rec.call) {
         case Launched(value: final req):
-          return Launched(req);
+          return Some(Launched(req));
         case Returned(value: final res):
           switch (res) {
             case Launched(value: final req):
-              return Returned(req);
+              return Some(Returned(req));
             case Returned(value: final res):
               return get(res);
           }
       }
     }
 
-    RecursiveCall<Req, Res> put(RecursiveCall<Req, Res> whole, Call<Res, Req> call) {
+    Optional<RecursiveCall<Req, Res>> put(RecursiveCall<Req, Res> whole, Call<Res, Req> call) {
       switch (whole.call) {
         case Launched():
           switch (call) {
             case Launched():
-              return whole; // guarded
+              return None();
             case Returned(value: final res):
-              return RecursiveCall(Returned(Launched(res)));
+              return Some(RecursiveCall(Returned(Launched(res))));
           }
         case Returned(value: final res):
           switch (res) {
             case Launched():
               switch (call) {
                 case Launched(value: final req):
-                  return RecursiveCall(Returned(Returned(RecursiveCall(Launched(req)))));
+                  return Some(RecursiveCall(Returned(Returned(RecursiveCall(Launched(req))))));
                 case Returned():
-                  return whole; // guarded
+                  return None();
               }
             case Returned(value: final res):
-              return RecursiveCall(Returned(Returned(put(res, call))));
+              return put(res, call).map((value) {
+                return RecursiveCall(Returned(Returned(value)));
+              });
           }
       }
     }
 
-    return Lens(get: get, put: put);
+    return Affine(get: get, put: put);
   }
 }
