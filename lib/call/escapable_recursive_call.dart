@@ -9,4 +9,18 @@ final class EscapableRecursiveCall<Req, Res, Err> {
   final Call<Err, Call<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>> call;
 
   EscapableRecursiveCall(this.call);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is EscapableRecursiveCall<Req, Res, Err> && other.call == call;
+  }
+
+  @override
+  int get hashCode => call.hashCode;
+
+  @override
+  String toString() {
+    return "EscapableRecursiveCall<$Req, $Res, $Err> { call=$call }";
+  }
 }
