@@ -58,17 +58,17 @@ extension ChamberMachine on MachineFactory {
     );
   }
 
-  Machine<State, State Function(State)> chamberX<State, Helper>({
+  Machine<State, Optional<State> Function(State)> chamberX<State, Helper>({
     required String id,
     required Future<Helper> Function() onCreateHelper,
     required Future<void> Function(Helper helper) onDestroyHelper,
     required State initial,
-    required Set<Silo<State Function(State)>> Function(Helper helper, State state) map,
+    required Set<Silo<Optional<State> Function(State)>> Function(Helper helper, State state) map,
     ChannelBufferStrategy<State>? inputBufferStrategy,
-    ChannelBufferStrategy<State Function(State)>? outputBufferStrategy,
-    ChannelBufferStrategy<FeatureEvent<State Function(State), State>>? internalBufferStrategy,
+    ChannelBufferStrategy<Optional<State> Function(State)>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<Optional<State> Function(State), State>>? internalBufferStrategy,
   }) {
-    return MachineFactory.shared.chamber<State, State Function(State), Helper>(
+    return MachineFactory.shared.chamber<State, Optional<State> Function(State), Helper>(
       id: id,
       onCreateHelper: onCreateHelper,
       onDestroyHelper: onDestroyHelper,
@@ -82,15 +82,15 @@ extension ChamberMachine on MachineFactory {
     );
   }
 
-  Machine<State, State Function(State)> chamberY<State, Helper>({
+  Machine<State, Optional<State> Function(State)> chamberY<State, Helper>({
     required String id,
     required Future<Helper> Function() onCreateHelper,
     required Future<void> Function(Helper helper) onDestroyHelper,
     required State initial,
     required List<ChamberConfig<State>> Function(Helper helper) map,
     ChannelBufferStrategy<State>? inputBufferStrategy,
-    ChannelBufferStrategy<State Function(State)>? outputBufferStrategy,
-    ChannelBufferStrategy<FeatureEvent<State Function(State), State>>? internalBufferStrategy,
+    ChannelBufferStrategy<Optional<State> Function(State)>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<Optional<State> Function(State), State>>? internalBufferStrategy,
   }) {
     return chamberX<State, Helper>(
       id: id,
@@ -98,13 +98,13 @@ extension ChamberMachine on MachineFactory {
       onDestroyHelper: onDestroyHelper,
       initial: initial,
       map: (helper, state) {
-        final Set<Silo<State Function(State)>> result = {};
+        final Set<Silo<Optional<State> Function(State)>> result = {};
 
         for (final config in map(helper)) {
           switch (config._silo(state)) {
-            case None<Silo<State Function(State)>>():
+            case None<Silo<Optional<State> Function(State)>>():
               break;
-            case Some<Silo<State Function(State)>>(value: final value):
+            case Some<Silo<Optional<State> Function(State)>>(value: final value):
               result.add(value);
               break;
           }
@@ -117,7 +117,7 @@ extension ChamberMachine on MachineFactory {
 }
 
 final class ChamberConfig<Whole> {
-  final Optional<Silo<Whole Function(Whole)>> Function(Whole) _silo;
+  final Optional<Silo<Optional<Whole> Function(Whole)>> Function(Whole) _silo;
 
   ChamberConfig._(this._silo);
 

@@ -96,11 +96,13 @@ final class Zoomable<Input, Output> {
   }
 }
 
-extension ValueZoomable<T> on Zoomable<T, T Function(T value)> {
-  Zoomable<V, V Function(V)> zoom<V>(Lens<T, V> lens) {
+extension ValueZoomable<T> on Zoomable<T, Optional<T> Function(T value)> {
+  Zoomable<V, Optional<V> Function(V)> zoom<V>(Lens<T, V> lens) {
     return mapInput(lens.get).mapOutput((update) {
       return (whole) {
-        return lens.put(whole, update(lens.get(whole)));
+        return update(lens.get(whole)).map((value) {
+          return lens.put(whole, value);
+        });
       };
     });
   }

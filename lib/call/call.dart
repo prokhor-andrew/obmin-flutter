@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/types/either.dart';
+import 'package:obmin/types/optional.dart';
 import 'package:obmin/types/product.dart';
 
 sealed class Call<Req, Res> {
@@ -15,8 +16,8 @@ sealed class Call<Req, Res> {
     }
   }
 
-  Call<Product<Req, void Function(Req Function(Req))>, Product<Res, void Function(Res Function(Res))>> attachUpdate(
-    void Function(Call<Req, Res> Function(Call<Req, Res> value) transition) update,
+  Call<Product<Req, void Function(Optional<Req> Function(Req))>, Product<Res, void Function(Optional<Res> Function(Res))>> attachUpdate(
+    void Function(Optional<Call<Req, Res>> Function(Call<Req, Res> value) transition) update,
   ) {
     switch (this) {
       case Launched<Req, Res>(value: final value):
@@ -25,7 +26,12 @@ sealed class Call<Req, Res> {
             value,
             (transition) {
               update((call) {
-                return call.asEither().mapLeft(transition).asCall();
+                switch (call) {
+                  case Launched<Req, Res>(value: final value):
+                    return transition(value).map(Launched.new);
+                  case Returned<Req, Res>(value: final value):
+                    return Some(Returned(value));
+                }
               });
             },
           ),
@@ -36,7 +42,12 @@ sealed class Call<Req, Res> {
             value,
             (transition) {
               update((call) {
-                return call.asEither().mapRight(transition).asCall();
+                switch (call) {
+                  case Launched<Req, Res>(value: final value):
+                    return Some(Launched(value));
+                  case Returned<Req, Res>(value: final value):
+                    return transition(value).map(Returned.new);
+                }
               });
             },
           ),

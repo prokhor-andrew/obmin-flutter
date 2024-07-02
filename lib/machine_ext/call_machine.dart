@@ -10,7 +10,7 @@ import 'package:obmin/optics/affine.dart';
 import 'package:obmin/types/optional.dart';
 
 extension CallMachine on MachineFactory {
-  Optional<Silo<Whole Function(Whole)>> call<Whole, Req, Res>({
+  Optional<Silo<Optional<Whole> Function(Whole)>> call<Whole, Req, Res>({
     required Whole state,
     required Affine<Whole, Call<Req, Res>> affine,
     required Silo<Res> Function(Req req) silo,
@@ -20,7 +20,7 @@ extension CallMachine on MachineFactory {
     }).map((machine) {
       return machine.mapOutput((output) {
         return (Whole whole) {
-          return affine.put(whole, Returned(output)).valueOr(whole);
+          return affine.put(whole, Returned(output));
         };
       });
     });

@@ -30,14 +30,6 @@ final class ChannelTask<T> {
     );
   }
 
-  ChannelTask<R> map<R>(Future<R> Function(Future<T> future) function) {
-    return ChannelTask(
-      id: id,
-      future: function(future),
-      cancel: cancel,
-    );
-  }
-
   @override
   String toString() {
     return "$ChannelTask<$T> id=$id";
