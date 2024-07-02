@@ -9,7 +9,7 @@ import 'package:obmin/optics/optics_factory.dart';
 import 'package:obmin/types/optional.dart';
 
 extension RecursiveCallOptics on OpticsFactory {
-  Affine<RecursiveCall<Req, Res>, Call<Req, Res>> recursiveCallToResultCallLens<Req, Res>() {
+  Affine<RecursiveCall<Req, Res>, Call<Req, Res>> recursiveCallToResultCallAffine<Req, Res>() {
     Optional<Call<Req, Res>> get(RecursiveCall<Req, Res> rec) {
       switch (rec.call) {
         case Launched(value: final req):
@@ -53,7 +53,7 @@ extension RecursiveCallOptics on OpticsFactory {
     return Affine(get: get, put: put);
   }
 
-  Affine<RecursiveCall<Req, Res>, Call<Res, Req>> recursiveCallToTriggerCallLens<Req, Res>() {
+  Affine<RecursiveCall<Req, Res>, Call<Res, Req>> recursiveCallToTriggerCallAffine<Req, Res>() {
     Optional<Call<Res, Req>> get(RecursiveCall<Req, Res> rec) {
       switch (rec.call) {
         case Launched(value: final req):
