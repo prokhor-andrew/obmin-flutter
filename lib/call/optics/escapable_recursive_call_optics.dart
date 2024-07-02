@@ -5,23 +5,24 @@
 import 'package:obmin/call/call.dart';
 import 'package:obmin/call/escapable_recursive_call.dart';
 import 'package:obmin/call/result.dart';
-import 'package:obmin/optics/lens.dart';
+import 'package:obmin/optics/affine.dart';
 import 'package:obmin/optics/optics_factory.dart';
+import 'package:obmin/types/optional.dart';
 
-extension EitherToLeftPrism on OpticsFactory {
-  Lens<EscapableRecursiveCall<Req, Res, Err>, Call<Req, Result<Res, Err>>> escapableRecursiveCallToCallLens<Req, Res, Err>() {
-    Call<Req, Result<Res, Err>> get(EscapableRecursiveCall<Req, Res, Err> rec) {
+extension EscapableRecursiveCallOptics on OpticsFactory {
+  Affine<EscapableRecursiveCall<Req, Res, Err>, Call<Req, Result<Res, Err>>> escapableRecursiveCallToCallLens<Req, Res, Err>() {
+    Optional<Call<Req, Result<Res, Err>>> get(EscapableRecursiveCall<Req, Res, Err> rec) {
       switch (rec.call) {
         case Launched(value: final req):
-          return Returned(Failure(req));
+          return Some(Returned(Failure(req)));
         case Returned(value: final res):
           switch (res) {
             case Launched(value: final req):
-              return Launched(req);
+              return Some(Launched(req));
             case Returned(value: final res):
               switch (res) {
                 case Success(value: final result):
-                  return Returned(Success(result));
+                  return Some(Returned(Success(result)));
                 case Failure(value: final error):
                   return get(error);
               }
@@ -29,40 +30,42 @@ extension EitherToLeftPrism on OpticsFactory {
       }
     }
 
-    EscapableRecursiveCall<Req, Res, Err> put(EscapableRecursiveCall<Req, Res, Err> whole, Call<Req, Result<Res, Err>> call) {
+    Optional<EscapableRecursiveCall<Req, Res, Err>> put(EscapableRecursiveCall<Req, Res, Err> whole, Call<Req, Result<Res, Err>> call) {
       switch (whole.call) {
         case Launched<Err, Call<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>>():
           switch (call) {
             case Launched<Req, Result<Res, Err>>(value: final req):
-              return EscapableRecursiveCall(Returned(Launched(req)));
+              return Some(EscapableRecursiveCall(Returned(Launched(req))));
             case Returned<Req, Result<Res, Err>>():
-              return whole; // guarded, cause we cant go from "awaiting for trigger" into result state immediately
+              return None();
           }
         case Returned<Err, Call<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>>(value: final res):
           switch (res) {
             case Launched<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>():
               switch (call) {
                 case Launched<Req, Result<Res, Err>>():
-                  return whole;
+                  return None();
                 case Returned<Req, Result<Res, Err>>(value: final res):
                   switch (res) {
                     case Success<Res, Err>(value: final result):
-                      return EscapableRecursiveCall(Returned(Returned(Success(result))));
+                      return Some(EscapableRecursiveCall(Returned(Returned(Success(result)))));
                     case Failure<Res, Err>(value: final error):
-                      return EscapableRecursiveCall(Returned(Returned(Failure(EscapableRecursiveCall(Launched(error))))));
+                      return Some(EscapableRecursiveCall(Returned(Returned(Failure(EscapableRecursiveCall(Launched(error)))))));
                   }
               }
             case Returned<Req, Result<Res, EscapableRecursiveCall<Req, Res, Err>>>(value: final res):
               switch (res) {
                 case Success<Res, EscapableRecursiveCall<Req, Res, Err>>():
-                  return whole; // guarded, we cant reach any other state when we reached success cause we "escaped"
+                  return None();
                 case Failure<Res, EscapableRecursiveCall<Req, Res, Err>>(value: final error):
-                  return EscapableRecursiveCall(Returned(Returned(Failure(put(error, call)))));
+                  return put(error, call).map((value) {
+                    return EscapableRecursiveCall(Returned(Returned(Failure(value))));
+                  });
               }
           }
       }
     }
 
-    return Lens(get: get, put: put);
+    return Affine(get: get, put: put);
   }
 }
