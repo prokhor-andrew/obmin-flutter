@@ -3,12 +3,13 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/core/core.dart';
-import 'package:obmin/machine/machine.dart';
 import 'package:obmin/core/core_x/core_x.dart';
+import 'package:obmin/machine/machine.dart';
+import 'package:obmin/types/optional.dart';
 
-Core<State, State, State Function(State state)> CoreY<State>({
+Core<State, State, Optional<State> Function(State state)> CoreY<State>({
   required State Function() state,
-  required Set<Machine<State, State Function(State state)>> Function(State state) machines,
+  required Set<Machine<State, Optional<State> Function(State state)>> Function(State state) machines,
 }) {
   return CoreX(
     state: state,

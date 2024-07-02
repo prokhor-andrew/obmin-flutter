@@ -5,10 +5,11 @@
 import 'package:obmin/core/core.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine_ext/feature_machine/scene.dart';
+import 'package:obmin/types/optional.dart';
 
 Core<State, State, Event> CoreX<State, Event>({
   required State Function() state,
-  required State Function(State state, Event event) reducer,
+  required Optional<State> Function(State state, Event event) reducer,
   required Set<Machine<State, Event>> Function(State state) machines,
 }) {
   return Core(
@@ -17,10 +18,18 @@ Core<State, State, Event> CoreX<State, Event>({
         return Scene.create(
           state: state,
           transit: (state, trigger, machineId) {
-            final value = reducer(state, trigger);
-            return SceneTransition(
-              scene(value),
-              effects: [value],
+            return reducer(state, trigger).fold<SceneTransition<State, Event, State>>(
+              (value) {
+                return SceneTransition(
+                  scene(value),
+                  effects: [value],
+                );
+              },
+              () {
+                return SceneTransition(
+                  scene(state),
+                );
+              },
             );
           },
         );
