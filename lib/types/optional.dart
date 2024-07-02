@@ -56,20 +56,18 @@ sealed class Optional<T> {
   }
 
   Either<T, ()> asEither() {
-    switch (this) {
-      case Some<T>(value: final value):
-        return Left(value);
-      case None<T>():
-        return Right(());
-    }
+    return fold(
+      Left.new,
+      () => Right(()),
+    );
   }
 
   @override
   String toString() {
-    return switch (this) {
-      None<T>() => "None<$T>",
-      Some<T>(value: final value) => "Some<$T> { value=$value }",
-    };
+    return fold<String>(
+      (value) => "Some<$T> { value=$value }",
+      () => "None<$T>",
+    );
   }
 }
 
@@ -100,11 +98,9 @@ final class None<T> extends Optional<T> {
 
 extension EitherToOptional<T> on Either<T, ()> {
   Optional<T> asOptional() {
-    switch (this) {
-      case Left(value: final value):
-        return Some(value);
-      case Right():
-        return None();
-    }
+    return fold<Optional<T>>(
+      Some.new,
+      (_) => None(),
+    );
   }
 }

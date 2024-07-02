@@ -30,22 +30,14 @@ sealed class Either<L, R> {
   Either<L, RightResult> mapRightTo<RightResult>(RightResult value) => mapRight((_) => value);
 
   Either<R, L> swapped() {
-    switch (this) {
-      case Left<L, R>(value: final value):
-        return Right(value);
-      case Right<L, R>(value: final value):
-        return Left(value);
-    }
+    return fold<Either<R, L>>(Right.new, Left.new);
   }
 
   void executeIfLeft(void Function(L value) function) {
-    switch (this) {
-      case Left<L, R>(value: final value):
-        function(value);
-        break;
-      case Right<L, R>():
-        break;
-    }
+    fold<void Function()>(
+      (value) => () => function(value),
+      (_) => () {},
+    )();
   }
 
   void executeIfRight(void Function(R value) function) {
@@ -69,12 +61,10 @@ sealed class Either<L, R> {
 
   @override
   String toString() {
-    switch (this) {
-      case Left<L, R>(value: var value):
-        return "Either<$L, $R> Left=$value";
-      case Right<L, R>(value: var value):
-        return "Either<$L, $R> Right=$value";
-    }
+    return fold<String>(
+      (value) => "Either<$L, $R> Left=$value",
+      (value) => "Either<$L, $R> Right=$value",
+    );
   }
 }
 
