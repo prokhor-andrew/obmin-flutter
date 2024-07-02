@@ -60,9 +60,9 @@ sealed class Call<Req, Res> {
   String toString() {
     switch (this) {
       case Launched<Req, Res>(value: var value):
-        return "$Launched<$Req, $Res> { value=$value }";
+        return "Launched<$Req, $Res> { value=$value }";
       case Returned<Req, Res>(value: var value):
-        return "$Returned<$Req, $Res> { value=$value }";
+        return "Returned<$Req, $Res> { value=$value }";
     }
   }
 }
