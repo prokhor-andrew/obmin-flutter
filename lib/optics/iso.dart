@@ -11,6 +11,13 @@ final class Iso<T1, T2> {
     required this.from,
   });
 
+  static Iso<T, T> identity<T>() {
+    return Iso<T, T>(
+      to: (v) => v,
+      from: (v) => v,
+    );
+  }
+
   @override
   String toString() {
     return "$Iso<$T1, $T2>";
