@@ -8,7 +8,7 @@ import 'package:obmin/optics/affine.dart';
 import 'package:obmin/optics/optics_factory.dart';
 import 'package:obmin/types/optional.dart';
 
-extension EitherToLeftPrism on OpticsFactory {
+extension RecursiveCallOptics on OpticsFactory {
   Affine<RecursiveCall<Req, Res>, Call<Req, Res>> recursiveCallToResultCallLens<Req, Res>() {
     Optional<Call<Req, Res>> get(RecursiveCall<Req, Res> rec) {
       switch (rec.call) {
