@@ -5,13 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core_widget.dart';
 import 'package:obmin/core/widget_machine/widget_machine_x.dart';
-import 'package:obmin/types/optional.dart';
+import 'package:obmin/types/transition.dart';
 
-WidgetMachine<State, State, Optional<State> Function(State)> WidgetMachineY<State>({
+WidgetMachine<State, State, Transition<State>> WidgetMachineY<State>({
   required String id,
-  required Widget Function(BuildContext context, State state, void Function(Optional<State> Function(State state) reducer)? update) builder,
+  required Widget Function(BuildContext context, State state, void Function(Transition<State> transition)? update) builder,
 }) {
-  return WidgetMachineX<State, Optional<State> Function(State)>(
+  return WidgetMachineX<State, Transition<State>>(
     id: id,
     builder: builder,
   );

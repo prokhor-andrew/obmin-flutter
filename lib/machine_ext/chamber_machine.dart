@@ -2,16 +2,17 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/call/call.dart';
+import 'package:obmin/channel/channel_lib.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/call_machine.dart';
-import 'package:obmin/machine_ext/silo_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
 import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
-import 'package:obmin/call/call.dart';
-import 'package:obmin/channel/channel_lib.dart';
+import 'package:obmin/machine_ext/silo_machine.dart';
 import 'package:obmin/optics/affine.dart';
 import 'package:obmin/types/optional.dart';
+import 'package:obmin/types/transition.dart';
 
 extension ChamberMachine on MachineFactory {
   Machine<Input, Output> chamber<Input, Output, Helper>({
@@ -58,17 +59,17 @@ extension ChamberMachine on MachineFactory {
     );
   }
 
-  Machine<State, Optional<State> Function(State)> chamberX<State, Helper>({
+  Machine<State, Transition<State>> chamberX<State, Helper>({
     required String id,
     required Future<Helper> Function() onCreateHelper,
     required Future<void> Function(Helper helper) onDestroyHelper,
     required State initial,
-    required Set<Silo<Optional<State> Function(State)>> Function(Helper helper, State state) map,
+    required Set<Silo<Transition<State>>> Function(Helper helper, State state) map,
     ChannelBufferStrategy<State>? inputBufferStrategy,
-    ChannelBufferStrategy<Optional<State> Function(State)>? outputBufferStrategy,
-    ChannelBufferStrategy<FeatureEvent<Optional<State> Function(State), State>>? internalBufferStrategy,
+    ChannelBufferStrategy<Transition<State>>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<Transition<State>, State>>? internalBufferStrategy,
   }) {
-    return MachineFactory.shared.chamber<State, Optional<State> Function(State), Helper>(
+    return MachineFactory.shared.chamber<State, Transition<State>, Helper>(
       id: id,
       onCreateHelper: onCreateHelper,
       onDestroyHelper: onDestroyHelper,
@@ -82,15 +83,15 @@ extension ChamberMachine on MachineFactory {
     );
   }
 
-  Machine<State, Optional<State> Function(State)> chamberY<State, Helper>({
+  Machine<State, Transition<State>> chamberY<State, Helper>({
     required String id,
     required Future<Helper> Function() onCreateHelper,
     required Future<void> Function(Helper helper) onDestroyHelper,
     required State initial,
     required List<ChamberConfig<State>> Function(Helper helper) map,
     ChannelBufferStrategy<State>? inputBufferStrategy,
-    ChannelBufferStrategy<Optional<State> Function(State)>? outputBufferStrategy,
-    ChannelBufferStrategy<FeatureEvent<Optional<State> Function(State), State>>? internalBufferStrategy,
+    ChannelBufferStrategy<Transition<State>>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<Transition<State>, State>>? internalBufferStrategy,
   }) {
     return chamberX<State, Helper>(
       id: id,
@@ -98,13 +99,13 @@ extension ChamberMachine on MachineFactory {
       onDestroyHelper: onDestroyHelper,
       initial: initial,
       map: (helper, state) {
-        final Set<Silo<Optional<State> Function(State)>> result = {};
+        final Set<Silo<Transition<State>>> result = {};
 
         for (final config in map(helper)) {
           switch (config._silo(state)) {
-            case None<Silo<Optional<State> Function(State)>>():
+            case None<Silo<Transition<State>>>():
               break;
-            case Some<Silo<Optional<State> Function(State)>>(value: final value):
+            case Some<Silo<Transition<State>>>(value: final value):
               result.add(value);
               break;
           }
@@ -117,7 +118,7 @@ extension ChamberMachine on MachineFactory {
 }
 
 final class ChamberConfig<Whole> {
-  final Optional<Silo<Optional<Whole> Function(Whole)>> Function(Whole) _silo;
+  final Optional<Silo<Transition<Whole>>> Function(Whole) _silo;
 
   ChamberConfig._(this._silo);
 

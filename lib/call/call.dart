@@ -5,6 +5,7 @@
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/types/product.dart';
+import 'package:obmin/types/transition.dart';
 
 sealed class Call<Req, Res> {
   Either<Req, Res> asEither() {
@@ -16,8 +17,8 @@ sealed class Call<Req, Res> {
     }
   }
 
-  Call<Product<Req, void Function(Optional<Req> Function(Req))>, Product<Res, void Function(Optional<Res> Function(Res))>> attachUpdate(
-    void Function(Optional<Call<Req, Res>> Function(Call<Req, Res> value) transition) update,
+  Call<Product<Req, void Function(Transition<Req>)>, Product<Res, void Function(Transition<Res>)>> attachUpdate(
+    void Function(Transition<Call<Req, Res>> transition) update,
   ) {
     switch (this) {
       case Launched<Req, Res>(value: final value):

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:obmin/optics/lens.dart';
 import 'package:obmin/types/optional.dart';
+import 'package:obmin/types/transition.dart';
 
 class ZoomableWidget<Input, Output> extends InheritedWidget {
   final Input input;
@@ -96,7 +97,7 @@ final class Zoomable<Input, Output> {
   }
 }
 
-extension ValueZoomable<T> on Zoomable<T, Optional<T> Function(T value)> {
+extension ValueZoomable<T> on Zoomable<T, Transition<T>> {
   Zoomable<V, Optional<V> Function(V)> zoom<V>(Lens<T, V> lens) {
     return mapInput(lens.get).mapOutput((update) {
       return (whole) {

@@ -8,9 +8,10 @@ import 'package:obmin/machine_ext/map_output_machine.dart';
 import 'package:obmin/call/call.dart';
 import 'package:obmin/optics/affine.dart';
 import 'package:obmin/types/optional.dart';
+import 'package:obmin/types/transition.dart';
 
 extension CallMachine on MachineFactory {
-  Optional<Silo<Optional<Whole> Function(Whole)>> call<Whole, Req, Res>({
+  Optional<Silo<Transition<Whole>>> call<Whole, Req, Res>({
     required Whole state,
     required Affine<Whole, Call<Req, Res>> affine,
     required Silo<Res> Function(Req req) silo,

@@ -4,13 +4,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:obmin/types/optional.dart';
+import 'package:obmin/types/transition.dart';
 import 'package:obmin/ui_tools/zoomable/calculator_widget.dart';
 import 'package:obmin/ui_tools/zoomable/zoomable_widget.dart';
 
-extension ValueCalculatorWidgetExtension<T> on Zoomable<T, Optional<T> Function(T)> {
+extension ValueCalculatorWidgetExtension<T> on Zoomable<T, Transition<T>> {
   Widget valueCalculator({
     Key? key,
-    required void Function(BuildContext context, Optional<T> oldState, T newState, void Function(Optional<T> Function(T value) transition) update) calculate,
+    required void Function(BuildContext context, Optional<T> oldState, T newState, void Function(Transition<T> transition) update) calculate,
     required Widget child,
   }) {
     return ValueCalculatorWidget<T>(
@@ -22,4 +23,4 @@ extension ValueCalculatorWidgetExtension<T> on Zoomable<T, Optional<T> Function(
   }
 }
 
-typedef ValueCalculatorWidget<T> = CalculatorWidget<T, Optional<T> Function(T)>;
+typedef ValueCalculatorWidget<T> = CalculatorWidget<T, Transition<T>>;
