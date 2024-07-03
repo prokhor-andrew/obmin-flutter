@@ -2,11 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:flutter/material.dart';
-import 'package:obmin/types/optional.dart';
-import 'package:obmin/types/transition.dart';
-import 'package:obmin/ui_tools/zoomable/calculator_widget.dart';
-import 'package:obmin/ui_tools/zoomable/zoomable_widget.dart';
+part of 'zoomable_lib.dart';
 
 extension ValueCalculatorWidgetExtension<T> on Zoomable<T, Transition<T>> {
   Widget valueCalculator({

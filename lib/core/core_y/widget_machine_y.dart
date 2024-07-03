@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core_widget.dart';
-import 'package:obmin/core/widget_machine/widget_machine_x.dart';
+import 'package:obmin/core/core_x/widget_machine_x.dart';
 import 'package:obmin/types/transition.dart';
 
 WidgetMachine<State, State, Transition<State>> WidgetMachineY<State>({

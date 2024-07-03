@@ -2,10 +2,8 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:flutter/material.dart';
-import 'package:obmin/types/transition.dart';
-import 'package:obmin/ui_tools/zoomable/render_widget.dart';
-import 'package:obmin/ui_tools/zoomable/zoomable_widget.dart';
+
+part of 'zoomable_lib.dart';
 
 extension ValueRenderWidgetExtension<T> on Zoomable<T, Transition<T>> {
   Widget valueRender({

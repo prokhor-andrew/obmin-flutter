@@ -2,10 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:flutter/material.dart';
-import 'package:obmin/optics/lens.dart';
-import 'package:obmin/types/optional.dart';
-import 'package:obmin/types/transition.dart';
+part of 'zoomable_lib.dart';
 
 class ZoomableWidget<Input, Output> extends InheritedWidget {
   final Input input;
@@ -47,97 +44,5 @@ class _ZoomableStatelessWidget<Input, Output> extends StatelessWidget {
     });
 
     return builder(context, zoomable);
-  }
-}
-
-final class Zoomable<Input, Output> {
-  final (Input input, void Function(Output) update) Function(BuildContext context) _data;
-
-  Zoomable._(this._data);
-
-  Zoomable<R, Output> mapInput<R>(R Function(Input value) function) {
-    return Zoomable._(
-      (context) {
-        final (input, send) = _data(context);
-
-        return (
-          function(input),
-          send,
-        );
-      },
-    );
-  }
-
-  Zoomable<Input, R> mapOutput<R>(Output Function(R value) function) {
-    return Zoomable._(
-      (context) {
-        final (input, update) = _data(context);
-
-        return (
-          input,
-          (event) {
-            update(function(event));
-          },
-        );
-      },
-    );
-  }
-
-  Widget build<S>({
-    Key? key,
-    required S Function(BuildContext? Function() context, Optional<S> state, Input input, void Function(Output output) update) processor,
-    required Widget Function(BuildContext context, S state) builder,
-  }) {
-    return ConsumerZoomableWidget<S, Input, Output>(
-      key: key,
-      zoomable: this,
-      processor: processor,
-      builder: builder,
-    );
-  }
-}
-
-extension ValueZoomableExtension<T> on Zoomable<T, Transition<T>> {
-  Zoomable<V, Optional<V> Function(V)> zoom<V>(Lens<T, V> lens) {
-    return mapInput(lens.get).mapOutput((update) {
-      return (whole) {
-        return update(lens.get(whole)).map((value) {
-          return lens.put(whole, value);
-        });
-      };
-    });
-  }
-}
-
-class ConsumerZoomableWidget<S, Input, Output> extends StatefulWidget {
-  final Zoomable<Input, Output> zoomable;
-  final S Function(BuildContext? Function() context, Optional<S> state, Input input, void Function(Output output) update) processor;
-  final Widget Function(BuildContext context, S state) builder;
-
-  const ConsumerZoomableWidget({
-    super.key,
-    required this.zoomable,
-    required this.processor,
-    required this.builder,
-  });
-
-  @override
-  State<ConsumerZoomableWidget<S, Input, Output>> createState() => _ConsumerZoomableWidgetState<S, Input, Output>();
-}
-
-class _ConsumerZoomableWidgetState<S, Input, Output> extends State<ConsumerZoomableWidget<S, Input, Output>> {
-  Optional<S> _state = None();
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final (input, update) = widget.zoomable._data(context);
-
-    _state = Some(widget.processor(() => mounted ? context : null, _state, input, update));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.builder(context, _state.force());
   }
 }
