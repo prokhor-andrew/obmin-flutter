@@ -6,7 +6,7 @@ import 'package:obmin/call/result.dart';
 import 'package:obmin/optics/iso.dart';
 import 'package:obmin/optics/optics_factory.dart';
 import 'package:obmin/optics/prism.dart';
-import 'package:obmin/optics_ext/either_optics.dart';
+import 'package:obmin/type_optics/either_optics.dart';
 import 'package:obmin/types/either.dart';
 
 extension ResultOptics on OpticsFactory {
