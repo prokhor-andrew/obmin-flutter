@@ -16,7 +16,7 @@ final class Lens<Whole, Part> {
 
   @override
   String toString() {
-    return "$Lens<$Whole, $Part>";
+    return "Lens<$Whole, $Part>";
   }
 
   Lens<Whole, SubPart> then<SubPart>(Lens<Part, SubPart> lens) {

@@ -16,7 +16,7 @@ final class Prism<Whole, Part> {
 
   @override
   String toString() {
-    return "$Prism<$Whole, $Part>";
+    return "Prism<$Whole, $Part>";
   }
 
   Prism<Whole, SubPart> then<SubPart>(Prism<Part, SubPart> prism) {

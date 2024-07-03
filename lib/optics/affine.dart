@@ -19,7 +19,7 @@ final class Affine<Whole, Part> {
 
   @override
   String toString() {
-    return "$Affine<$Whole, $Part>";
+    return "Affine<$Whole, $Part>";
   }
 
   Affine<Whole, SubPart> then<SubPart>(Affine<Part, SubPart> affine) {

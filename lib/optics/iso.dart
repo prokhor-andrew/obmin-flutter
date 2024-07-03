@@ -20,7 +20,7 @@ final class Iso<T1, T2> {
 
   @override
   String toString() {
-    return "$Iso<$T1, $T2>";
+    return "Iso<$T1, $T2>";
   }
 
   Iso<T1, T3> then<T3>(Iso<T2, T3> iso) {
