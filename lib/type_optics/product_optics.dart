@@ -40,4 +40,32 @@ extension ProductOptics on OpticsFactory {
       },
     );
   }
+
+  Iso<Product<T1, T2>, Product<R, T2>> pairMapV1Iso<T1, T2, R>({
+    required R Function(T1 value) to,
+    required T1 Function(R value) from,
+  }) {
+    return Iso(
+      to: (whole) {
+        return whole.mapV1(to);
+      },
+      from: (part) {
+        return part.mapV1(from);
+      },
+    );
+  }
+
+  Iso<Product<T1, T2>, Product<T1, R>> pairMapV2Iso<T1, T2, R>({
+    required R Function(T2 value) to,
+    required T2 Function(R value) from,
+  }) {
+    return Iso(
+      to: (whole) {
+        return whole.mapV2(to);
+      },
+      from: (part) {
+        return part.mapV2(from);
+      },
+    );
+  }
 }
