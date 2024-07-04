@@ -54,7 +54,7 @@ final class Zoomable<Input, Output> {
 
 
 extension ValueZoomableExtension<T> on Zoomable<T, Transition<T>> {
-  Zoomable<V, Optional<V> Function(V)> zoom<V>(Lens<T, V> lens) {
+  Zoomable<V, Transition<V>> zoom<V>(Lens<T, V> lens) {
     return mapInput(lens.get).mapOutput((update) {
       return (whole) {
         return update(lens.get(whole)).map((value) {
