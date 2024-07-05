@@ -3,17 +3,17 @@
 // See the LICENSE file in the project root for license information.
 
 final class Product<T1, T2> {
-  final T1 v1;
-  final T2 v2;
+  final T1 value1;
+  final T2 value2;
 
-  Product(this.v1, this.v2);
+  Product(this.value1, this.value2);
 
   Product<T2, T1> swapped() {
-    return Product(v2, v1);
+    return Product(value2, value1);
   }
 
   Product<R, T2> mapV1<R>(R Function(T1 value) function) {
-    return Product(function(v1), v2);
+    return Product(function(value1), value2);
   }
 
   Product<R, T2> mapV1To<R>(R value) {
@@ -30,16 +30,16 @@ final class Product<T1, T2> {
 
   @override
   String toString() {
-    return "Pair<$T1, $T2> { v1=$v1, v2=$v2 }";
+    return "Pair<$T1, $T2> { value1=$value1, value2=$value2 }";
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is Product<T1, T2> && other.v1 == v1 && other.v2 == v2;
+    return other is Product<T1, T2> && other.value1 == value1 && other.value2 == value2;
   }
 
   @override
-  int get hashCode => v1.hashCode ^ v2.hashCode;
+  int get hashCode => value1.hashCode ^ value2.hashCode;
 }

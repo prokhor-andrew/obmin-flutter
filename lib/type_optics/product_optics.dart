@@ -11,10 +11,10 @@ extension ProductOptics on OpticsFactory {
   Lens<Product<T1, T2>, T1> pairToV1Lens<T1, T2>() {
     return Lens(
       get: (whole) {
-        return whole.v1;
+        return whole.value1;
       },
       put: (whole, part) {
-        return Product(part, whole.v2);
+        return Product(part, whole.value2);
       },
     );
   }
@@ -22,10 +22,10 @@ extension ProductOptics on OpticsFactory {
   Lens<Product<T1, T2>, T2> pairToV2Lens<T1, T2>() {
     return Lens(
       get: (whole) {
-        return whole.v2;
+        return whole.value2;
       },
       put: (whole, part) {
-        return Product(whole.v1, part);
+        return Product(whole.value1, part);
       },
     );
   }
