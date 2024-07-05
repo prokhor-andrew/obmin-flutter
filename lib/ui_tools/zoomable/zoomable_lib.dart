@@ -6,6 +6,7 @@ library zoomable;
 
 import 'package:flutter/material.dart';
 import 'package:obmin/optics/lens.dart';
+import 'package:obmin/types/either.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/types/transition.dart';
 

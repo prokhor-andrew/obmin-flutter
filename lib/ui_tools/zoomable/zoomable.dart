@@ -51,8 +51,6 @@ final class Zoomable<Input, Output> {
   }
 }
 
-
-
 extension ValueZoomableExtension<T> on Zoomable<T, Transition<T>> {
   Zoomable<V, Transition<V>> zoom<V>(Lens<T, V> lens) {
     return mapInput(lens.get).mapOutput((update) {
@@ -65,3 +63,42 @@ extension ValueZoomableExtension<T> on Zoomable<T, Transition<T>> {
   }
 }
 
+extension ValueEitherZoomableExtension<T1, T2> on Zoomable<Either<T1, T2>, Transition<Either<T1, T2>>> {
+  Widget fold(
+    Widget Function(T1 value, void Function(Transition<T1>) callback) ifLeft,
+    Widget Function(T2 value, void Function(Transition<T2>) callback) ifRight,
+  ) {
+    return valueRender(builder: (context, state, callback) {
+      return state.fold(
+        (value) {
+          void mappedCallback(Transition<T1> transition) {
+            callback((either) {
+              switch (either) {
+                case Left<T1, T2>(value: final value):
+                  return transition(value).map(Left.new);
+                case Right<T1, T2>(value: final value):
+                  return Some(Right(value));
+              }
+            });
+          }
+
+          return ifLeft(value, mappedCallback);
+        },
+        (value) {
+          void mappedCallback(Transition<T2> transition) {
+            callback((either) {
+              switch (either) {
+                case Left<T1, T2>(value: final value):
+                  return Some(Left(value));
+                case Right<T1, T2>(value: final value):
+                  return transition(value).map(Right.new);
+              }
+            });
+          }
+
+          return ifRight(value, mappedCallback);
+        },
+      );
+    });
+  }
+}

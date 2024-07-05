@@ -3,9 +3,6 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/types/either.dart';
-import 'package:obmin/types/optional.dart';
-import 'package:obmin/types/product.dart';
-import 'package:obmin/types/transition.dart';
 
 sealed class Call<Req, Res> {
   Either<Req, Res> asEither() {
@@ -14,45 +11,6 @@ sealed class Call<Req, Res> {
         return Left(value);
       case Returned<Req, Res>(value: final value):
         return Right(value);
-    }
-  }
-
-  Call<Product<Req, void Function(Transition<Req>)>, Product<Res, void Function(Transition<Res>)>> attachUpdate(
-    void Function(Transition<Call<Req, Res>> transition) update,
-  ) {
-    switch (this) {
-      case Launched<Req, Res>(value: final value):
-        return Launched(
-          Product(
-            value,
-            (transition) {
-              update((call) {
-                switch (call) {
-                  case Launched<Req, Res>(value: final value):
-                    return transition(value).map(Launched.new);
-                  case Returned<Req, Res>(value: final value):
-                    return Some(Returned(value));
-                }
-              });
-            },
-          ),
-        );
-      case Returned<Req, Res>(value: final value):
-        return Returned(
-          Product(
-            value,
-            (transition) {
-              update((call) {
-                switch (call) {
-                  case Launched<Req, Res>(value: final value):
-                    return Some(Launched(value));
-                  case Returned<Req, Res>(value: final value):
-                    return transition(value).map(Returned.new);
-                }
-              });
-            },
-          ),
-        );
     }
   }
 
