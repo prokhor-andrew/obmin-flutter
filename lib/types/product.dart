@@ -8,6 +8,10 @@ final class Product<T1, T2> {
 
   Product(this.value1, this.value2);
 
+  R fold<R>(R Function(T1 value1, T2 value2) function) {
+    return function(value1, value2);
+  }
+
   Product<T2, T1> swapped() {
     return Product(value2, value1);
   }
