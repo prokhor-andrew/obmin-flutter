@@ -65,8 +65,8 @@ extension ValueZoomableExtension<T> on Zoomable<T, Transition<T>> {
 
 extension ValueEitherZoomableExtension<T1, T2> on Zoomable<Either<T1, T2>, Transition<Either<T1, T2>>> {
   Widget fold(
-    Widget Function(T1 value, void Function(Transition<T1>) callback) ifLeft,
-    Widget Function(T2 value, void Function(Transition<T2>) callback) ifRight,
+    Widget Function(T1 value, void Function(Transition<T1>) update, void Function(Transition<Either<T1, T2>>) callback) ifLeft,
+    Widget Function(T2 value, void Function(Transition<T2>) update, void Function(Transition<Either<T1, T2>>) callback) ifRight,
   ) {
     return valueRender(builder: (context, state, callback) {
       return state.fold(
@@ -82,7 +82,7 @@ extension ValueEitherZoomableExtension<T1, T2> on Zoomable<Either<T1, T2>, Trans
             });
           }
 
-          return ifLeft(value, mappedCallback);
+          return ifLeft(value, mappedCallback, callback);
         },
         (value) {
           void mappedCallback(Transition<T2> transition) {
@@ -96,7 +96,7 @@ extension ValueEitherZoomableExtension<T1, T2> on Zoomable<Either<T1, T2>, Trans
             });
           }
 
-          return ifRight(value, mappedCallback);
+          return ifRight(value, mappedCallback, callback);
         },
       );
     });
