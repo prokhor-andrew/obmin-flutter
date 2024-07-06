@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/optics/affine.dart';
 import 'package:obmin/optics/iso.dart';
 import 'package:obmin/optics/lens.dart';
 import 'package:obmin/optics/optics_factory.dart';
@@ -67,5 +68,33 @@ extension ProductOptics on OpticsFactory {
         return part.mapV2(from);
       },
     );
+  }
+}
+
+extension ProductZoom<Whole, T1, T2> on Affine<Whole, Product<T1, T2>> {
+  Affine<Whole, T1> zoomIntoV1() {
+    return then(OpticsFactory.shared.pairToV1Lens<T1, T2>().asAffine());
+  }
+
+  Affine<Whole, T2> zoomIntoV2() {
+    return then(OpticsFactory.shared.pairToV2Lens<T1, T2>().asAffine());
+  }
+
+  Affine<Whole, Product<T2, T1>> zoomIntoSwapped() {
+    return then(OpticsFactory.shared.pairSwapIso<T1, T2>().asAffine());
+  }
+
+  Affine<Whole, Product<R, T2>> zoomIntoMapV1<R>({
+    required R Function(T1 value) to,
+    required T1 Function(R value) from,
+  }) {
+    return then(OpticsFactory.shared.pairMapV1Iso<T1, T2, R>(to: to, from: from).asAffine());
+  }
+
+  Affine<Whole, Product<T1, R>> zoomIntoMapV2<R>({
+    required R Function(T2 value) to,
+    required T2 Function(R value) from,
+  }) {
+    return then(OpticsFactory.shared.pairMapV2Iso<T1, T2, R>(to: to, from: from).asAffine());
   }
 }

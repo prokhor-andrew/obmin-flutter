@@ -3,10 +3,9 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/call/result.dart';
+import 'package:obmin/optics/affine.dart';
 import 'package:obmin/optics/iso.dart';
 import 'package:obmin/optics/optics_factory.dart';
-import 'package:obmin/optics/prism.dart';
-import 'package:obmin/type_optics/either_optics.dart';
 import 'package:obmin/types/either.dart';
 
 extension ResultOptics on OpticsFactory {
@@ -31,12 +30,16 @@ extension ResultOptics on OpticsFactory {
       },
     );
   }
+}
 
-  Prism<Result<Res, Err>, Res> resultToResPrism<Res, Err>() {
-    return resultToEitherIso<Res, Err>().asPrism().then(eitherToLeftPrism<Res, Err>());
+extension ResultToEitherZoom<Whole, Res, Err> on Affine<Whole, Result<Res, Err>> {
+  Affine<Whole, Either<Res, Err>> zoomIntoEither() {
+    return then(OpticsFactory.shared.resultToEitherIso<Res, Err>().asAffine());
   }
+}
 
-  Prism<Result<Res, Err>, Err> resultToErrPrism<Res, Err>() {
-    return resultToEitherIso<Res, Err>().asPrism().then(eitherToRightPrism<Res, Err>());
+extension EitherToResultZoom<Whole, L, R> on Affine<Whole, Either<L, R>> {
+  Affine<Whole, Result<L, R>> zoomIntoResult() {
+    return then(OpticsFactory.shared.eitherToResultIso<L, R>().asAffine());
   }
 }
