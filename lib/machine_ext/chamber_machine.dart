@@ -11,6 +11,7 @@ import 'package:obmin/machine_ext/feature_machine/feature.dart';
 import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
 import 'package:obmin/machine_ext/silo_machine.dart';
 import 'package:obmin/optics/affine.dart';
+import 'package:obmin/optics/iso.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/types/transition.dart';
 
@@ -133,5 +134,12 @@ final class ChamberConfig<Whole> {
         silo: silo,
       );
     });
+  }
+
+  static ChamberConfig<Whole> identity<Whole, Req, Res>({
+    required Affine<Whole, Call<Req, Res>> Function(Affine<Whole, Whole> affine) affine,
+    required Silo<Res> Function(Req req) silo,
+  }) {
+    return create(affine: affine(Iso.identity<Whole>().asAffine()), silo: silo);
   }
 }
