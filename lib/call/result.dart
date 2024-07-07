@@ -18,9 +18,9 @@ sealed class Result<Res, Err> {
   String toString() {
     switch (this) {
       case Success<Res, Err>(value: var value):
-        return "$Success<$Res, $Err> { value=$value }";
+        return "Success<$Res, $Err> { value=$value }";
       case Failure<Res, Err>(value: var value):
-        return "$Failure<$Res, $Err> { value=$value }";
+        return "Failure<$Res, $Err> { value=$value }";
     }
   }
 }
