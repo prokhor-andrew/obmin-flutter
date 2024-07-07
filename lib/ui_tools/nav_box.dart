@@ -6,17 +6,25 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+final class NavItem {
+  final String tag;
+  final Widget child;
+
+  NavItem({
+    required this.tag,
+    required this.child,
+  });
+}
+
 class NavBox extends InheritedWidget {
   final bool Function(bool isForced) onPopTriggered;
-  final String mainTag;
-  final Widget mainWidget;
-  final List<(String tag, Widget widget)> others;
+  final NavItem main;
+  final List<NavItem> others;
 
   NavBox({
     super.key,
     required this.onPopTriggered,
-    required this.mainTag,
-    required this.mainWidget,
+    required this.main,
     required this.others,
   }) : super(child: _NavBox());
 
@@ -28,7 +36,7 @@ class NavBox extends InheritedWidget {
 
   @override
   bool updateShouldNotify(NavBox oldWidget) {
-    return mainTag != oldWidget.mainTag || others != oldWidget.others;
+    return main != oldWidget.main || others.map((value) => value.tag) != oldWidget.others.map((value) => value.tag);
   }
 }
 
@@ -108,12 +116,13 @@ final class _TheRouterDelegate extends RouterDelegate {
   Widget build(BuildContext context) {
     final NavBox box = NavBox._of(context);
 
-    final List<(String, Widget)> tuples = [];
-    tuples.add((box.mainTag, box.mainWidget));
+    final List<NavItem> tuples = [];
+    tuples.add(box.main);
     tuples.addAll(box.others);
 
     final List<Page<dynamic>> pages = tuples.map((tuple) {
-      final (tag, widget) = tuple;
+      final tag = tuple.tag;
+      final widget = tuple.child;
       return MaterialPage(
         key: ValueKey(tag),
         child: widget,
