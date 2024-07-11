@@ -31,6 +31,12 @@ final class Prism<Whole, Part> {
       },
     );
   }
+
+  Optional<Whole> modify(Whole whole, Part Function(Part part) transform) {
+    return get(whole).map((value) {
+      return set(transform(value));
+    });
+  }
 }
 
 extension IsoAsPrism<T1, T2> on Iso<T1, T2> {

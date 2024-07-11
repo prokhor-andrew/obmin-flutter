@@ -33,4 +33,8 @@ final class Iso<T1, T2> {
       },
     );
   }
+
+  T1 modify(T1 value, T2 Function(T2 value) transform) {
+    return from(transform(to(value)));
+  }
 }

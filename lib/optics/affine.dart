@@ -2,7 +2,6 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-
 import 'package:obmin/optics/iso.dart';
 import 'package:obmin/optics/lens.dart';
 import 'package:obmin/optics/prism.dart';
@@ -35,6 +34,12 @@ final class Affine<Whole, Part> {
         });
       },
     );
+  }
+
+  Optional<Whole> modify(Whole whole, Part Function(Part part) transform) {
+    return get(whole).bind((value) {
+      return put(whole, transform(value));
+    });
   }
 }
 
