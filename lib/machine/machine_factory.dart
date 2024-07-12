@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 final class MachineFactory {
-  static final MachineFactory shared = MachineFactory._();
+  static const MachineFactory shared = MachineFactory._();
 
-  MachineFactory._();
+  const MachineFactory._();
 }

@@ -6,7 +6,7 @@ final class Product<T1, T2> {
   final T1 value1;
   final T2 value2;
 
-  Product(this.value1, this.value2);
+  const Product(this.value1, this.value2);
 
   R fold<R>(R Function(T1 value1, T2 value2) function) {
     return function(value1, value2);

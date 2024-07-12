@@ -5,6 +5,8 @@
 import 'package:obmin/types/product.dart';
 
 sealed class Either<L, R> {
+  const Either();
+
   Either<LeftResult, R> bindLeft<LeftResult>(Either<LeftResult, R> Function(L left) function) {
     return fold<Either<LeftResult, R>>(function, Right.new);
   }
@@ -71,7 +73,7 @@ sealed class Either<L, R> {
 final class Left<L, R> extends Either<L, R> {
   final L value;
 
-  Left(this.value);
+  const Left(this.value);
 
   @override
   bool operator ==(Object other) {
@@ -86,7 +88,7 @@ final class Left<L, R> extends Either<L, R> {
 final class Right<L, R> extends Either<L, R> {
   final R value;
 
-  Right(this.value);
+  const Right(this.value);
 
   @override
   bool operator ==(Object other) {
