@@ -8,6 +8,7 @@ import 'package:obmin/machine_ext/feature_machine/feature.dart';
 import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/outline.dart';
 import 'package:obmin/channel/channel_lib.dart';
+import 'package:obmin/machine_ext/silo_machine.dart';
 
 extension MapOutputMachine<Input, Output> on Machine<Input, Output> {
   Machine<Input, R> mapOutput<R>(
@@ -49,6 +50,22 @@ extension MapOutputMachine<Input, Output> on Machine<Input, Output> {
         return outline().asFeature({this});
       },
       onDestroyFeature: (_) async {},
+    );
+  }
+}
+
+extension MapSilo<T> on Silo<T> {
+  Silo<R> map<R>(
+    R Function(T value) function, {
+    ChannelBufferStrategy<()>? inputBufferStrategy,
+    ChannelBufferStrategy<R>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<T, ()>>? internalBufferStrategy,
+  }) {
+    return mapOutput<R>(
+      function,
+      inputBufferStrategy: inputBufferStrategy,
+      outputBufferStrategy: outputBufferStrategy,
+      internalBufferStrategy: internalBufferStrategy,
     );
   }
 }
