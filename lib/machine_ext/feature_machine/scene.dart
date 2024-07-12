@@ -12,7 +12,7 @@ final class Scene<State, Trigger, Effect> {
     String,
   ) transit;
 
-  Scene._({
+  const Scene._({
     required this.state,
     required this.transit,
   });
@@ -55,7 +55,7 @@ final class SceneTransition<State, Trigger, Effect> {
   final Scene<State, Trigger, Effect> scene;
   final List<Effect> effects;
 
-  SceneTransition(
+  const SceneTransition(
     this.scene, {
     this.effects = const [],
   });

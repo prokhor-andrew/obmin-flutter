@@ -5,6 +5,8 @@
 part of 'channel_lib.dart';
 
 sealed class ChannelBufferEvent {
+  const ChannelBufferEvent();
+
   bool get isAdded => switch (this) {
         ChannelBufferAddedEvent() => true,
         ChannelBufferRemovedEvent() => false,

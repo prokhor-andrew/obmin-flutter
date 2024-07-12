@@ -11,7 +11,7 @@ final class Affine<Whole, Part> {
   final Optional<Part> Function(Whole) get;
   final Optional<Whole> Function(Whole whole, Part part) put;
 
-  Affine({
+  const Affine({
     required this.get,
     required this.put,
   });

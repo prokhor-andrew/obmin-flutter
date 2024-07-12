@@ -19,7 +19,7 @@ final class Machine<Input, Output> {
   )
       Function() onCreate;
 
-  Machine({
+  const Machine({
     required this.id,
     this.inputBufferStrategy,
     this.outputBufferStrategy,
@@ -129,7 +129,7 @@ final class Process<Input> {
   final String id;
   final void Function() _cancel;
 
-  Process._({
+  const Process._({
     required this.id,
     required void Function() cancel,
   }) : _cancel = cancel;

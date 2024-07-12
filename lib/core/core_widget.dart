@@ -92,7 +92,7 @@ final class WidgetMachine<State, Input, Output> {
   final Object Function(Object state, Input input) _process;
   final Widget Function(BuildContext context, Object state) _build;
 
-  WidgetMachine._({
+  const WidgetMachine._({
     required String id,
     required Object Function(State state) init,
     required Object Function(Object state, void Function(Output output) callback) activate,

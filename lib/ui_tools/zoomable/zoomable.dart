@@ -7,7 +7,7 @@ part of 'zoomable_lib.dart';
 final class Zoomable<Input, Output> {
   final (Input input, void Function(Output) update) Function(BuildContext context) _data;
 
-  Zoomable._(this._data);
+  const Zoomable._(this._data);
 
   Zoomable<R, Output> mapInput<R>(R Function(Input value) function) {
     return Zoomable._(

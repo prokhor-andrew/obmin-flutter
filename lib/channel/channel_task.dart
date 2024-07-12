@@ -9,26 +9,11 @@ final class ChannelTask<T> {
   final Future<T> future;
   final void Function() cancel;
 
-  ChannelTask({
+  const ChannelTask({
     required this.id,
     required this.future,
     required this.cancel,
   });
-
-  static ChannelTask<List<T>> combine<T>(List<ChannelTask<T>> list) {
-    final String id = const Uuid().v4().toString();
-    return ChannelTask(
-      id: id,
-      future: Future.wait(list.map((e) {
-        return e.future;
-      })),
-      cancel: () {
-        for (final task in list) {
-          task.cancel();
-        }
-      },
-    );
-  }
 
   @override
   String toString() {
