@@ -2,7 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-part of 'zoomable_lib.dart';
+part of '../zoomable_lib.dart';
 
 extension CalculatorWidgetExtension<State, Event> on Zoomable<State, Event> {
   Widget calculator({
@@ -33,7 +33,7 @@ class CalculatorWidget<State, Event> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return zoomable.build<State>(
+    return zoomable.consume<State>(
       key: key,
       processor: (context, state, input, update) {
         WidgetsBinding.instance.addPostFrameCallback((_) {

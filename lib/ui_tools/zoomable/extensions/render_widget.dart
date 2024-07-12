@@ -2,8 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-
-part of 'zoomable_lib.dart';
+part of '../zoomable_lib.dart';
 
 extension RenderWidgetExtension<State, Event> on Zoomable<State, Event> {
   Widget render({
@@ -26,7 +25,7 @@ class RenderWidget<State, Event> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return zoomable.build<(State, void Function(Event))>(
+    return zoomable.consume<(State, void Function(Event))>(
       key: key,
       processor: (context, state, input, update) {
         return (input, update);
