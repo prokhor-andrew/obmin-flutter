@@ -6,7 +6,7 @@ final class Traversal<Whole, Item> {
   final Iterable<Item> Function(Whole whole) getAll;
   final Whole Function(Whole whole, Item Function(Item item) modify) modifyAll;
 
-  Traversal({
+  const Traversal({
     required this.getAll,
     required this.modifyAll,
   });
