@@ -8,7 +8,7 @@ import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
 import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
 import 'package:obmin/machine_ext/silo_machine.dart';
-import 'package:obmin/types/transition.dart';
+import 'package:obmin/types/update.dart';
 
 extension ChamberMachine on MachineFactory {
   Machine<Input, Output> chamber<Input, Output, Helper>({
@@ -57,18 +57,18 @@ extension ChamberMachine on MachineFactory {
     );
   }
 
-  Machine<State, Transition<State>> chamberX<State, Helper>({
+  Machine<State, Update<State>> chamberX<State, Helper>({
     required String id,
     required Future<Helper> Function() onCreateHelper,
     required Future<void> Function(Helper helper) onDestroyHelper,
     required State initial,
-    required Set<Silo<Transition<State>>> Function(Helper helper, State state) map,
+    required Set<Silo<Update<State>>> Function(Helper helper, State state) map,
     void Function(String loggable)? onLog,
     ChannelBufferStrategy<State>? inputBufferStrategy,
-    ChannelBufferStrategy<Transition<State>>? outputBufferStrategy,
-    ChannelBufferStrategy<FeatureEvent<Transition<State>, State>>? internalBufferStrategy,
+    ChannelBufferStrategy<Update<State>>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<Update<State>, State>>? internalBufferStrategy,
   }) {
-    return MachineFactory.shared.chamber<State, Transition<State>, Helper>(
+    return MachineFactory.shared.chamber<State, Update<State>, Helper>(
       id: id,
       onCreateHelper: onCreateHelper,
       onDestroyHelper: onDestroyHelper,
