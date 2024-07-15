@@ -9,7 +9,7 @@ final class ChannelBufferData<T> {
   final T data;
   final Completer<bool> _completer;
 
-  ChannelBufferData._({
+  const ChannelBufferData._({
     required this.id,
     required this.data,
     required Completer<bool> completer,

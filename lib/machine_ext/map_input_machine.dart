@@ -9,7 +9,7 @@ import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/outline.dart';
 import 'package:obmin/channel/channel_lib.dart';
 
-extension MapInputMachine<Input, Output> on Machine<Input, Output> {
+extension MapInputMachineExtension<Input, Output> on Machine<Input, Output> {
   Machine<R, Output> mapInput<R>(Input Function(R input) function, {
     ChannelBufferStrategy<R>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,

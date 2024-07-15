@@ -5,6 +5,9 @@
 import 'package:obmin/types/either.dart';
 
 sealed class Call<Req, Res> {
+
+  const Call();
+
   Either<Req, Res> asEither() {
     switch (this) {
       case Launched<Req, Res>(value: final value):
@@ -28,7 +31,7 @@ sealed class Call<Req, Res> {
 final class Launched<Req, Res> extends Call<Req, Res> {
   final Req value;
 
-  Launched(this.value);
+  const Launched(this.value);
 
   @override
   bool operator ==(Object other) {
@@ -43,7 +46,7 @@ final class Launched<Req, Res> extends Call<Req, Res> {
 final class Returned<Req, Res> extends Call<Req, Res> {
   final Res value;
 
-  Returned(this.value);
+  const Returned(this.value);
 
   @override
   bool operator ==(Object other) {

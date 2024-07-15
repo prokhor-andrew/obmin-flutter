@@ -2,11 +2,11 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/channel/channel_lib.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/basic_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
-import 'package:obmin/channel/channel_lib.dart';
 import 'package:obmin/types/optional.dart';
 
 extension FeatureMachine on MachineFactory {
@@ -14,6 +14,7 @@ extension FeatureMachine on MachineFactory {
     required String id,
     required Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() onCreateFeature,
     required Future<void> Function(State state) onDestroyFeature,
+    void Function(String loggable)? onLog,
     ChannelBufferStrategy<ExtTrigger>? inputBufferStrategy,
     ChannelBufferStrategy<ExtEffect>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<IntTrigger, ExtTrigger>>? internalBufferStrategy,
@@ -28,6 +29,7 @@ extension FeatureMachine on MachineFactory {
           bufferStrategy: internalBufferStrategy,
           onCreate: onCreateFeature,
           onDestroy: onDestroyFeature,
+          onLog: onLog,
         );
       },
       onChange: (object, callback) async {
@@ -44,6 +46,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
   final String _id;
   final Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() _onCreate;
   final Future<void> Function(State state) _onDestroy;
+  final void Function(String loggable)? _onLog;
 
   bool _isCancelled = false;
 
@@ -67,12 +70,21 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
     ChannelBufferStrategy<FeatureEvent<IntTrigger, ExtTrigger>>? bufferStrategy,
     required Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() onCreate,
     required Future<void> Function(State state) onDestroy,
+    required void Function(String loggable)? onLog,
   })  : _id = id,
         _onCreate = onCreate,
         _onDestroy = onDestroy,
+        _onLog = onLog,
         _channel = Channel(
           bufferStrategy: bufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default"),
         );
+
+  void _log() {
+    final onLog = _onLog;
+    if (onLog != null) {
+      onLog("FeatureMachine<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect> { id=$_id, state=$_state, process=$_processes }");
+    }
+  }
 
   Future<void> onChange(ChannelTask<bool> Function(ExtEffect effect)? callback) async {
     this._callback = callback;
@@ -96,6 +108,8 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
           },
         );
       }).toSet();
+
+      _log();
 
       Future(() async {
         while (true) {
@@ -123,6 +137,8 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
       _processes = {};
 
       await _onDestroy(_state);
+
+      _log();
     }
   }
 
@@ -188,7 +204,10 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
     }).toSet();
 
     _processes = processesToAdd.union(processesToKeep);
+    _state = transition.feature.state;
     _transit = transition.feature.transit;
+
+    _log();
 
     final effects = transition.effects;
 

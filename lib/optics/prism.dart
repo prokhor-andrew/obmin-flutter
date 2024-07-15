@@ -9,7 +9,7 @@ final class Prism<Whole, Part> {
   final Optional<Part> Function(Whole whole) get;
   final Whole Function(Part part) set;
 
-  Prism({
+  const Prism({
     required this.get,
     required this.set,
   });

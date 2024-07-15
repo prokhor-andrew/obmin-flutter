@@ -4,9 +4,9 @@
 
 
 final class OpticsFactory {
-  static final OpticsFactory shared = OpticsFactory._();
+  static const OpticsFactory shared = OpticsFactory._();
 
-  OpticsFactory._();
+  const OpticsFactory._();
 }
 
 

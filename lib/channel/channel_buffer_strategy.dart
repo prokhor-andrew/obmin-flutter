@@ -8,7 +8,7 @@ final class ChannelBufferStrategy<T> {
   final String id;
   final List<ChannelBufferData<T>> Function(List<ChannelBufferData<T>> data, ChannelBufferEvent event) bufferReducer;
 
-  ChannelBufferStrategy({
+  const ChannelBufferStrategy({
     required this.id,
     required this.bufferReducer,
   });

@@ -10,7 +10,7 @@ final class NavItem {
   final String tag;
   final Widget child;
 
-  NavItem({
+  const NavItem({
     required this.tag,
     required this.child,
   });

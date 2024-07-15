@@ -2,8 +2,22 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-
 part of 'zoomable_lib.dart';
+
+extension ZoomableConsumerWidgetExtension<Input, Output> on Zoomable<Input, Output> {
+  Widget consume<S>({
+    Key? key,
+    required S Function(BuildContext? Function() context, Optional<S> state, Input input, void Function(Output output) update) processor,
+    required Widget Function(BuildContext context, S state) builder,
+  }) {
+    return ZoomableConsumerWidget<S, Input, Output>(
+      key: key,
+      zoomable: this,
+      processor: processor,
+      builder: builder,
+    );
+  }
+}
 
 class ZoomableConsumerWidget<S, Input, Output> extends StatefulWidget {
   final Zoomable<Input, Output> zoomable;

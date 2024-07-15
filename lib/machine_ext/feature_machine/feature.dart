@@ -14,7 +14,7 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
     String machineId,
   ) transit;
 
-  Feature._({
+  const Feature._({
     required this.state,
     required this.machines,
     required this.transit,
@@ -69,7 +69,7 @@ final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffec
   final Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> feature;
   final List<FeatureEvent<IntEffect, ExtEffect>> effects;
 
-  FeatureTransition(
+  const FeatureTransition(
     this.feature, {
     this.effects = const [],
   });
@@ -93,6 +93,8 @@ final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffec
 }
 
 sealed class FeatureEvent<Int, Ext> {
+  const FeatureEvent();
+
   bool get isExternal => switch (this) {
         InternalFeatureEvent<Int, Ext>() => false,
         ExternalFeatureEvent<Int, Ext>() => true,
@@ -104,7 +106,7 @@ sealed class FeatureEvent<Int, Ext> {
 final class InternalFeatureEvent<Int, Ext> extends FeatureEvent<Int, Ext> {
   final Int value;
 
-  InternalFeatureEvent(this.value);
+  const InternalFeatureEvent(this.value);
 
   @override
   bool operator ==(Object other) {
@@ -123,7 +125,7 @@ final class InternalFeatureEvent<Int, Ext> extends FeatureEvent<Int, Ext> {
 final class ExternalFeatureEvent<Int, Ext> extends FeatureEvent<Int, Ext> {
   final Ext value;
 
-  ExternalFeatureEvent(this.value);
+  const ExternalFeatureEvent(this.value);
 
   @override
   bool operator ==(Object other) {

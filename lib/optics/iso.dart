@@ -6,7 +6,7 @@ final class Iso<T1, T2> {
   final T2 Function(T1 value) to;
   final T1 Function(T2 value) from;
 
-  Iso({
+  const Iso({
     required this.to,
     required this.from,
   });

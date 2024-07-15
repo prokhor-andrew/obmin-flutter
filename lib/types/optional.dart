@@ -5,6 +5,8 @@
 import 'package:obmin/types/either.dart';
 
 sealed class Optional<T> {
+  const Optional();
+
   Optional<R> bind<R>(Optional<R> Function(T value) function) {
     return asEither().bindLeft<R>((value) {
       return function(value).asEither();
@@ -74,7 +76,7 @@ sealed class Optional<T> {
 final class Some<T> extends Optional<T> {
   final T value;
 
-  Some(this.value);
+  const Some(this.value);
 
   @override
   bool operator ==(Object other) {
@@ -87,6 +89,8 @@ final class Some<T> extends Optional<T> {
 }
 
 final class None<T> extends Optional<T> {
+  const None();
+
   @override
   bool operator ==(Object other) {
     return other is None<T>;
@@ -100,7 +104,7 @@ extension EitherToOptional<T> on Either<T, ()> {
   Optional<T> asOptional() {
     return fold<Optional<T>>(
       Some.new,
-      (_) => None(),
+      (_) => const None(),
     );
   }
 }

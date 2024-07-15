@@ -12,7 +12,7 @@ final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
     String,
   ) transit;
 
-  Outline._({
+  const Outline._({
     required this.state,
     required this.transit,
   });
@@ -70,7 +70,7 @@ final class OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffec
   final Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> outline;
   final List<FeatureEvent<IntEffect, ExtEffect>> effects;
 
-  OutlineTransition(
+  const OutlineTransition(
     this.outline, {
     this.effects = const [],
   });

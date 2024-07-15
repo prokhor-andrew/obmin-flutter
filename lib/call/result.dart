@@ -5,6 +5,8 @@
 import 'package:obmin/types/either.dart';
 
 sealed class Result<Res, Err> {
+  const Result();
+
   Either<Res, Err> asEither() {
     switch (this) {
       case Success<Res, Err>(value: final value):
@@ -28,7 +30,7 @@ sealed class Result<Res, Err> {
 final class Success<Res, Err> extends Result<Res, Err> {
   final Res value;
 
-  Success(this.value);
+  const Success(this.value);
 
   @override
   bool operator ==(Object other) {
@@ -43,7 +45,7 @@ final class Success<Res, Err> extends Result<Res, Err> {
 final class Failure<Res, Err> extends Result<Res, Err> {
   final Err value;
 
-  Failure(this.value);
+  const Failure(this.value);
 
   @override
   bool operator ==(Object other) {
