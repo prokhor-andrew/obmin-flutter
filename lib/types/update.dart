@@ -2,11 +2,4 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-
-final class OpticsFactory {
-  static const OpticsFactory shared = OpticsFactory._();
-
-  const OpticsFactory._();
-}
-
-
+typedef Update<T> = T Function(T value);

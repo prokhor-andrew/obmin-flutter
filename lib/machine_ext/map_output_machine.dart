@@ -9,8 +9,6 @@ import 'package:obmin/machine_ext/feature_machine/feature.dart';
 import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/outline.dart';
 import 'package:obmin/machine_ext/silo_machine.dart';
-import 'package:obmin/optics/affine.dart';
-import 'package:obmin/types/transition.dart';
 
 extension MapOutputMachineExtension<Input, Output> on Machine<Input, Output> {
   Machine<Input, R> mapOutput<R>(
@@ -68,26 +66,6 @@ extension MapSiloExtension<T> on Silo<T> {
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
-    );
-  }
-}
-
-extension MapSiloWithAffineExtension<T> on Silo<T> {
-  Silo<Transition<R>> mapWithAffine<R>(
-    Affine<R, T> affine, {
-    ChannelBufferStrategy<()>? inputBufferStrategy,
-    ChannelBufferStrategy<Transition<R>>? outputBufferStrategy,
-    ChannelBufferStrategy<FeatureEvent<T, ()>>? internalBufferStrategy,
-  }) {
-    return map<Transition<R>>(
-      (value) {
-        return (whole) {
-          return affine.put(whole, value);
-        };
-      },
-      internalBufferStrategy: internalBufferStrategy,
-      inputBufferStrategy: inputBufferStrategy,
-      outputBufferStrategy: outputBufferStrategy,
     );
   }
 }
