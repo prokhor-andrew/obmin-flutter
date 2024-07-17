@@ -6,8 +6,8 @@ import 'package:obmin/optics/fold.dart';
 import 'package:obmin/optics/getter.dart';
 import 'package:obmin/optics/preview.dart';
 
-final class Equivalence<T> {
-  const Equivalence();
+final class Eqv<T> {
+  const Eqv();
 
   T identity(T value) => value;
 
@@ -25,6 +25,6 @@ final class Equivalence<T> {
 
   @override
   String toString() {
-    return "Equivalence<$T>";
+    return "Eqv<$T>";
   }
 }

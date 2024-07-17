@@ -8,7 +8,7 @@ import 'package:obmin/optics/settable/bi_preview.dart';
 import 'package:obmin/optics/settable/iso.dart';
 import 'package:obmin/optics/settable/prism.dart';
 
-final class Reflector <Whole, Part> {
+final class Reflector<Whole, Part> {
   final Getter<Whole, Part> getter;
   final Preview<Part, Whole> preview;
 

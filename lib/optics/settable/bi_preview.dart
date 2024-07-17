@@ -4,8 +4,8 @@
 
 import 'package:obmin/optics/preview.dart';
 import 'package:obmin/optics/settable/iso.dart';
-import 'package:obmin/optics/settable/reflector.dart';
 import 'package:obmin/optics/settable/prism.dart';
+import 'package:obmin/optics/settable/reflector.dart';
 
 final class BiPreview<T1, T2> {
   final Preview<T1, T2> forward;
