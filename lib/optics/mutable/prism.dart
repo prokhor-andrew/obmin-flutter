@@ -4,9 +4,9 @@
 
 import 'package:obmin/optics/getter.dart';
 import 'package:obmin/optics/preview.dart';
-import 'package:obmin/optics/settable/bi_preview.dart';
-import 'package:obmin/optics/settable/iso.dart';
-import 'package:obmin/optics/settable/reflector.dart';
+import 'package:obmin/optics/mutable/bi_preview.dart';
+import 'package:obmin/optics/mutable/iso.dart';
+import 'package:obmin/optics/mutable/reflector.dart';
 
 final class Prism<Whole, Part> {
   final Preview<Whole, Part> tryGet;
