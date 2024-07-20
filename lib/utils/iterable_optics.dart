@@ -10,8 +10,7 @@ import 'package:obmin/optics/preview.dart';
 import 'package:obmin/types/optional.dart';
 
 extension IterableOpticsEqvExtension<T> on Eqv<Iterable<T>> {
-
-
+  Fold<Iterable<T>, T> get folded => asFold().compose(Fold<Iterable<T>, T>((whole) => whole));
 
   Preview<Iterable<T>, T> find(bool Function(T element) function) {
     return asGetter().find(function);
