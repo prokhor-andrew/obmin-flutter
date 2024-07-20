@@ -2,19 +2,8 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/types/either.dart';
-
 sealed class Result<Res, Err> {
   const Result();
-
-  Either<Res, Err> asEither() {
-    switch (this) {
-      case Success<Res, Err>(value: final value):
-        return Left(value);
-      case Failure<Res, Err>(value: final value):
-        return Right(value);
-    }
-  }
 
   @override
   String toString() {
@@ -55,13 +44,4 @@ final class Failure<Res, Err> extends Result<Res, Err> {
 
   @override
   int get hashCode => value.hashCode;
-}
-
-extension EitherToResult<Res, Err> on Either<Res, Err> {
-  Result<Res, Err> asResult() {
-    return fold<Result<Res, Err>>(
-      Success.new,
-      Failure.new,
-    );
-  }
 }

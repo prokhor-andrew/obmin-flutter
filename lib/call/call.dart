@@ -2,20 +2,10 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/types/either.dart';
+
 
 sealed class Call<Req, Res> {
-
   const Call();
-
-  Either<Req, Res> asEither() {
-    switch (this) {
-      case Launched<Req, Res>(value: final value):
-        return Left(value);
-      case Returned<Req, Res>(value: final value):
-        return Right(value);
-    }
-  }
 
   @override
   String toString() {
@@ -56,13 +46,4 @@ final class Returned<Req, Res> extends Call<Req, Res> {
 
   @override
   int get hashCode => value.hashCode;
-}
-
-extension EitherToCall<Req, Res> on Either<Req, Res> {
-  Call<Req, Res> asCall() {
-    return fold<Call<Req, Res>>(
-      Launched.new,
-      Returned.new,
-    );
-  }
 }
