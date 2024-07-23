@@ -37,3 +37,21 @@ final class Zoomable<Input, Output> {
     );
   }
 }
+
+extension ZoomableMapWithOpticExtension<Input, Whole> on Zoomable<Input, Update<Whole>> {
+  Zoomable<Input, Update<Part>> mapWithOpticIntoUpdate<Part>(Mutator<Whole, Part> optic) {
+    return mapOutput((update) {
+      return (whole) {
+        return optic.apply(whole, update);
+      };
+    });
+  }
+
+  Zoomable<Input, Part> mapWithOpticIntoSet<Part>(Mutator<Whole, Part> optic) {
+    return mapOutput((part) {
+      return (whole) {
+        return optic.set(whole, part);
+      };
+    });
+  }
+}
