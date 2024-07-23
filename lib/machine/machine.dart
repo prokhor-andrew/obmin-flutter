@@ -75,7 +75,7 @@ final class Machine<Input, Output> {
             final ChannelTask<Optional<Input>> task = inputChannel.next();
             inputTask = task;
             final value = await task.future;
-            if (value is None<Input>) {
+            if (value.isNone) {
               break;
             }
             await onProcess(value.force());
@@ -89,7 +89,7 @@ final class Machine<Input, Output> {
             final ChannelTask<Optional<Output>> task = outputChannel.next();
             outputTask = task;
             final value = await task.future;
-            if (value is None<Output>) {
+            if (value.isNone) {
               break;
             }
             await onConsume(value.force());

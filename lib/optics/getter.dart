@@ -32,7 +32,7 @@ final class Getter<Whole, Part> {
 
   Preview<Whole, Part> asPreview() {
     return Preview((whole) {
-      return Some(get(whole));
+      return Optional<Part>.some(get(whole));
     });
   }
 

@@ -27,7 +27,7 @@ final class Channel<T> {
       case _AwaitingForProducer<T>(cur: final cur, rest: final rest):
         _state = _IdleChannelState();
         for (final element in [cur].plusMultiple(rest)) {
-          element.comp.complete(Some(val));
+          element.comp.complete(Optional<T>.some(val));
         }
         completer.complete(true);
         break;
@@ -69,7 +69,7 @@ final class Channel<T> {
         break;
       case _AwaitingForConsumer<T>(buffer: final array):
         array[0]._completer.complete(true);
-        completer.complete(Some(array[0].data));
+        completer.complete(Optional<T>.some(array[0].data));
         _handleBuffer(event: ChannelBufferRemovedEvent(isConsumed: true), currentArray: array.minusFirst());
         break;
     }
@@ -85,17 +85,17 @@ final class Channel<T> {
             if (cur.id == id) {
               if (rest.isEmpty) {
                 _state = _IdleChannelState();
-                cur.comp.complete(None());
+                cur.comp.complete(Optional<T>.none());
               } else {
                 _state = _AwaitingForProducer(cur: rest[0], rest: rest.minusFirst());
-                cur.comp.complete(None());
+                cur.comp.complete(Optional<T>.none());
               }
             } else {
               final newList = rest.where((item) {
                 if (item.id != id) {
                   return true;
                 } else {
-                  item.comp.complete(None());
+                  item.comp.complete(Optional<T>.none());
                   return false;
                 }
               }).toList();

@@ -120,9 +120,10 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
           _task = task;
           final value = await task.future;
 
-          if (value is None<FeatureEvent<IntTrigger, ExtTrigger>>) {
+          if (value.isNone) {
             break;
           }
+
           await _handle(value.force());
         }
       });

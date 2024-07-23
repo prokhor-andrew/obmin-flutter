@@ -249,8 +249,8 @@ extension CallObminOpticToolMethodsExtension<Req, Res> on Call<Req, Res> {
   }
 
   Optional<Launched<Req, Res>> get launchedOrNone => fold<Optional<Launched<Req, Res>>>(
-        ifLaunched: Some.new,
-        ifReturned: (_) => const None(),
+        ifLaunched: Optional.some,
+        ifReturned: (_) => Optional<Launched<Req, Res>>.none(),
       );
 
   void executeIfLaunched(void Function(Launched<Req, Res> value) function) {
@@ -279,8 +279,8 @@ extension CallObminOpticToolMethodsExtension<Req, Res> on Call<Req, Res> {
   }
 
   Optional<Returned<Req, Res>> get returnedOrNone => fold<Optional<Returned<Req, Res>>>(
-        ifLaunched: (_) => const None(),
-        ifReturned: Some.new,
+        ifLaunched: (_) => Optional<Returned<Req, Res>>.none(),
+        ifReturned: Optional.some,
       );
 
   void executeIfReturned(void Function(Returned<Req, Res> value) function) {

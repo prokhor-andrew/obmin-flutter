@@ -12,13 +12,59 @@ import 'package:obmin/optics/mutable/prism.dart';
 import 'package:obmin/optics/mutable/reflector.dart';
 import 'package:obmin/optics/preview.dart';
 import 'package:obmin/types/either.dart';
+import 'package:obmin/utils/bool_fold.dart';
 
-sealed class Optional<T> {
-  const Optional();
+final class Optional<T> {
+  final bool _isSome;
+  final T? _value;
 
-  static Eqv<Optional<T>> eqv<T>() => Eqv<Optional<T>>();
+  const Optional.some(T value)
+      : _value = value,
+        _isSome = true;
 
-  static Mutator<Optional<T>, Optional<T>> setter<T>() => Mutator.setter<Optional<T>>();
+  const Optional.none()
+      : _value = null,
+        _isSome = false;
+
+  V fold<V>(
+    V Function(T value) ifSome,
+    V Function() ifNone,
+  ) {
+    return _isSome.fold<V>(
+      () => ifSome(_value!),
+      ifNone,
+    );
+  }
+
+  Either<T, ()> asEither() {
+    return fold(
+      Either<T, ()>.left,
+      () => Either<T, ()>.right(()),
+    );
+  }
+
+  @override
+  String toString() {
+    return fold<String>(
+      (value) => "Some<$T> { value=$value }",
+      () => "None<$T>",
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! Optional<T>) return false;
+
+    if (_isSome != other._isSome) return false;
+
+    if (_isSome) return _value == other._value;
+
+    return true;
+  }
+
+  @override
+  int get hashCode => _isSome ? _value.hashCode : 0;
 
   Optional<R> bind<R>(Optional<R> Function(T value) function) {
     return asEither().bindLeft<R>((value) {
@@ -28,22 +74,12 @@ sealed class Optional<T> {
 
   Optional<R> map<R>(R Function(T value) function) {
     return bind((value) {
-      return Some(function(value));
+      return Optional<R>.some(function(value));
     });
   }
 
   Optional<R> mapTo<R>(R value) {
     return map<R>((_) => value);
-  }
-
-  V fold<V>(
-    V Function(T value) ifSome,
-    V Function() ifNone,
-  ) {
-    return switch (this) {
-      Some<T>(value: final value) => ifSome(value),
-      None<T>() => ifNone(),
-    };
   }
 
   T valueOr(T replacement) {
@@ -52,6 +88,10 @@ sealed class Optional<T> {
       () => replacement,
     );
   }
+
+  bool get isSome => mapTo(true).valueOr(false);
+
+  bool get isNone => !isSome;
 
   T force() {
     return fold<T>(
@@ -70,296 +110,77 @@ sealed class Optional<T> {
     });
   }
 
-  Either<T, ()> asEither() {
-    return fold(
-      Left.new,
-      () => Right(()),
-    );
-  }
+  static Eqv<Optional<T>> eqv<T>() => Eqv<Optional<T>>();
 
-  @override
-  String toString() {
-    return fold<String>(
-      (value) => "Some<$T> { value=$value }",
-      () => "None<$T>",
-    );
-  }
-}
-
-final class Some<T> extends Optional<T> {
-  final T value;
-
-  const Some(this.value);
-
-  static Eqv<Some<T>> eqv<T>() => Eqv<Some<T>>();
-
-  static Mutator<Some<T>, Some<T>> setter<T>() => Mutator.setter<Some<T>>();
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Some<T> && other.value == value;
-  }
-
-  @override
-  int get hashCode => value.hashCode;
-}
-
-final class None<T> extends Optional<T> {
-  const None();
-
-  @override
-  bool operator ==(Object other) {
-    return other is None<T>;
-  }
-
-  @override
-  int get hashCode => 0;
+  static Mutator<Optional<T>, Optional<T>> setter<T>() => Mutator.setter<Optional<T>>();
 }
 
 extension EitherToOptional<T> on Either<T, ()> {
   Optional<T> asOptional() {
     return fold<Optional<T>>(
-      Some.new,
-      (_) => const None(),
+      Optional<T>.some,
+      (_) => Optional.none(),
     );
-  }
-}
-
-extension SomeObminOpticEqvExtension<T> on Eqv<Some<T>> {
-  Getter<Some<T>, T> get value => asGetter().value;
-}
-
-extension SomeObminOpticGetterExtension<Whole, T> on Getter<Whole, Some<T>> {
-  Getter<Whole, T> get value => compose(Getter<Some<T>, T>((whole) => whole.value));
-}
-
-extension SomeObminOpticPreviewExtension<Whole, T> on Preview<Whole, Some<T>> {
-  Preview<Whole, T> get value => composeWithGetter(Getter<Some<T>, T>((whole) => whole.value));
-}
-
-extension SomeObminOpticFoldExtension<Whole, T> on Fold<Whole, Some<T>> {
-  Fold<Whole, T> get value => composeWithGetter(Getter<Some<T>, T>((whole) => whole.value));
-}
-
-extension SomeObminOpticMutatorExtension<Whole, T> on Mutator<Whole, Some<T>> {
-  Mutator<Whole, T> get value => compose(
-        Mutator.lens<Some<T>, T>(
-          Getter<Some<T>, T>((whole) => whole.value),
-          (whole, part) => Some(part),
-        ),
-      );
-}
-
-extension SomeObminOpticIsoExtension<Whole, T> on Iso<Whole, Some<T>> {
-  Mutator<Whole, T> get value => asMutator().compose(
-        Mutator.lens<Some<T>, T>(
-          Getter<Some<T>, T>((whole) => whole.value),
-          (whole, part) => Some(part),
-        ),
-      );
-}
-
-extension SomeObminOpticPrismExtension<Whole, T> on Prism<Whole, Some<T>> {
-  Mutator<Whole, T> get value => asMutator().compose(
-        Mutator.lens<Some<T>, T>(
-          Getter<Some<T>, T>((whole) => whole.value),
-          (whole, part) => Some(part),
-        ),
-      );
-}
-
-extension SomeObminOpticReflectorExtension<Whole, T> on Reflector<Whole, Some<T>> {
-  Mutator<Whole, T> get value => asMutator().compose(
-        Mutator.lens<Some<T>, T>(
-          Getter<Some<T>, T>((whole) => whole.value),
-          (whole, part) => Some(part),
-        ),
-      );
-}
-
-extension SomeObminOpticBiPreviewExtension<Whole, T> on BiPreview<Whole, Some<T>> {
-  Mutator<Whole, T> get value => asMutator().compose(
-        Mutator.lens<Some<T>, T>(
-          Getter<Some<T>, T>((whole) => whole.value),
-          (whole, part) => Some(part),
-        ),
-      );
-}
-
-extension OptionalObminOpticToolMethodsExtension<T> on Optional<T> {
-  Optional<T> mapSome(Some<T> Function(Some<T> value) function) {
-    return fold<Optional<T>>(
-      ifSome: function,
-      ifNone: (val) => val,
-    );
-  }
-
-  Optional<T> mapSomeTo(Some<T> value) {
-    return mapSome((_) => value);
-  }
-
-  Optional<T> bindSome(Optional<T> Function(Some<T> value) function) {
-    return fold<Optional<T>>(
-      ifSome: function,
-      ifNone: (val) => val,
-    );
-  }
-
-  Optional<Some<T>> get someOrNone => fold<Optional<Some<T>>>(
-        ifSome: Some.new,
-        ifNone: (_) => const None(),
-      );
-
-  void executeIfSome(void Function(Some<T> value) function) {
-    fold<void Function()>(
-      ifSome: (value) => () => function(value),
-      ifNone: (_) => () {},
-    )();
-  }
-
-  Optional<T> mapNone(None<T> Function(None<T> value) function) {
-    return fold<Optional<T>>(
-      ifSome: (val) => val,
-      ifNone: function,
-    );
-  }
-
-  Optional<T> mapNoneTo(None<T> value) {
-    return mapNone((_) => value);
-  }
-
-  Optional<T> bindNone(Optional<T> Function(None<T> value) function) {
-    return fold<Optional<T>>(
-      ifSome: (val) => val,
-      ifNone: function,
-    );
-  }
-
-  Optional<None<T>> get noneOrNone => fold<Optional<None<T>>>(
-        ifSome: (_) => const None(),
-        ifNone: Some.new,
-      );
-
-  void executeIfNone(void Function(None<T> value) function) {
-    fold<void Function()>(
-      ifSome: (_) => () {},
-      ifNone: (value) => () => function(value),
-    )();
-  }
-
-  R fold<R>({
-    required R Function(Some<T> value) ifSome,
-    required R Function(None<T> value) ifNone,
-  }) {
-    final value = this;
-    return switch (value) {
-      Some<T>() => ifSome(value),
-      None<T>() => ifNone(value),
-    };
   }
 }
 
 extension OptionalObminOpticEqvExtension<T> on Eqv<Optional<T>> {
-  Preview<Optional<T>, Some<T>> get some => Preview<Optional<T>, Some<T>>((whole) => whole.someOrNone);
-
-  Preview<Optional<T>, None<T>> get none => Preview<Optional<T>, None<T>>((whole) => whole.noneOrNone);
+  Preview<Optional<T>, T> get value => Preview<Optional<T>, T>((whole) => whole);
 }
 
 extension OptionalObminOpticGetterExtension<Whole, T> on Getter<Whole, Optional<T>> {
-  Preview<Whole, Some<T>> get some => composeWithPreview(Preview<Optional<T>, Some<T>>((whole) => whole.someOrNone));
-
-  Preview<Whole, None<T>> get none => composeWithPreview(Preview<Optional<T>, None<T>>((whole) => whole.noneOrNone));
+  Preview<Whole, T> get value => composeWithPreview(Preview<Optional<T>, T>((whole) => whole));
 }
 
 extension OptionalObminOpticPreviewExtension<Whole, T> on Preview<Whole, Optional<T>> {
-  Preview<Whole, Some<T>> get some => compose(Preview<Optional<T>, Some<T>>((whole) => whole.someOrNone));
-
-  Preview<Whole, None<T>> get none => compose(Preview<Optional<T>, None<T>>((whole) => whole.noneOrNone));
+  Preview<Whole, T> get value => compose(Preview<Optional<T>, T>((whole) => whole));
 }
 
 extension OptionalObminOpticFoldExtension<Whole, T> on Fold<Whole, Optional<T>> {
-  Fold<Whole, Some<T>> get some => composeWithPreview(Preview<Optional<T>, Some<T>>((whole) => whole.someOrNone));
-
-  Fold<Whole, None<T>> get none => composeWithPreview(Preview<Optional<T>, None<T>>((whole) => whole.noneOrNone));
+  Fold<Whole, T> get value => composeWithPreview(Preview<Optional<T>, T>((whole) => whole));
 }
 
 extension OptionalObminOpticMutatorExtension<Whole, T> on Mutator<Whole, Optional<T>> {
-  Mutator<Whole, Some<T>> get some => composeWithPrism(
-        Prism<Optional<T>, Some<T>>(
-          Preview<Optional<T>, Some<T>>((whole) => whole.someOrNone),
-          Getter<Some<T>, Optional<T>>((part) => part),
-        ),
-      );
-
-  Mutator<Whole, None<T>> get none => composeWithPrism(
-        Prism<Optional<T>, None<T>>(
-          Preview<Optional<T>, None<T>>((whole) => whole.noneOrNone),
-          Getter<None<T>, Optional<T>>((part) => part),
+  Mutator<Whole, T> get value => composeWithPrism(
+        Prism<Optional<T>, T>(
+          Preview<Optional<T>, T>((whole) => whole),
+          Getter<T, Optional<T>>(Optional<T>.some),
         ),
       );
 }
 
 extension OptionalObminOpticIsoExtension<Whole, T> on Iso<Whole, Optional<T>> {
-  Prism<Whole, Some<T>> get some => composeWithPrism(
-        Prism<Optional<T>, Some<T>>(
-          Preview<Optional<T>, Some<T>>((whole) => whole.someOrNone),
-          Getter<Some<T>, Optional<T>>((part) => part),
-        ),
-      );
-
-  Prism<Whole, None<T>> get none => composeWithPrism(
-        Prism<Optional<T>, None<T>>(
-          Preview<Optional<T>, None<T>>((whole) => whole.noneOrNone),
-          Getter<None<T>, Optional<T>>((part) => part),
+  Prism<Whole, T> get value => composeWithPrism(
+        Prism<Optional<T>, T>(
+          Preview<Optional<T>, T>((whole) => whole),
+          Getter<T, Optional<T>>(Optional<T>.some),
         ),
       );
 }
 
 extension OptionalObminOpticPrismExtension<Whole, T> on Prism<Whole, Optional<T>> {
-  Prism<Whole, Some<T>> get some => compose(
-        Prism<Optional<T>, Some<T>>(
-          Preview<Optional<T>, Some<T>>((whole) => whole.someOrNone),
-          Getter<Some<T>, Optional<T>>((part) => part),
-        ),
-      );
-
-  Prism<Whole, None<T>> get none => compose(
-        Prism<Optional<T>, None<T>>(
-          Preview<Optional<T>, None<T>>((whole) => whole.noneOrNone),
-          Getter<None<T>, Optional<T>>((part) => part),
+  Prism<Whole, T> get value => compose(
+        Prism<Optional<T>, T>(
+          Preview<Optional<T>, T>((whole) => whole),
+          Getter<T, Optional<T>>(Optional<T>.some),
         ),
       );
 }
 
 extension OptionalObminOpticReflectorExtension<Whole, T> on Reflector<Whole, Optional<T>> {
-  BiPreview<Whole, Some<T>> get some => composeWithPrism(
-        Prism<Optional<T>, Some<T>>(
-          Preview<Optional<T>, Some<T>>((whole) => whole.someOrNone),
-          Getter<Some<T>, Optional<T>>((part) => part),
-        ),
-      );
-
-  BiPreview<Whole, None<T>> get none => composeWithPrism(
-        Prism<Optional<T>, None<T>>(
-          Preview<Optional<T>, None<T>>((whole) => whole.noneOrNone),
-          Getter<None<T>, Optional<T>>((part) => part),
+  BiPreview<Whole, T> get value => composeWithPrism(
+        Prism<Optional<T>, T>(
+          Preview<Optional<T>, T>((whole) => whole),
+          Getter<T, Optional<T>>(Optional<T>.some),
         ),
       );
 }
 
 extension OptionalObminOpticBiPreviewExtension<Whole, T> on BiPreview<Whole, Optional<T>> {
-  BiPreview<Whole, Some<T>> get some => composeWithPrism(
-        Prism<Optional<T>, Some<T>>(
-          Preview<Optional<T>, Some<T>>((whole) => whole.someOrNone),
-          Getter<Some<T>, Optional<T>>((part) => part),
-        ),
-      );
-
-  BiPreview<Whole, None<T>> get none => composeWithPrism(
-        Prism<Optional<T>, None<T>>(
-          Preview<Optional<T>, None<T>>((whole) => whole.noneOrNone),
-          Getter<None<T>, Optional<T>>((part) => part),
+  BiPreview<Whole, T> get value => composeWithPrism(
+        Prism<Optional<T>, T>(
+          Preview<Optional<T>, T>((whole) => whole),
+          Getter<T, Optional<T>>(Optional<T>.some),
         ),
       );
 }

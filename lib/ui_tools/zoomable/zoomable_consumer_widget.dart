@@ -36,14 +36,14 @@ class ZoomableConsumerWidget<S, Input, Output> extends StatefulWidget {
 }
 
 class _ConsumerZoomableWidgetState<S, Input, Output> extends State<ZoomableConsumerWidget<S, Input, Output>> {
-  Optional<S> _state = None();
+  Optional<S> _state = Optional<S>.none();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final (input, update) = widget.zoomable._data(context);
 
-    _state = Some(widget.processor(() => mounted ? context : null, _state, input, update));
+    _state = Optional<S>.some(widget.processor(() => mounted ? context : null, _state, input, update));
   }
 
   @override

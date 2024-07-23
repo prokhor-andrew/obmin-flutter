@@ -43,9 +43,9 @@ extension IterableOpticsPreviewExtension<Whole, T> on Preview<Whole, Iterable<T>
         (whole) {
           final found = whole.firstWhereOrNull(function);
           if (found == null) {
-            return None();
+            return Optional<T>.none();
           } else {
-            return Some(found);
+            return Optional<T>.some(found);
           }
         },
       ),
@@ -64,9 +64,9 @@ extension IterableOpticsFoldExtension<Whole, T> on Fold<Whole, Iterable<T>> {
         (whole) {
           final found = whole.firstWhereOrNull(function);
           if (found == null) {
-            return None();
+            return Optional<T>.none();
           } else {
-            return Some(found);
+            return Optional<T>.some(found);
           }
         },
       ),
@@ -90,9 +90,9 @@ extension IterableOpticsMutatorExtension<Whole, T> on Mutator<Whole, Iterable<T>
         Preview<Iterable<T>, T>((whole) {
           final found = whole.firstWhereOrNull(function);
           if (found == null) {
-            return None();
+            return Optional<T>.none();
           } else {
-            return Some(found);
+            return Optional<T>.some(found);
           }
         }),
         (whole, part) {
@@ -168,9 +168,9 @@ extension ListOpticsPreviewExtension<Whole, T> on Preview<Whole, List<T>> {
         Preview<List<T>, T>(
           (whole) {
             if (whole.isEmpty) {
-              return None();
+              return Optional<T>.none();
             } else {
-              return Some(whole.last);
+              return Optional<T>.some(whole.last);
             }
           },
         ),
@@ -180,9 +180,9 @@ extension ListOpticsPreviewExtension<Whole, T> on Preview<Whole, List<T>> {
         Preview<List<T>, T>(
           (whole) {
             if (whole.isEmpty) {
-              return None();
+              return Optional<T>.none();
             } else {
-              return Some(whole[0]);
+              return Optional<T>.some(whole[0]);
             }
           },
         ),
@@ -193,10 +193,10 @@ extension ListOpticsPreviewExtension<Whole, T> on Preview<Whole, List<T>> {
       Preview<List<T>, T>(
         (whole) {
           if (index < 0 || index >= whole.length) {
-            return None();
+            return Optional<T>.none();
           } else {
             final element = whole[index];
-            return Some(element);
+            return Optional<T>.some(element);
           }
         },
       ),
@@ -209,9 +209,9 @@ extension ListOpticsFoldExtension<Whole, T> on Fold<Whole, List<T>> {
         Preview<List<T>, T>(
           (whole) {
             if (whole.isEmpty) {
-              return None();
+              return Optional<T>.none();
             } else {
-              return Some(whole.last);
+              return Optional<T>.some(whole.last);
             }
           },
         ),
@@ -221,9 +221,9 @@ extension ListOpticsFoldExtension<Whole, T> on Fold<Whole, List<T>> {
         Preview<List<T>, T>(
           (whole) {
             if (whole.isEmpty) {
-              return None();
+              return Optional<T>.none();
             } else {
-              return Some(whole[0]);
+              return Optional<T>.some(whole[0]);
             }
           },
         ),
@@ -234,10 +234,10 @@ extension ListOpticsFoldExtension<Whole, T> on Fold<Whole, List<T>> {
       Preview<List<T>, T>(
         (whole) {
           if (index < 0 || index >= whole.length) {
-            return None();
+            return Optional<T>.none();
           } else {
             final element = whole[index];
-            return Some(element);
+            return Optional<T>.some(element);
           }
         },
       ),
@@ -250,9 +250,9 @@ extension ListOpticsMutatorExtension<Whole, T> on Mutator<Whole, List<T>> {
         Mutator.affine<List<T>, T>(
           Preview<List<T>, T>((whole) {
             if (whole.isEmpty) {
-              return None();
+              return Optional<T>.none();
             } else {
-              return Some(whole.last);
+              return Optional<T>.some(whole.last);
             }
           }),
           (whole, part) {
@@ -274,9 +274,9 @@ extension ListOpticsMutatorExtension<Whole, T> on Mutator<Whole, List<T>> {
         Mutator.affine<List<T>, T>(
           Preview<List<T>, T>((whole) {
             if (whole.isEmpty) {
-              return None();
+              return Optional<T>.none();
             } else {
-              return Some(whole.last);
+              return Optional<T>.some(whole.last);
             }
           }),
           (whole, part) {
@@ -298,9 +298,9 @@ extension ListOpticsMutatorExtension<Whole, T> on Mutator<Whole, List<T>> {
       Mutator.affine<List<T>, T>(
         Preview<List<T>, T>((whole) {
           if (index < 0 || index >= whole.length) {
-            return None();
+            return Optional<T>.none();
           } else {
-            return Some(whole.last);
+            return Optional<T>.some(whole.last);
           }
         }),
         (whole, part) {
@@ -337,9 +337,9 @@ extension MapOpticsPreviewExtension<Whole, Key, T> on Preview<Whole, Map<Key, T>
         (whole) {
           final element = whole[key];
           if (element == null) {
-            return None();
+            return Optional<T>.none();
           } else {
-            return Some(element);
+            return Optional<T>.some(element);
           }
         },
       ),
@@ -354,9 +354,9 @@ extension MapOpticsFoldExtension<Whole, Key, T> on Fold<Whole, Map<Key, T>> {
         (whole) {
           final element = whole[key];
           if (element == null) {
-            return None();
+            return Optional<T>.none();
           } else {
-            return Some(element);
+            return Optional<T>.some(element);
           }
         },
       ),
@@ -371,9 +371,9 @@ extension MapOpticsMutatorExtension<Whole, Key, T> on Mutator<Whole, Map<Key, T>
         Preview<Map<Key, T>, T>((whole) {
           final element = whole[key];
           if (element == null) {
-            return None();
+            return Optional<T>.none();
           } else {
-            return Some(element);
+            return Optional<T>.some(element);
           }
         }),
         (whole, part) {

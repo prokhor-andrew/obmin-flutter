@@ -13,57 +13,112 @@ import 'package:obmin/optics/mutable/reflector.dart';
 import 'package:obmin/optics/preview.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/types/product.dart';
+import 'package:obmin/utils/bool_fold.dart';
 
-sealed class Either<L, R> {
-  const Either();
+final class Either<L, R> {
+  final bool _isLeft;
+  final L? _left;
+  final R? _right;
 
-  static Eqv<Either<L, R>> eqv<L, R>() => Eqv<Either<L, R>>();
+  const Either.left(L left)
+      : _left = left,
+        _right = null,
+        _isLeft = true;
 
-  static Mutator<Either<L, R>, Either<L, R>> setter<L, R>() => Mutator.setter<Either<L, R>>();
+  const Either.right(R right)
+      : _right = right,
+        _left = null,
+        _isLeft = false;
 
-  Optional<L> get leftOrNone => fold<Optional<L>>(
-        Some.new,
-        (_) => const None(),
-      );
-
-  Optional<R> get rightOrNone => fold<Optional<R>>(
-        (_) => const None(),
-        Some.new,
-      );
-
-  Either<LeftResult, R> bindLeft<LeftResult>(Either<LeftResult, R> Function(L left) function) {
-    return fold<Either<LeftResult, R>>(function, Right.new);
+  T fold<T>(
+    T Function(L value) ifLeft,
+    T Function(R value) ifRight,
+  ) {
+    return _isLeft.fold<T>(
+      () => ifLeft(_left!),
+      () => ifRight(_right!),
+    );
   }
 
-  Either<L, RightResult> bindRight<RightResult>(Either<L, RightResult> Function(R right) function) {
-    return swapped().bindLeft<RightResult>((value) {
-      return function(value).swapped();
-    }).swapped();
+  @override
+  String toString() {
+    return fold<String>(
+      (value) => "Either<$L, $R> Left=$value",
+      (value) => "Either<$L, $R> Right=$value",
+    );
   }
 
-  Either<LeftResult, R> mapLeft<LeftResult>(LeftResult Function(L left) function) {
-    return bindLeft<LeftResult>((value) {
-      return Left(function(value));
-    });
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! Either<L, R>) return false;
+
+    if (_isLeft != other._isLeft) {
+      return false;
+    }
+    if (_isLeft) {
+      return _left == other._left;
+    } else {
+      return _right == other._right;
+    }
   }
 
-  Either<LeftResult, R> mapLeftTo<LeftResult>(LeftResult value) => mapLeft((_) => value);
-
-  Either<L, RightResult> mapRight<RightResult>(RightResult Function(R right) function) {
-    return swapped().mapLeft(function).swapped();
-  }
-
-  Either<L, RightResult> mapRightTo<RightResult>(RightResult value) => mapRight((_) => value);
+  @override
+  int get hashCode => _isLeft ? _left.hashCode : _right.hashCode;
 
   Either<R, L> swapped() {
-    return fold<Either<R, L>>(Right.new, Left.new);
+    return fold<Either<R, L>>(
+      Either<R, L>.right,
+      Either<R, L>.left,
+    );
   }
+
+  Either<T, R> bindLeft<T>(Either<T, R> Function(L value) function) {
+    return fold<Either<T, R>>(
+      function,
+      Either<T, R>.right,
+    );
+  }
+
+  Either<T, R> mapLeft<T>(T Function(L value) function) {
+    return bindLeft<T>((value) => Either<T, R>.left(function(value)));
+  }
+
+  Either<T, R> mapLeftTo<T>(T value) {
+    return mapLeft<T>((_) => value);
+  }
+
+  Either<L, T> bindRight<T>(Either<L, T> Function(R value) function) {
+    return fold<Either<L, T>>(
+      Either<L, T>.left,
+      function,
+    );
+  }
+
+  Either<L, T> mapRight<T>(T Function(R value) function) {
+    return swapped().mapLeft<T>(function).swapped();
+  }
+
+  Either<L, T> mapRightTo<T>(T value) {
+    return mapRight<T>((_) => value);
+  }
+
+  Optional<L> get leftOrNone => fold<Optional<L>>(
+        (left) => Optional<L>.some(left),
+        (right) => Optional<L>.none(),
+      );
+
+  Optional<R> get rightOrNone => swapped().leftOrNone;
+
+  bool get isLeft => leftOrNone.mapTo(true).valueOr(false);
+
+  bool get isRight => !isLeft;
 
   void executeIfLeft(void Function(L value) function) {
     fold<void Function()>(
       (value) => () => function(value),
       (_) => () {},
-    )();
+    );
   }
 
   void executeIfRight(void Function(R value) function) {
@@ -78,58 +133,9 @@ sealed class Either<L, R> {
     });
   }
 
-  T fold<T>(T Function(L left) ifLeft, T Function(R right) ifRight) {
-    return switch (this) {
-      Left<L, R>(value: final value) => ifLeft(value),
-      Right<L, R>(value: final value) => ifRight(value),
-    };
-  }
+  static Eqv<Either<L, R>> eqv<L, R>() => Eqv<Either<L, R>>();
 
-  @override
-  String toString() {
-    return fold<String>(
-      (value) => "Either<$L, $R> Left=$value",
-      (value) => "Either<$L, $R> Right=$value",
-    );
-  }
-}
-
-final class Left<L, R> extends Either<L, R> {
-  final L value;
-
-  const Left(this.value);
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Left<L, R> && other.value == value;
-  }
-
-  @override
-  int get hashCode => value.hashCode;
-
-  static Eqv<Left<L, R>> eqv<L, R>() => Eqv<Left<L, R>>();
-
-  static Mutator<Left<L, R>, Left<L, R>> setter<L, R>() => Mutator.setter<Left<L, R>>();
-}
-
-final class Right<L, R> extends Either<L, R> {
-  final R value;
-
-  const Right(this.value);
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Right<L, R> && other.value == value;
-  }
-
-  @override
-  int get hashCode => value.hashCode;
-
-  static Eqv<Right<L, R>> eqv<L, R>() => Eqv<Right<L, R>>();
-
-  static Mutator<Right<L, R>, Right<L, R>> setter<L, R>() => Mutator.setter<Right<L, R>>();
+  static Mutator<Either<L, R>, Either<L, R>> setter<L, R>() => Mutator.setter<Either<L, R>>();
 }
 
 extension EitherValueWhenBoth<T> on Either<T, T> {
@@ -139,239 +145,106 @@ extension EitherValueWhenBoth<T> on Either<T, T> {
       );
 }
 
-extension EitherValueWhenLeftNever<T> on Either<Never, T> {
-  T get value => fold<T>(
-        (never) => throw "Unreachable code is reached", // this code cannot be reached
-        (val) => val,
-      );
-}
-
-extension EitherValueWhenRightNever<T> on Either<T, Never> {
-  T get value => swapped().value;
-}
-
-extension LeftObminOpticEqvExtension<L, R> on Eqv<Left<L, R>> {
-  Getter<Left<L, R>, L> get value => asGetter().value;
-}
-
-extension LeftObminOpticGetterExtension<Whole, L, R> on Getter<Whole, Left<L, R>> {
-  Getter<Whole, L> get value => compose(Getter<Left<L, R>, L>((whole) => whole.value));
-}
-
-extension LeftObminOpticPreviewExtension<Whole, L, R> on Preview<Whole, Left<L, R>> {
-  Preview<Whole, L> get value => composeWithGetter(Getter<Left<L, R>, L>((whole) => whole.value));
-}
-
-extension LeftObminOpticFoldExtension<Whole, L, R> on Fold<Whole, Left<L, R>> {
-  Fold<Whole, L> get value => composeWithGetter(Getter<Left<L, R>, L>((whole) => whole.value));
-}
-
-extension LeftObminOpticMutatorExtension<Whole, L, R> on Mutator<Whole, Left<L, R>> {
-  Mutator<Whole, L> get value => compose(
-        Mutator.lens<Left<L, R>, L>(
-          Getter<Left<L, R>, L>((whole) => whole.value),
-          (whole, part) => Left(part),
-        ),
-      );
-}
-
-extension LeftObminOpticIsoExtension<Whole, L, R> on Iso<Whole, Left<L, R>> {
-  Mutator<Whole, L> get value => asMutator().compose(
-        Mutator.lens<Left<L, R>, L>(
-          Getter<Left<L, R>, L>((whole) => whole.value),
-          (whole, part) => Left(part),
-        ),
-      );
-}
-
-extension LeftObminOpticPrismExtension<Whole, L, R> on Prism<Whole, Left<L, R>> {
-  Mutator<Whole, L> get value => asMutator().compose(
-        Mutator.lens<Left<L, R>, L>(
-          Getter<Left<L, R>, L>((whole) => whole.value),
-          (whole, part) => Left(part),
-        ),
-      );
-}
-
-extension LeftObminOpticReflectorExtension<Whole, L, R> on Reflector<Whole, Left<L, R>> {
-  Mutator<Whole, L> get value => asMutator().compose(
-        Mutator.lens<Left<L, R>, L>(
-          Getter<Left<L, R>, L>((whole) => whole.value),
-          (whole, part) => Left(part),
-        ),
-      );
-}
-
-extension LeftObminOpticBiPreviewExtension<Whole, L, R> on BiPreview<Whole, Left<L, R>> {
-  Mutator<Whole, L> get value => asMutator().compose(
-        Mutator.lens<Left<L, R>, L>(
-          Getter<Left<L, R>, L>((whole) => whole.value),
-          (whole, part) => Left(part),
-        ),
-      );
-}
-
-extension RightObminOpticEqvExtension<L, R> on Eqv<Right<L, R>> {
-  Getter<Right<L, R>, R> get value => asGetter().value;
-}
-
-extension RightObminOpticGetterExtension<Whole, L, R> on Getter<Whole, Right<L, R>> {
-  Getter<Whole, R> get value => compose(Getter<Right<L, R>, R>((whole) => whole.value));
-}
-
-extension RightObminOpticPreviewExtension<Whole, L, R> on Preview<Whole, Right<L, R>> {
-  Preview<Whole, R> get value => composeWithGetter(Getter<Right<L, R>, R>((whole) => whole.value));
-}
-
-extension RightObminOpticFoldExtension<Whole, L, R> on Fold<Whole, Right<L, R>> {
-  Fold<Whole, R> get value => composeWithGetter(Getter<Right<L, R>, R>((whole) => whole.value));
-}
-
-extension RightObminOpticMutatorExtension<Whole, L, R> on Mutator<Whole, Right<L, R>> {
-  Mutator<Whole, R> get value => compose(
-        Mutator.lens<Right<L, R>, R>(
-          Getter<Right<L, R>, R>((whole) => whole.value),
-          (whole, part) => Right(part),
-        ),
-      );
-}
-
-extension RightObminOpticIsoExtension<Whole, L, R> on Iso<Whole, Right<L, R>> {
-  Mutator<Whole, R> get value => asMutator().compose(
-        Mutator.lens<Right<L, R>, R>(
-          Getter<Right<L, R>, R>((whole) => whole.value),
-          (whole, part) => Right(part),
-        ),
-      );
-}
-
-extension RightObminOpticPrismExtension<Whole, L, R> on Prism<Whole, Right<L, R>> {
-  Mutator<Whole, R> get value => asMutator().compose(
-        Mutator.lens<Right<L, R>, R>(
-          Getter<Right<L, R>, R>((whole) => whole.value),
-          (whole, part) => Right(part),
-        ),
-      );
-}
-
-extension RightObminOpticReflectorExtension<Whole, L, R> on Reflector<Whole, Right<L, R>> {
-  Mutator<Whole, R> get value => asMutator().compose(
-        Mutator.lens<Right<L, R>, R>(
-          Getter<Right<L, R>, R>((whole) => whole.value),
-          (whole, part) => Right(part),
-        ),
-      );
-}
-
-extension RightObminOpticBiPreviewExtension<Whole, L, R> on BiPreview<Whole, Right<L, R>> {
-  Mutator<Whole, R> get value => asMutator().compose(
-        Mutator.lens<Right<L, R>, R>(
-          Getter<Right<L, R>, R>((whole) => whole.value),
-          (whole, part) => Right(part),
-        ),
-      );
-}
-
 extension EitherObminOpticEqvExtension<L, R> on Eqv<Either<L, R>> {
-  Preview<Either<L, R>, Left<L, R>> get left => Preview<Either<L, R>, Left<L, R>>((whole) => whole.leftOrNone.map(Left.new));
+  Preview<Either<L, R>, L> get left => Preview<Either<L, R>, L>((whole) => whole.leftOrNone);
 
-  Preview<Either<L, R>, Right<L, R>> get right => Preview<Either<L, R>, Right<L, R>>((whole) => whole.rightOrNone.map(Right.new));
+  Preview<Either<L, R>, R> get right => Preview<Either<L, R>, R>((whole) => whole.rightOrNone);
 }
 
 extension EitherObminOpticGetterExtension<Whole, L, R> on Getter<Whole, Either<L, R>> {
-  Preview<Whole, Left<L, R>> get left => composeWithPreview(Preview<Either<L, R>, Left<L, R>>((whole) => whole.leftOrNone.map(Left.new)));
+  Preview<Whole, L> get left => composeWithPreview(Preview<Either<L, R>, L>((whole) => whole.leftOrNone));
 
-  Preview<Whole, Right<L, R>> get right => composeWithPreview(Preview<Either<L, R>, Right<L, R>>((whole) => whole.rightOrNone.map(Right.new)));
+  Preview<Whole, R> get right => composeWithPreview(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
 }
 
 extension EitherObminOpticPreviewExtension<Whole, L, R> on Preview<Whole, Either<L, R>> {
-  Preview<Whole, Left<L, R>> get left => compose(Preview<Either<L, R>, Left<L, R>>((whole) => whole.leftOrNone.map(Left.new)));
+  Preview<Whole, L> get left => compose(Preview<Either<L, R>, L>((whole) => whole.leftOrNone));
 
-  Preview<Whole, Right<L, R>> get right => compose(Preview<Either<L, R>, Right<L, R>>((whole) => whole.rightOrNone.map(Right.new)));
+  Preview<Whole, R> get right => compose(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
 }
 
 extension EitherObminOpticFoldExtension<Whole, L, R> on Fold<Whole, Either<L, R>> {
-  Fold<Whole, Left<L, R>> get left => composeWithPreview(Preview<Either<L, R>, Left<L, R>>((whole) => whole.leftOrNone.map(Left.new)));
+  Fold<Whole, L> get left => composeWithPreview(Preview<Either<L, R>, L>((whole) => whole.leftOrNone));
 
-  Fold<Whole, Right<L, R>> get right => composeWithPreview(Preview<Either<L, R>, Right<L, R>>((whole) => whole.rightOrNone.map(Right.new)));
+  Fold<Whole, R> get right => composeWithPreview(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
 }
 
 extension EitherObminOpticMutatorExtension<Whole, L, R> on Mutator<Whole, Either<L, R>> {
-  Mutator<Whole, Left<L, R>> get left => composeWithPrism(
-        Prism<Either<L, R>, Left<L, R>>(
-          Preview<Either<L, R>, Left<L, R>>((whole) => whole.leftOrNone.map(Left.new)),
-          Getter<Left<L, R>, Either<L, R>>((part) => part),
+  Mutator<Whole, L> get left => composeWithPrism(
+        Prism<Either<L, R>, L>(
+          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
+          Getter<L, Either<L, R>>(Either<L, R>.left),
         ),
       );
 
-  Mutator<Whole, Right<L, R>> get right => composeWithPrism(
-        Prism<Either<L, R>, Right<L, R>>(
-          Preview<Either<L, R>, Right<L, R>>((whole) => whole.rightOrNone.map(Right.new)),
-          Getter<Right<L, R>, Either<L, R>>((part) => part),
+  Mutator<Whole, R> get right => composeWithPrism(
+        Prism<Either<L, R>, R>(
+          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
+          Getter<R, Either<L, R>>(Either<L, R>.right),
         ),
       );
 }
 
 extension EitherObminOpticIsoExtension<Whole, L, R> on Iso<Whole, Either<L, R>> {
-  Prism<Whole, Left<L, R>> get left => composeWithPrism(
-        Prism<Either<L, R>, Left<L, R>>(
-          Preview<Either<L, R>, Left<L, R>>((whole) => whole.leftOrNone.map(Left.new)),
-          Getter<Left<L, R>, Either<L, R>>((part) => part),
+  Prism<Whole, L> get left => composeWithPrism(
+        Prism<Either<L, R>, L>(
+          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
+          Getter<L, Either<L, R>>(Either<L, R>.left),
         ),
       );
 
-  Prism<Whole, Right<L, R>> get right => composeWithPrism(
-        Prism<Either<L, R>, Right<L, R>>(
-          Preview<Either<L, R>, Right<L, R>>((whole) => whole.rightOrNone.map(Right.new)),
-          Getter<Right<L, R>, Either<L, R>>((part) => part),
+  Prism<Whole, R> get right => composeWithPrism(
+        Prism<Either<L, R>, R>(
+          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
+          Getter<R, Either<L, R>>(Either<L, R>.right),
         ),
       );
 }
 
 extension EitherObminOpticPrismExtension<Whole, L, R> on Prism<Whole, Either<L, R>> {
-  Prism<Whole, Left<L, R>> get left => compose(
-        Prism<Either<L, R>, Left<L, R>>(
-          Preview<Either<L, R>, Left<L, R>>((whole) => whole.leftOrNone.map(Left.new)),
-          Getter<Left<L, R>, Either<L, R>>((part) => part),
+  Prism<Whole, L> get left => compose(
+        Prism<Either<L, R>, L>(
+          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
+          Getter<L, Either<L, R>>(Either<L, R>.left),
         ),
       );
 
-  Prism<Whole, Right<L, R>> get right => compose(
-        Prism<Either<L, R>, Right<L, R>>(
-          Preview<Either<L, R>, Right<L, R>>((whole) => whole.rightOrNone.map(Right.new)),
-          Getter<Right<L, R>, Either<L, R>>((part) => part),
+  Prism<Whole, R> get right => compose(
+        Prism<Either<L, R>, R>(
+          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
+          Getter<R, Either<L, R>>(Either<L, R>.right),
         ),
       );
 }
 
 extension EitherObminOpticReflectorExtension<Whole, L, R> on Reflector<Whole, Either<L, R>> {
-  BiPreview<Whole, Left<L, R>> get left => composeWithPrism(
-        Prism<Either<L, R>, Left<L, R>>(
-          Preview<Either<L, R>, Left<L, R>>((whole) => whole.leftOrNone.map(Left.new)),
-          Getter<Left<L, R>, Either<L, R>>((part) => part),
+  BiPreview<Whole, L> get left => composeWithPrism(
+        Prism<Either<L, R>, L>(
+          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
+          Getter<L, Either<L, R>>(Either<L, R>.left),
         ),
       );
 
-  BiPreview<Whole, Right<L, R>> get right => composeWithPrism(
-        Prism<Either<L, R>, Right<L, R>>(
-          Preview<Either<L, R>, Right<L, R>>((whole) => whole.rightOrNone.map(Right.new)),
-          Getter<Right<L, R>, Either<L, R>>((part) => part),
+  BiPreview<Whole, R> get right => composeWithPrism(
+        Prism<Either<L, R>, R>(
+          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
+          Getter<R, Either<L, R>>(Either<L, R>.right),
         ),
       );
 }
 
 extension EitherObminOpticBiPreviewExtension<Whole, L, R> on BiPreview<Whole, Either<L, R>> {
-  BiPreview<Whole, Left<L, R>> get left => composeWithPrism(
-        Prism<Either<L, R>, Left<L, R>>(
-          Preview<Either<L, R>, Left<L, R>>((whole) => whole.leftOrNone.map(Left.new)),
-          Getter<Left<L, R>, Either<L, R>>((part) => part),
+  BiPreview<Whole, L> get left => composeWithPrism(
+        Prism<Either<L, R>, L>(
+          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
+          Getter<L, Either<L, R>>(Either<L, R>.left),
         ),
       );
 
-  BiPreview<Whole, Right<L, R>> get right => composeWithPrism(
-        Prism<Either<L, R>, Right<L, R>>(
-          Preview<Either<L, R>, Right<L, R>>((whole) => whole.rightOrNone.map(Right.new)),
-          Getter<Right<L, R>, Either<L, R>>((part) => part),
+  BiPreview<Whole, R> get right => composeWithPrism(
+        Prism<Either<L, R>, R>(
+          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
+          Getter<R, Either<L, R>>(Either<L, R>.right),
         ),
       );
 }
