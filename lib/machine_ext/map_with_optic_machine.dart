@@ -9,8 +9,28 @@ import 'package:obmin/machine_ext/silo_machine.dart';
 import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/types/update.dart';
 
+extension MapWithOpicToUpdateMachineExtension<T> on Silo<Update<T>> {
+  Silo<Update<R>> mapWithOpticIntoUpdate<R>(
+    Mutator<R, T> mutator, {
+    ChannelBufferStrategy<()>? inputBufferStrategy,
+    ChannelBufferStrategy<Update<R>>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<Update<T>, ()>>? internalBufferStrategy,
+  }) {
+    return map<Update<R>>(
+      (update) {
+        return (whole) {
+          return mutator.apply(whole, update);
+        };
+      },
+      internalBufferStrategy: internalBufferStrategy,
+      inputBufferStrategy: inputBufferStrategy,
+      outputBufferStrategy: outputBufferStrategy,
+    );
+  }
+}
+
 extension MapWithOpticMachineExtension<T> on Silo<T> {
-  Silo<Update<R>> mapWithOptic<R>(
+  Silo<Update<R>> mapWithOpticIntoSet<R>(
     Mutator<R, T> mutator, {
     ChannelBufferStrategy<()>? inputBufferStrategy,
     ChannelBufferStrategy<Update<R>>? outputBufferStrategy,
