@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      obmin|optic:
+        enabled: true
+
+builders:
+  optic:
+    target: ":obmin"
+    import: "package:obmin/generators/builder.dart"
+    builder_factories: ["opticGeneratorFactory"]
+    build_extensions: {".dart": [".optic.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
