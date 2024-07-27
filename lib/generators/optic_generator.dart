@@ -69,8 +69,6 @@ StringBuffer _generateSealedClass(ClassElement element, List<ClassElement> cases
 }
 
 void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<ClassElement> cases) {
-  final String className = element.displayName;
-
   final String generics;
 
   if (element.typeParameters.isEmpty) {
@@ -85,7 +83,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
   for (final caseE in cases) {
     final caseName = caseE.displayName;
 
-    buffer.writeln("extension Optic${caseName}UtilsExtension$generics on $className$generics {");
+    buffer.writeln("extension Optic${caseName}UtilsExtension$generics on $caseName$generics {");
 
     String arguments = "";
     String compares = "";
@@ -537,9 +535,9 @@ void _generateSealedMapMethods(StringBuffer buffer, ClassElement element, List<C
     for (final caseE in cases) {
       final caseName = caseE.displayName;
       if (caseName == selectedCase) {
-        acc += "if$caseName: Some.new,";
+        acc += "if$caseName: Optional.some,";
       } else {
-        acc += "if$caseName: (_) => const None(),";
+        acc += "if$caseName: (_) => const Optional.none(),";
       }
     }
     return acc;
