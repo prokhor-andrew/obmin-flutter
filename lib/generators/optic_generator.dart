@@ -965,7 +965,6 @@ void _generateFinalPODO(StringBuffer buffer, ClassElement element) {
 
   buffer.writeln("extension Optic${className}UtilsExtension${generics} on $className$generics {");
 
-  String properties = "";
   String arguments = "";
   String compares = "";
   String hashes = "";
@@ -976,13 +975,10 @@ void _generateFinalPODO(StringBuffer buffer, ClassElement element) {
 
     final bool isAnyIterableSubclass = type.isDartCoreIterable;
 
-    properties += "  final $type $name;\n";
     arguments += " $name=\$$name,";
     compares += "&& ${isAnyIterableSubclass ? "const IterableEquality().equals(other.$name, $name)" : "other.$name == $name"}";
     hashes += "${isAnyIterableSubclass ? "const IterableEquality().hash($name)" : name},";
   }
-
-  buffer.writeln(properties);
   
   buffer.writeln("");
   buffer.writeln("");
