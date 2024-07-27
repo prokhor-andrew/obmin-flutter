@@ -16,11 +16,7 @@ class OpticGenerator extends GeneratorForAnnotation<Optic> {
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError('Generator cannot target `${element.runtimeType}`.');
     }
-
-    if (!element.isPrivate) {
-      throw InvalidGenerationSourceError('Annotated class must be private.');
-    }
-
+    
     if (!_isSubClassOfObject(element)) {
       throw "Annotated class must not have a superclass.";
     }
@@ -43,10 +39,7 @@ class OpticGenerator extends GeneratorForAnnotation<Optic> {
       }
 
       for (final caseE in cases) {
-        if (!caseE.isPrivate) {
-          throw InvalidGenerationSourceError('Classes that extend annotated sealed class must be private.');
-        }
-
+        
         if (caseE.fields.isEmpty) {
           throw InvalidGenerationSourceError('Classes that extend annotated sealed class must have properties.');
         }
@@ -66,8 +59,6 @@ class OpticGenerator extends GeneratorForAnnotation<Optic> {
 StringBuffer _generateSealedClass(ClassElement element, List<ClassElement> cases) {
   final StringBuffer buffer = StringBuffer();
 
-  _generateSealedClassObject(buffer, element);
-
   _generateSealedClassCases(buffer, element, cases);
 
   _generateSealedMapMethods(buffer, element, cases);
@@ -78,7 +69,7 @@ StringBuffer _generateSealedClass(ClassElement element, List<ClassElement> cases
 }
 
 void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<ClassElement> cases) {
-  final String className = element.displayName.substring(1);
+  final String className = element.displayName;
 
   final String generics;
 
@@ -92,12 +83,10 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
   }
 
   for (final caseE in cases) {
-    final caseName = caseE.displayName.substring(1);
+    final caseName = caseE.displayName;
 
-    buffer.writeln("final class $caseName$generics extends $className$generics {");
+    buffer.writeln("extension Optic${caseName}UtilsExtension$generics on $className$generics {");
 
-    String properties = "";
-    String params = "";
     String arguments = "";
     String compares = "";
     String hashes = "";
@@ -108,24 +97,13 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
 
       final bool isAnyIterableSubclass = type.isDartCoreIterable;
 
-      properties += "  final $type $name;\n";
-      params += "    required this.$name,\n";
       arguments += " $name=\$$name,";
       compares += "&& ${isAnyIterableSubclass ? "const IterableEquality().equals(other.$name, $name)" : "other.$name == $name"}";
       hashes += "${isAnyIterableSubclass ? "const IterableEquality().hash($name)" : name},";
     }
 
-    buffer.writeln(properties);
 
-    buffer.writeln("  const $caseName({");
-    buffer.writeln(params);
-    buffer.writeln("  });");
-
-    buffer.writeln("");
-    buffer.writeln("");
-
-    buffer.writeln("  @override");
-    buffer.writeln("  String toString() {");
+    buffer.writeln("  String _toString() {");
     buffer.writeln("    return \"$caseName${caseE.typeParameters.isEmpty ? "" : "<${_dropLastChar(caseE.typeParameters.fold("", (acc, element) {
         return "$acc\$$element,";
       }))}>"} {${_dropLastChar(arguments)} }\";");
@@ -135,8 +113,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
     buffer.writeln("");
 
     buffer.writeln("  // you need \"collection:\" package if you want to use Iterable in your class");
-    buffer.writeln("  @override");
-    buffer.writeln("  bool operator ==(Object other) {");
+    buffer.writeln("  bool _equals(Object other) {");
     buffer.writeln("    if (identical(this, other)) return true;");
     buffer.writeln("    return other is $caseName$generics");
     buffer.writeln("    $compares;");
@@ -145,35 +122,12 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
     buffer.writeln("");
     buffer.writeln("");
 
-    buffer.writeln("  @override");
-    buffer.writeln("  int get hashCode => Object.hashAll([");
+    buffer.writeln("  int get _hashCode => Object.hashAll([");
     buffer.writeln("    $hashes");
     buffer.writeln("  ]);");
 
     buffer.writeln("");
     buffer.writeln("");
-
-    if (generics.isEmpty) {
-      buffer.writeln("  static const Eqv<$caseName> eqv = Eqv<$caseName>();");
-
-      buffer.writeln("");
-      buffer.writeln("");
-
-      buffer.writeln("  static final Mutator<$caseName, $caseName> setter = Mutator.setter<$caseName>();");
-    } else {
-      buffer.writeln("  static Eqv<$caseName$generics> eqv$generics() => Eqv<$caseName$generics>();");
-
-      buffer.writeln("");
-      buffer.writeln("");
-
-      buffer.writeln("  static Mutator<$caseName$generics, $caseName$generics> setter$generics() => Mutator.setter<$caseName$generics>();");
-    }
-
-    buffer.writeln("");
-    buffer.writeln("");
-
-    buffer.writeln("  // method exists only to reference _$caseName to silence \"Not being used\" warning");
-    buffer.writeln("  void _stub(_$caseName$generics _) {}");
 
     buffer.writeln("}");
 
@@ -372,7 +326,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
 }
 
 void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<ClassElement> cases) {
-  final String className = element.displayName.substring(1);
+  final String className = element.displayName;
 
   final String generics;
 
@@ -388,7 +342,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
   buffer.writeln("extension ${className}ObminOpticEqvExtension$generics on Eqv<$className$generics> {");
 
   for (final caseE in cases) {
-    final caseName = caseE.displayName.substring(1);
+    final caseName = caseE.displayName;
 
     buffer.writeln("");
 
@@ -405,7 +359,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
       "extension ${className}ObminOpticGetterExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Getter<Whole, $className$generics> {");
 
   for (final caseE in cases) {
-    final caseName = caseE.displayName.substring(1);
+    final caseName = caseE.displayName;
 
     buffer.writeln("");
 
@@ -422,7 +376,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
       "extension ${className}ObminOpticPreviewExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Preview<Whole, $className$generics> {");
 
   for (final caseE in cases) {
-    final caseName = caseE.displayName.substring(1);
+    final caseName = caseE.displayName;
 
     buffer.writeln("");
 
@@ -439,7 +393,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
       "extension ${className}ObminOpticFoldExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Fold<Whole, $className$generics> {");
 
   for (final caseE in cases) {
-    final caseName = caseE.displayName.substring(1);
+    final caseName = caseE.displayName;
 
     buffer.writeln("");
 
@@ -456,7 +410,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
       "extension ${className}ObminOpticMutatorExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Mutator<Whole, $className$generics> {");
 
   for (final caseE in cases) {
-    final caseName = caseE.displayName.substring(1);
+    final caseName = caseE.displayName;
 
     buffer.writeln("  Mutator<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
     buffer.writeln("    Prism<$className$generics, $caseName$generics>(");
@@ -475,7 +429,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
       "extension ${className}ObminOpticIsoExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Iso<Whole, $className$generics> {");
 
   for (final caseE in cases) {
-    final caseName = caseE.displayName.substring(1);
+    final caseName = caseE.displayName;
 
     buffer.writeln("  Prism<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
     buffer.writeln("    Prism<$className$generics, $caseName$generics>(");
@@ -494,7 +448,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
       "extension ${className}ObminOpticPrismExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Prism<Whole, $className$generics> {");
 
   for (final caseE in cases) {
-    final caseName = caseE.displayName.substring(1);
+    final caseName = caseE.displayName;
 
     buffer.writeln("  Prism<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => compose(");
     buffer.writeln("    Prism<$className$generics, $caseName$generics>(");
@@ -513,7 +467,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
       "extension ${className}ObminOpticReflectorExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Reflector<Whole, $className$generics> {");
 
   for (final caseE in cases) {
-    final caseName = caseE.displayName.substring(1);
+    final caseName = caseE.displayName;
 
     buffer.writeln("  BiPreview<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
     buffer.writeln("    Prism<$className$generics, $caseName$generics>(");
@@ -532,7 +486,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
       "extension ${className}ObminOpticBiPreviewExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on BiPreview<Whole, $className$generics> {");
 
   for (final caseE in cases) {
-    final caseName = caseE.displayName.substring(1);
+    final caseName = caseE.displayName;
 
     buffer.writeln("  BiPreview<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
     buffer.writeln("    Prism<$className$generics, $caseName$generics>(");
@@ -545,44 +499,9 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
   buffer.writeln('}');
 }
 
-void _generateSealedClassObject(StringBuffer buffer, ClassElement element) {
-  final String className = element.displayName.substring(1);
-
-  final String generics;
-
-  if (element.typeParameters.isEmpty) {
-    generics = "";
-  } else {
-    final params = _dropLastChar(element.typeParameters.fold("", (acc, element) {
-      return "$acc$element,";
-    }));
-    generics = "<$params>";
-  }
-
-  buffer.writeln("sealed class $className$generics {");
-  buffer.writeln("const $className();");
-
-  if (generics.isEmpty) {
-    buffer.writeln("  static const Eqv<$className> eqv = Eqv<$className>();");
-
-    buffer.writeln("");
-    buffer.writeln("");
-
-    buffer.writeln("  static final Mutator<$className, $className> setter = Mutator.setter<$className>();");
-  } else {
-    buffer.writeln("  static Eqv<$className$generics> eqv$generics() => Eqv<$className$generics>();");
-
-    buffer.writeln("");
-    buffer.writeln("");
-
-    buffer.writeln("  static Mutator<$className$generics, $className$generics> setter$generics() => Mutator.setter<$className$generics>();");
-  }
-
-  buffer.writeln("}");
-}
 
 void _generateSealedMapMethods(StringBuffer buffer, ClassElement element, List<ClassElement> cases) {
-  final String className = element.displayName.substring(1);
+  final String className = element.displayName;
 
   final String generics;
 
@@ -603,7 +522,7 @@ void _generateSealedMapMethods(StringBuffer buffer, ClassElement element, List<C
   String getMapArgs(String selectedCase) {
     String acc = "";
     for (final caseE in cases) {
-      final caseName = caseE.displayName.substring(1);
+      final caseName = caseE.displayName;
       if (caseName == selectedCase) {
         acc += "if$caseName: function,";
       } else {
@@ -616,7 +535,7 @@ void _generateSealedMapMethods(StringBuffer buffer, ClassElement element, List<C
   String getCaseOrNoneArgs(String selectedCase) {
     String acc = "";
     for (final caseE in cases) {
-      final caseName = caseE.displayName.substring(1);
+      final caseName = caseE.displayName;
       if (caseName == selectedCase) {
         acc += "if$caseName: Some.new,";
       } else {
@@ -629,7 +548,7 @@ void _generateSealedMapMethods(StringBuffer buffer, ClassElement element, List<C
   String getCaseExecuteArgs(String selectedCase) {
     String acc = "";
     for (final caseE in cases) {
-      final caseName = caseE.displayName.substring(1);
+      final caseName = caseE.displayName;
       if (caseName == selectedCase) {
         acc += "if$caseName: (value) => () => function(value),";
       } else {
@@ -642,7 +561,7 @@ void _generateSealedMapMethods(StringBuffer buffer, ClassElement element, List<C
   String getIsCaseBoolArgs(String selectedCase) {
     String acc = "";
     for (final caseE in cases) {
-      final caseName = caseE.displayName.substring(1);
+      final caseName = caseE.displayName;
       if (caseName == selectedCase) {
         acc += "if$caseName: (_) => true,";
       } else {
@@ -653,7 +572,7 @@ void _generateSealedMapMethods(StringBuffer buffer, ClassElement element, List<C
   }
 
   for (final caseE in cases) {
-    final caseName = caseE.displayName.substring(1);
+    final caseName = caseE.displayName;
 
     foldArgs += "required R Function($caseName$generics value) if$caseName, ";
 
@@ -740,17 +659,17 @@ StringBuffer _generateFinalClass(ClassElement element) {
 
 String _lowercaseFirstCharacter(String input) {
   if (input.isEmpty) return input;
-  return input[0].toLowerCase() + input.substring(1);
+  return input[0].toLowerCase() + input;
 }
 
 String _uppercaseFirstCharacter(String input) {
   if (input.isEmpty) return input;
 
-  return input[0].toUpperCase() + input.substring(1);
+  return input[0].toUpperCase() + input;
 }
 
 void _generateForEqv(StringBuffer buffer, ClassElement element) {
-  final String className = element.displayName.substring(1);
+  final String className = element.displayName;
 
   final String generics;
 
@@ -778,7 +697,7 @@ void _generateForEqv(StringBuffer buffer, ClassElement element) {
 }
 
 void _generateForGetter(StringBuffer buffer, ClassElement element) {
-  final String className = element.displayName.substring(1);
+  final String className = element.displayName;
   final String generics;
 
   if (element.typeParameters.isEmpty) {
@@ -806,7 +725,7 @@ void _generateForGetter(StringBuffer buffer, ClassElement element) {
 }
 
 void _generateForPreview(StringBuffer buffer, ClassElement element) {
-  final String className = element.displayName.substring(1);
+  final String className = element.displayName;
 
   final String generics;
 
@@ -835,7 +754,7 @@ void _generateForPreview(StringBuffer buffer, ClassElement element) {
 }
 
 void _generateForFold(StringBuffer buffer, ClassElement element) {
-  final String className = element.displayName.substring(1);
+  final String className = element.displayName;
 
   final String generics;
 
@@ -864,7 +783,7 @@ void _generateForFold(StringBuffer buffer, ClassElement element) {
 }
 
 void _generateFinalMapMethods(StringBuffer buffer, ClassElement element) {
-  final String className = element.displayName.substring(1);
+  final String className = element.displayName;
 
   final String generics;
 
@@ -921,7 +840,7 @@ void _generateFinalMapMethods(StringBuffer buffer, ClassElement element) {
 }
 
 void _generateForMutator(StringBuffer buffer, ClassElement element) {
-  final String className = element.displayName.substring(1);
+  final String className = element.displayName;
 
   final String generics;
 
@@ -1031,7 +950,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
 }
 
 void _generateFinalPODO(StringBuffer buffer, ClassElement element) {
-  final String className = element.displayName.substring(1);
+  final String className = element.displayName;
 
   final String generics;
 
@@ -1044,10 +963,9 @@ void _generateFinalPODO(StringBuffer buffer, ClassElement element) {
     generics = "<$params>";
   }
 
-  buffer.writeln("final class $className$generics {");
+  buffer.writeln("extension Optic${className}UtilsExtension${generics} on $className$generics {");
 
   String properties = "";
-  String params = "";
   String arguments = "";
   String compares = "";
   String hashes = "";
@@ -1059,23 +977,17 @@ void _generateFinalPODO(StringBuffer buffer, ClassElement element) {
     final bool isAnyIterableSubclass = type.isDartCoreIterable;
 
     properties += "  final $type $name;\n";
-    params += "    required this.$name,\n";
     arguments += " $name=\$$name,";
     compares += "&& ${isAnyIterableSubclass ? "const IterableEquality().equals(other.$name, $name)" : "other.$name == $name"}";
     hashes += "${isAnyIterableSubclass ? "const IterableEquality().hash($name)" : name},";
   }
 
   buffer.writeln(properties);
-
-  buffer.writeln("  const $className({");
-  buffer.writeln(params);
-  buffer.writeln("  });");
-
+  
   buffer.writeln("");
   buffer.writeln("");
 
-  buffer.writeln("  @override");
-  buffer.writeln("  String toString() {");
+  buffer.writeln("  String _toString() {");
   buffer.writeln("    return \"$className${element.typeParameters.isEmpty ? "" : "<${_dropLastChar(element.typeParameters.fold("", (acc, element) {
       return "$acc\$$element,";
     }))}>"} {${_dropLastChar(arguments)} }\";");
@@ -1085,8 +997,7 @@ void _generateFinalPODO(StringBuffer buffer, ClassElement element) {
   buffer.writeln("");
 
   buffer.writeln("  // you need \"collection:\" package if you want to use Iterable in your class");
-  buffer.writeln("  @override");
-  buffer.writeln("  bool operator ==(Object other) {");
+  buffer.writeln("  bool _equals(Object other) {");
   buffer.writeln("    if (identical(this, other)) return true;");
   buffer.writeln("    return other is $className$generics");
   buffer.writeln("    $compares;");
@@ -1095,36 +1006,13 @@ void _generateFinalPODO(StringBuffer buffer, ClassElement element) {
   buffer.writeln("");
   buffer.writeln("");
 
-  buffer.writeln("  @override");
-  buffer.writeln("  int get hashCode => Object.hashAll([");
+  buffer.writeln("  int get _hashCode => Object.hashAll([");
   buffer.writeln("    $hashes");
   buffer.writeln("  ]);");
 
   buffer.writeln("");
   buffer.writeln("");
-
-  if (generics.isEmpty) {
-    buffer.writeln("  static const Eqv<$className> eqv = Eqv<$className>();");
-
-    buffer.writeln("");
-    buffer.writeln("");
-
-    buffer.writeln("  static final Mutator<$className, $className> setter = Mutator.setter<$className>();");
-  } else {
-    buffer.writeln("  static Eqv<$className$generics> eqv$generics() => Eqv<$className$generics>();");
-
-    buffer.writeln("");
-    buffer.writeln("");
-
-    buffer.writeln("  static Mutator<$className$generics, $className$generics> setter$generics() => Mutator.setter<$className$generics>();");
-  }
-
-  buffer.writeln("");
-  buffer.writeln("");
-
-  buffer.writeln("  // method exists only to reference _$className to silence \"Not being used\" warning");
-  buffer.writeln("  void _stub(_$className$generics _) {}");
-
+  
   buffer.writeln("}");
 }
 
