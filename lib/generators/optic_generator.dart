@@ -22,7 +22,18 @@ class OpticGenerator extends GeneratorForAnnotation<Optic> {
 
     if (_isClassFinal(element)) {
       if (element.fields.isEmpty) {
-        throw InvalidGenerationSourceError('Annotated final class must have properties.');
+        throw InvalidGenerationSourceError('Annotated final class must have stored properties.');
+      } else {
+        bool isValid = false;
+        for (final field in element.fields) {
+          if (!_isComputedProperty(field)) {
+            isValid = true;
+            break;
+          }
+        }
+        if (!isValid) {
+          throw InvalidGenerationSourceError('Annotated final class must have stored properties.');
+        }
       }
 
       return _generateFinalClass(element).toString();
@@ -88,7 +99,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
     String hashes = "";
 
     for (final field in caseE.fields) {
-      if (field.getter == null) {
+      if (!_isComputedProperty(field)) {
         final type = field.type;
         final name = field.displayName;
 
@@ -132,7 +143,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
       String result = "$caseName(";
       if (caseE.fields.isNotEmpty) {
         for (final field in caseE.fields) {
-          if (field.getter == null) {
+          if (!_isComputedProperty(field)) {
             result += "${field.displayName}: ${field.displayName == modified ? "function(${field.displayName})" : field.displayName},";
           }
         }
@@ -148,7 +159,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
     buffer.writeln("");
 
     for (final field in caseE.fields) {
-      if (field.getter == null) {
+      if (!_isComputedProperty(field)) {
         final String fieldName = field.displayName;
         final fieldType = field.type;
 
@@ -177,7 +188,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
     buffer.writeln("extension ${caseName}ObminOpticEqvExtension$generics on Eqv<$caseName$generics> {");
 
     for (final field in caseE.fields) {
-      if (field.getter == null) {
+      if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
@@ -193,7 +204,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         "extension ${caseName}ObminOpticGetterExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Getter<Whole, $caseName$generics> {");
 
     for (final field in caseE.fields) {
-      if (field.getter == null) {
+      if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
@@ -209,7 +220,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         "extension ${caseName}ObminOpticPreviewExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Preview<Whole, $caseName$generics> {");
 
     for (final field in caseE.fields) {
-      if (field.getter == null) {
+      if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
@@ -226,7 +237,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         "extension ${caseName}ObminOpticFoldExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Fold<Whole, $caseName$generics> {");
 
     for (final field in caseE.fields) {
-      if (field.getter == null) {
+      if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
@@ -242,7 +253,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         "extension ${caseName}ObminOpticMutatorExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Mutator<Whole, $caseName$generics> {");
 
     for (final field in caseE.fields) {
-      if (field.getter == null) {
+      if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
@@ -263,7 +274,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         "extension ${caseName}ObminOpticIsoExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Iso<Whole, $caseName$generics> {");
 
     for (final field in caseE.fields) {
-      if (field.getter == null) {
+      if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
@@ -284,7 +295,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         "extension ${caseName}ObminOpticPrismExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Prism<Whole, $caseName$generics> {");
 
     for (final field in caseE.fields) {
-      if (field.getter == null) {
+      if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
@@ -305,7 +316,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         "extension ${caseName}ObminOpticReflectorExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Reflector<Whole, $caseName$generics> {");
 
     for (final field in caseE.fields) {
-      if (field.getter == null) {
+      if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
@@ -326,7 +337,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         "extension ${caseName}ObminOpticBiPreviewExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on BiPreview<Whole, $caseName$generics> {");
 
     for (final field in caseE.fields) {
-      if (field.getter == null) {
+      if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
@@ -704,7 +715,7 @@ void _generateForEqv(StringBuffer buffer, ClassElement element) {
   buffer.writeln("extension ${className}ObminOpticEqvExtension$generics on Eqv<$className$generics> {");
 
   for (final field in element.fields) {
-    if (field.getter == null) {
+    if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
@@ -734,7 +745,7 @@ void _generateForGetter(StringBuffer buffer, ClassElement element) {
       "extension ${className}ObminOpticGetterExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Getter<Whole, $className$generics> {");
 
   for (final field in element.fields) {
-    if (field.getter == null) {
+    if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
@@ -765,7 +776,7 @@ void _generateForPreview(StringBuffer buffer, ClassElement element) {
       "extension ${className}ObminOpticPreviewExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Preview<Whole, $className$generics> {");
 
   for (final field in element.fields) {
-    if (field.getter == null) {
+    if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
@@ -796,7 +807,7 @@ void _generateForFold(StringBuffer buffer, ClassElement element) {
       "extension ${className}ObminOpticFoldExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Fold<Whole, $className$generics> {");
 
   for (final field in element.fields) {
-    if (field.getter == null) {
+    if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
@@ -827,7 +838,7 @@ void _generateFinalMapMethods(StringBuffer buffer, ClassElement element) {
     String result = "$className(";
     if (element.fields.isNotEmpty) {
       for (final field in element.fields) {
-        if (field.getter == null) {
+        if (!_isComputedProperty(field)) {
           result += "${field.displayName}: ${field.displayName == modified ? "function(${field.displayName})" : field.displayName},";
         }
       }
@@ -843,7 +854,7 @@ void _generateFinalMapMethods(StringBuffer buffer, ClassElement element) {
   buffer.writeln("");
 
   for (final field in element.fields) {
-    if (field.getter == null) {
+    if (!_isComputedProperty(field)) {
       final String fieldName = field.displayName;
       final fieldType = field.type;
 
@@ -888,7 +899,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
       "extension ${className}ObminOpticMutatorExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Mutator<Whole, $className$generics> {");
 
   for (final field in element.fields) {
-    if (field.getter == null) {
+    if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
@@ -909,7 +920,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
       "extension ${className}ObminOpticIsoExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Iso<Whole, $className$generics> {");
 
   for (final field in element.fields) {
-    if (field.getter == null) {
+    if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
@@ -930,7 +941,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
       "extension ${className}ObminOpticPrismExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Prism<Whole, $className$generics> {");
 
   for (final field in element.fields) {
-    if (field.getter == null) {
+    if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
@@ -951,7 +962,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
       "extension ${className}ObminOpticReflectorExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Reflector<Whole, $className$generics> {");
 
   for (final field in element.fields) {
-    if (field.getter == null) {
+    if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
@@ -972,7 +983,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
       "extension ${className}ObminOpticBiPreviewExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on BiPreview<Whole, $className$generics> {");
 
   for (final field in element.fields) {
-    if (field.getter == null) {
+    if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
@@ -1011,7 +1022,7 @@ void _generateFinalPODO(StringBuffer buffer, ClassElement element) {
   String hashes = "";
 
   for (final field in element.fields) {
-    if (field.getter == null) {
+    if (!_isComputedProperty(field)) {
       final type = field.type;
       final name = field.displayName;
 
@@ -1105,4 +1116,8 @@ List<ClassElement> _findSubclasses(ClassElement sealedClass) {
   }
 
   return subclasses;
+}
+
+bool _isComputedProperty(FieldElement field) {
+  return field.getter != null && field.setter == null && !field.isFinal;
 }
