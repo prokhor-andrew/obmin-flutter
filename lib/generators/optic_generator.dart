@@ -657,13 +657,13 @@ StringBuffer _generateFinalClass(ClassElement element) {
 
 String _lowercaseFirstCharacter(String input) {
   if (input.isEmpty) return input;
-  return input[0].toLowerCase() + input;
+  return input[0].toLowerCase() + input.substring(1);
 }
 
 String _uppercaseFirstCharacter(String input) {
   if (input.isEmpty) return input;
 
-  return input[0].toUpperCase() + input;
+  return input[0].toUpperCase() + input.substring(1);
 }
 
 void _generateForEqv(StringBuffer buffer, ClassElement element) {
@@ -815,15 +815,17 @@ void _generateFinalMapMethods(StringBuffer buffer, ClassElement element) {
     final String fieldName = field.displayName;
     final fieldType = field.type;
 
-    buffer.writeln("    $className$generics copyUpdate${_uppercaseFirstCharacter(fieldName)}($fieldType Function($fieldType $fieldName) function) {");
-    buffer.writeln("        return ${constructObject(fieldName)}");
-    buffer.writeln("    }");
-    buffer.writeln("");
+    if (field.getter == null) {
+      buffer.writeln("    $className$generics copyUpdate${_uppercaseFirstCharacter(fieldName)}($fieldType Function($fieldType $fieldName) function) {");
+      buffer.writeln("        return ${constructObject(fieldName)}");
+      buffer.writeln("    }");
+      buffer.writeln("");
 
-    buffer.writeln("    $className$generics copySet${_uppercaseFirstCharacter(fieldName)}($fieldType $fieldName) {");
-    buffer.writeln("        return copyUpdate${_uppercaseFirstCharacter(fieldName)}((_) => $fieldName);");
-    buffer.writeln("    }");
-    buffer.writeln("");
+      buffer.writeln("    $className$generics copySet${_uppercaseFirstCharacter(fieldName)}($fieldType $fieldName) {");
+      buffer.writeln("        return copyUpdate${_uppercaseFirstCharacter(fieldName)}((_) => $fieldName);");
+      buffer.writeln("    }");
+      buffer.writeln("");
+    }
   }
 
   buffer.writeln("");
