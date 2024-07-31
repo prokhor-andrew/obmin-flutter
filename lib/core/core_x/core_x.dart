@@ -27,8 +27,10 @@ Core<State, State, Event> CoreX<State, Event>({
                 );
               },
               () {
+                // temp, will be removed in the next version
                 return SceneTransition(
-                  scene(state),
+                  scene(value),
+                  effects: [value],
                 );
               },
             );
