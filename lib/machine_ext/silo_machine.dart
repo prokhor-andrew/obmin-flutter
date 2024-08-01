@@ -9,7 +9,7 @@ import 'package:obmin/channel/channel_lib.dart';
 
 typedef Silo<T> = Machine<(), T>;
 
-extension SiloMachine on MachineFactory {
+extension SiloMachineExtension on MachineFactory {
   Silo<T> silo<Object, T>({
     required String id,
     required Object Function(void Function(T response) callback) onStart,

@@ -16,7 +16,7 @@ final class NavItem {
   });
 }
 
-class NavBox extends InheritedWidget {
+final class NavBox extends InheritedWidget {
   final bool Function(bool isForced) onPopTriggered;
   final NavItem main;
   final List<NavItem> others;
@@ -40,7 +40,7 @@ class NavBox extends InheritedWidget {
   }
 }
 
-class _ProxyNavBox extends InheritedWidget {
+final class _ProxyNavBox extends InheritedWidget {
   const _ProxyNavBox({
     required super.child,
   });
@@ -56,12 +56,12 @@ class _ProxyNavBox extends InheritedWidget {
   }
 }
 
-class _NavBox extends StatefulWidget {
+final class _NavBox extends StatefulWidget {
   @override
   State<_NavBox> createState() => _NavBoxState();
 }
 
-class _NavBoxState extends State<_NavBox> {
+final class _NavBoxState extends State<_NavBox> {
   bool _isInit = true;
 
   BackButtonDispatcher? _backButtonDispatcher;

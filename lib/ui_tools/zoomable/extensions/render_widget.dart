@@ -13,7 +13,7 @@ extension RenderWidgetExtension<State, Event> on Zoomable<State, Event> {
   }
 }
 
-class RenderWidget<State, Event> extends StatelessWidget {
+final class RenderWidget<State, Event> extends StatelessWidget {
   final Zoomable<State, Event> zoomable;
   final Widget Function(BuildContext context, State state, void Function(Event event) update) builder;
 

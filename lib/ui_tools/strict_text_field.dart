@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:obmin/ui_tools/stateless_text_field.dart';
 
-class StrictTextField extends StatefulWidget {
+final class StrictTextField extends StatefulWidget {
   final String text;
   final String? error;
   final bool autocorrect;
@@ -37,7 +37,7 @@ class StrictTextField extends StatefulWidget {
   State<StrictTextField> createState() => _StrictTextFieldState();
 }
 
-class _StrictTextFieldState extends State<StrictTextField> {
+final class _StrictTextFieldState extends State<StrictTextField> {
   late bool isHidden;
 
   @override

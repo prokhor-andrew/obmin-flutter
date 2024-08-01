@@ -115,7 +115,7 @@ final class Optional<T> {
   static Mutator<Optional<T>, Optional<T>> setter<T>() => Mutator.setter<Optional<T>>();
 }
 
-extension EitherToOptional<T> on Either<T, ()> {
+extension EitherToOptionalExtension<T> on Either<T, ()> {
   Optional<T> asOptional() {
     return fold<Optional<T>>(
       Optional<T>.some,

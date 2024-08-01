@@ -19,7 +19,7 @@ extension CalculatorWidgetExtension<State, Event> on Zoomable<State, Event> {
   }
 }
 
-class CalculatorWidget<State, Event> extends StatelessWidget {
+final class CalculatorWidget<State, Event> extends StatelessWidget {
   final Zoomable<State, Event> zoomable;
   final void Function(BuildContext context, Optional<State> oldState, State newState, void Function(Event event) update) calculate;
   final Widget child;

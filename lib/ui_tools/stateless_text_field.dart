@@ -6,7 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class StatelessTextField extends StatelessWidget {
+final class StatelessTextField extends StatelessWidget {
   final TextMagnifierConfiguration? magnifierConfiguration;
   final InputDecoration? decoration;
   final TextInputType keyboardType;
@@ -167,7 +167,7 @@ class StatelessTextField extends StatelessWidget {
   }
 }
 
-class _WrapperTextField extends InheritedWidget {
+final class _WrapperTextField extends InheritedWidget {
   final TextMagnifierConfiguration? magnifierConfiguration;
   final InputDecoration? decoration;
   final TextInputType keyboardType;
@@ -334,7 +334,7 @@ class _WrapperTextField extends InheritedWidget {
   }
 }
 
-class _CustomTextField extends StatefulWidget {
+final class _CustomTextField extends StatefulWidget {
   final TextMagnifierConfiguration? magnifierConfiguration;
   final InputDecoration? decoration;
   final TextInputType keyboardType;
@@ -439,7 +439,7 @@ class _CustomTextField extends StatefulWidget {
   State<_CustomTextField> createState() => _CustomTextFieldState();
 }
 
-class _CustomTextFieldState extends State<_CustomTextField> {
+final class _CustomTextFieldState extends State<_CustomTextField> {
   final TextEditingController _controller = TextEditingController();
 
   bool isFirstTime = true;

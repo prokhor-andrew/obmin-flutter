@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class ActionMessageWidget extends StatelessWidget {
+final class ActionMessageWidget extends StatelessWidget {
   final String message;
   final String actionLabel;
   final void Function()? onPressed;

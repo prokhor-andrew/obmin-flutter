@@ -75,7 +75,7 @@ final class SceneTransition<State, Trigger, Effect> {
   }
 }
 
-extension SceneToOutlineConverter<State, Trigger, Effect> on Scene<State, Trigger, Effect> {
+extension SceneToOutlineConverterExtension<State, Trigger, Effect> on Scene<State, Trigger, Effect> {
   Outline<State, IntTrigger, IntEffect, Trigger, Effect> asExtTriggerExtEffect<IntTrigger, IntEffect>() {
     return Outline.create(
       state: state,

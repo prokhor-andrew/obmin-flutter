@@ -138,7 +138,7 @@ final class Either<L, R> {
   static Mutator<Either<L, R>, Either<L, R>> setter<L, R>() => Mutator.setter<Either<L, R>>();
 }
 
-extension EitherValueWhenBoth<T> on Either<T, T> {
+extension EitherValueWhenBothExtension<T> on Either<T, T> {
   T get value => fold<T>(
         (val) => val,
         (val) => val,

@@ -10,7 +10,7 @@ import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/outline.dart';
 import 'package:obmin/types/optional.dart';
 
-extension DistinctUntilChangedMachine<Input, Output> on Machine<Input, Output> {
+extension DistinctUntilChangedMachineExtension<Input, Output> on Machine<Input, Output> {
   Machine<Input, Output> distinctUntilChangedInput({
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,

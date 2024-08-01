@@ -19,7 +19,7 @@ extension ZoomableConsumerWidgetExtension<Input, Output> on Zoomable<Input, Outp
   }
 }
 
-class ZoomableConsumerWidget<S, Input, Output> extends StatefulWidget {
+final class ZoomableConsumerWidget<S, Input, Output> extends StatefulWidget {
   final Zoomable<Input, Output> zoomable;
   final S Function(BuildContext? Function() context, Optional<S> state, Input input, void Function(Output output) update) processor;
   final Widget Function(BuildContext context, S state) builder;
@@ -35,7 +35,7 @@ class ZoomableConsumerWidget<S, Input, Output> extends StatefulWidget {
   State<ZoomableConsumerWidget<S, Input, Output>> createState() => _ConsumerZoomableWidgetState<S, Input, Output>();
 }
 
-class _ConsumerZoomableWidgetState<S, Input, Output> extends State<ZoomableConsumerWidget<S, Input, Output>> {
+final class _ConsumerZoomableWidgetState<S, Input, Output> extends State<ZoomableConsumerWidget<S, Input, Output>> {
   Optional<S> _state = Optional<S>.none();
 
   @override

@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/silo_machine.dart';
 
-extension StreamMachine on MachineFactory {
+extension StreamMachineExtension on MachineFactory {
   Silo<Res> stream<Res>({
     required String id,
     required Stream<Res> Function() stream,

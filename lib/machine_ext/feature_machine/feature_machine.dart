@@ -9,7 +9,7 @@ import 'package:obmin/machine_ext/basic_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
 import 'package:obmin/types/optional.dart';
 
-extension FeatureMachine on MachineFactory {
+extension FeatureMachineExtension on MachineFactory {
   Machine<ExtTrigger, ExtEffect> feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({
     required String id,
     required Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() onCreateFeature,

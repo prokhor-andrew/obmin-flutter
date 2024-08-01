@@ -6,7 +6,7 @@ import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/channel/channel_lib.dart';
 
-extension BasicMachine on MachineFactory {
+extension BasicMachineExtension on MachineFactory {
   Machine<Input, Output> basic<Object, Input, Output>({
     required String id,
     required Object Function(String id) onCreate,

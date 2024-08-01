@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class CreateDestroyWidget extends StatefulWidget {
+final class CreateDestroyWidget extends StatefulWidget {
   final void Function() onCreate;
   final void Function() onDestroy;
   final Widget child;

@@ -4,7 +4,7 @@
 
 part of 'zoomable_lib.dart';
 
-class ZoomableWidget<Input, Output> extends InheritedWidget {
+final class ZoomableWidget<Input, Output> extends InheritedWidget {
   final Input input;
   final void Function(Output) update;
 
@@ -25,7 +25,7 @@ class ZoomableWidget<Input, Output> extends InheritedWidget {
   }
 }
 
-class _ZoomableStatelessWidget<Input, Output> extends StatelessWidget {
+final class _ZoomableStatelessWidget<Input, Output> extends StatelessWidget {
   final Widget Function(BuildContext context, Zoomable<Input, Output> zoomable) builder;
 
   const _ZoomableStatelessWidget({

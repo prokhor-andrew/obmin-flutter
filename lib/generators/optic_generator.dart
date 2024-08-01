@@ -9,7 +9,7 @@ import 'package:build/build.dart';
 import 'package:obmin/annotations/optic.dart';
 import 'package:source_gen/source_gen.dart';
 
-class OpticGenerator extends GeneratorForAnnotation<Optic> {
+final class OpticGenerator extends GeneratorForAnnotation<Optic> {
   @override
   FutureOr<String> generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) {
     if (element is! ClassElement) {

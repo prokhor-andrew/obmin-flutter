@@ -2,7 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-extension MinusOnList<T> on List<T> {
+extension MinusOnListExtension<T> on List<T> {
   List<T> minusLast([int count = 1]) {
     assert(count >= 0);
 

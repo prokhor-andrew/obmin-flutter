@@ -2,7 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-extension PlusOnList<T> on List<T> {
+extension PlusOnListExtension<T> on List<T> {
   List<T> plus(T element) {
     final List<T> copy = toList();
     copy.add(element);

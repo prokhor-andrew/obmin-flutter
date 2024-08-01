@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class KeyboardContainer extends StatelessWidget {
+final class KeyboardContainer extends StatelessWidget {
   final double horSpacing;
   final double verSpacing;
   final List<Widget> children;

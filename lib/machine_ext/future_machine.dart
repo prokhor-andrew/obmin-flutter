@@ -8,7 +8,7 @@ import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/silo_machine.dart';
 import 'package:obmin/machine_ext/stream_machine.dart';
 
-extension FutureMachine on MachineFactory {
+extension FutureMachineExtension on MachineFactory {
   Silo<Res> future<Res>({
     required String id,
     required Future<Res> Function() future,

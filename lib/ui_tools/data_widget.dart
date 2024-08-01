@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class DataWidget<T> extends StatefulWidget {
+final class DataWidget<T> extends StatefulWidget {
   final T Function() init;
   final Widget Function(
     BuildContext context,
@@ -22,7 +22,7 @@ class DataWidget<T> extends StatefulWidget {
   State<DataWidget<T>> createState() => _DataWidgetState<T>();
 }
 
-class _DataWidgetState<T> extends State<DataWidget<T>> {
+final class _DataWidgetState<T> extends State<DataWidget<T>> {
   late T _state;
 
   @override

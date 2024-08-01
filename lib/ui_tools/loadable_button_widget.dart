@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class LoadableButtonWidget extends StatelessWidget {
+final class LoadableButtonWidget extends StatelessWidget {
   final double height;
   final double width;
   final double indicatorHeight;
