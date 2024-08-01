@@ -5,7 +5,6 @@
 import 'package:obmin/core/core.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine_ext/feature_machine/scene.dart';
-import 'package:obmin/utils/bool_fold.dart';
 
 Core<State, State, Event> CoreX<State, Event>({
   required State Function() state,
@@ -19,18 +18,9 @@ Core<State, State, Event> CoreX<State, Event>({
           state: state,
           transit: (state, trigger, machineId) {
             final value = reducer(state, trigger);
-            return (value != state).fold<SceneTransition<State, Event, State>>(
-              () {
-                return SceneTransition(
-                  scene(value),
-                  effects: [value],
-                );
-              },
-              () {
-                return SceneTransition(
-                  scene(state),
-                );
-              },
+            return SceneTransition(
+              scene(value),
+              effects: [value],
             );
           },
         );
