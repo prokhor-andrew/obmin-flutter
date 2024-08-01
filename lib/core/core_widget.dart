@@ -8,7 +8,7 @@ import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/basic_machine.dart';
 
-class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
+final class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
   final Core<DomainState, Input, Output> _initialCore;
   final WidgetMachine<DomainState, Input, Output> uiMachine;
 
@@ -22,7 +22,7 @@ class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
   State<CoreWidget<DomainState, Input, Output>> createState() => _CoreWidgetState<DomainState, Input, Output>();
 }
 
-class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidget<DomainState, Input, Output>> {
+final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidget<DomainState, Input, Output>> {
   late Object _state;
   Core<DomainState, Input, Output>? _core;
 
@@ -39,30 +39,11 @@ class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidget<Doma
         return coreScene;
       },
       machines: (state) {
-        final Machine<Input, Output> uiMachine = MachineFactory.shared.basic<(), Input, Output>(
-          id: widget.uiMachine._id,
-          onCreate: (id) {
-            return ();
-          },
-          onChange: (_, callback) async {
-            if (callback != null) {
-              if (mounted) {
-                setState(() {
-                  _state = widget.uiMachine._activate(_state, (output) async {
-                    await callback(output).future;
-                  });
-                });
-              }
-            }
-          },
-          onProcess: (_, input) async {
-            if (mounted) {
-              setState(() {
-                _state = widget.uiMachine._process(_state, input);
-              });
-            }
-          },
-        );
+        final Machine<Input, Output> uiMachine = widget.uiMachine._machine(() => mounted, (set) {
+          setState(() {
+            _state = set(_state);
+          });
+        });
 
         return coreMachines.union({
           uiMachine,
@@ -86,23 +67,27 @@ class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidget<Doma
 }
 
 final class WidgetMachine<State, Input, Output> {
-  final String _id;
   final Object Function(State state) _init;
-  final Object Function(Object state, void Function(Output output) callback) _activate;
-  final Object Function(Object state, Input input) _process;
+  final Machine<Input, Output> Function(bool Function() getIsMounted, void Function(Object Function(Object)) setState) _machine;
   final Widget Function(BuildContext context, Object state) _build;
 
   const WidgetMachine._({
-    required String id,
     required Object Function(State state) init,
-    required Object Function(Object state, void Function(Output output) callback) activate,
-    required Object Function(Object state, Input input) process,
+    required Machine<Input, Output> Function(bool Function() getIsMounted, void Function(Object Function(Object)) setState) machine,
     required Widget Function(BuildContext context, Object state) build,
-  })  : _id = id,
-        _init = init,
-        _activate = activate,
-        _process = process,
+  })  : _init = init,
+        _machine = machine,
         _build = build;
+
+  WidgetMachine<State, RInput, ROutput> transform<RInput, ROutput>(Machine<RInput, ROutput> Function(Machine<Input, Output> machine) function) {
+    return WidgetMachine._(
+      init: _init,
+      build: _build,
+      machine: (getIsMounted, setState) {
+        return function(_machine(getIsMounted, setState));
+      },
+    );
+  }
 
   static WidgetMachine<State, Input, Output> create<UiState, State, Input, Output>({
     required String id,
@@ -112,15 +97,34 @@ final class WidgetMachine<State, Input, Output> {
     required Widget Function(BuildContext context, UiState state) build,
   }) {
     return WidgetMachine<State, Input, Output>._(
-      id: id,
       init: (state) {
         return init(state) as Object;
       },
-      activate: (state, callback) {
-        return activate(state as UiState, callback) as Object;
-      },
-      process: (state, input) {
-        return process(state as UiState, input) as Object;
+      machine: (getIsMounted, setState) {
+        return MachineFactory.shared.basic<(), Input, Output>(
+          id: id,
+          onCreate: (id) {
+            return ();
+          },
+          onChange: (_, callback) async {
+            if (callback != null) {
+              if (getIsMounted()) {
+                setState((state) {
+                  return activate(state as UiState, (output) async {
+                    await callback(output).future;
+                  }) as Object;
+                });
+              }
+            }
+          },
+          onProcess: (_, input) async {
+            if (getIsMounted()) {
+              setState((state) {
+                return process(state as UiState, input) as Object;
+              });
+            }
+          },
+        );
       },
       build: (context, state) {
         return build(context, state as UiState);
