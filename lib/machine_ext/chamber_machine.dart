@@ -5,6 +5,7 @@
 import 'package:obmin/channel/channel_lib.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine/machine_factory.dart';
+import 'package:obmin/machine_ext/distinct_until_changed_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
 import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
 import 'package:obmin/machine_ext/silo_machine.dart';
@@ -63,12 +64,13 @@ extension ChamberMachine on MachineFactory {
     required Future<void> Function(Helper helper) onDestroyHelper,
     required State initial,
     required Set<Silo<Update<State>>> Function(Helper helper, State state) map,
+    bool isDistinctUntilChangedOn = true,
     void Function(String loggable)? onLog,
     ChannelBufferStrategy<State>? inputBufferStrategy,
     ChannelBufferStrategy<Update<State>>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<Update<State>, State>>? internalBufferStrategy,
   }) {
-    return MachineFactory.shared.chamber<State, Update<State>, Helper>(
+    final machine = MachineFactory.shared.chamber<State, Update<State>, Helper>(
       id: id,
       onCreateHelper: onCreateHelper,
       onDestroyHelper: onDestroyHelper,
@@ -81,5 +83,6 @@ extension ChamberMachine on MachineFactory {
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
     );
+    return isDistinctUntilChangedOn ? machine.distinctUntilChangedInput() : machine;
   }
 }
