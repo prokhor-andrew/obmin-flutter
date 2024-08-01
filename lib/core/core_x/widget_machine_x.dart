@@ -4,10 +4,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core_widget.dart';
+import 'package:obmin/machine_ext/distinct_until_changed_machine.dart';
 
 WidgetMachine<State, State, Event> WidgetMachineX<State, Event>({
   required String id,
   required Widget Function(BuildContext context, State state, void Function(Event event)? update) builder,
+  bool isDistinctUntilChanged = true,
 }) {
   return WidgetMachine.create<(State, void Function(Event event)?), State, State, Event>(
     id: id,
@@ -24,5 +26,7 @@ WidgetMachine<State, State, Event> WidgetMachineX<State, Event>({
       final (state, update) = pack;
       return builder(context, state, update);
     },
-  );
+  ).transform((machine) {
+    return isDistinctUntilChanged ? machine.distinctUntilChangedInput() : machine;
+  });
 }

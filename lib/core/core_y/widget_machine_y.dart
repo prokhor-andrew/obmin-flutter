@@ -10,9 +10,11 @@ import 'package:obmin/types/update.dart';
 WidgetMachine<State, State, Update<State>> WidgetMachineY<State>({
   required String id,
   required Widget Function(BuildContext context, State state, void Function(Update<State> transition)? update) builder,
+  bool isDistinctUntilChanged = true,
 }) {
   return WidgetMachineX<State, Update<State>>(
     id: id,
     builder: builder,
+    isDistinctUntilChanged: isDistinctUntilChanged,
   );
 }
