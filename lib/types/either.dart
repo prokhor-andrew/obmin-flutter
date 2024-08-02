@@ -118,7 +118,7 @@ final class Either<L, R> {
     fold<void Function()>(
       (value) => () => function(value),
       (_) => () {},
-    );
+    )();
   }
 
   void executeIfRight(void Function(R value) function) {

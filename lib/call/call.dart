@@ -112,14 +112,14 @@ final class Call<Req, Res> {
     fold<void Function()>(
       (value) => () => function(value),
       (_) => () {},
-    );
+    )();
   }
 
   void executeIfReturned(void Function(Res value) function) {
     fold<void Function()>(
       (_) => () {},
       (value) => () => function(value),
-    );
+    )();
   }
 
   static Eqv<Call<L, R>> eqv<L, R>() => Eqv<Call<L, R>>();

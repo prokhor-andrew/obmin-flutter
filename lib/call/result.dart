@@ -112,14 +112,14 @@ final class Result<Res, Err> {
     fold<void Function()>(
           (value) => () => function(value),
           (_) => () {},
-    );
+    )();
   }
 
   void executeIfFailure(void Function(Err value) function) {
     fold<void Function()>(
           (_) => () {},
           (value) => () => function(value),
-    );
+    )();
   }
 
   static Eqv<Result<L, R>> eqv<L, R>() => Eqv<Result<L, R>>();
