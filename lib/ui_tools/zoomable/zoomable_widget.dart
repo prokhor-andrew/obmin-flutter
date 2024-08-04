@@ -4,29 +4,27 @@
 
 part of 'zoomable_lib.dart';
 
-final class ZoomableWidget<Input, Output> extends InheritedWidget {
+final class ZoomableWidget<Input> extends InheritedWidget {
   final Input input;
-  final void Function(Output) update;
 
   ZoomableWidget({
     super.key,
     required this.input,
-    required this.update,
-    required Widget Function(BuildContext context, Zoomable<Input, Output> zoomable) builder,
-  }) : super(child: _ZoomableStatelessWidget<Input, Output>(builder: builder));
+    required Widget Function(BuildContext context, Zoomable<Input> zoomable) builder,
+  }) : super(child: _ZoomableStatelessWidget<Input>(builder: builder));
 
-  static ZoomableWidget<Input, Output> _of<Input, Output>(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ZoomableWidget<Input, Output>>()!;
+  static ZoomableWidget<Input> _of<Input>(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<ZoomableWidget<Input>>()!;
   }
 
   @override
-  bool updateShouldNotify(ZoomableWidget<Input, Output> oldWidget) {
+  bool updateShouldNotify(ZoomableWidget<Input> oldWidget) {
     return input != oldWidget.input;
   }
 }
 
-final class _ZoomableStatelessWidget<Input, Output> extends StatelessWidget {
-  final Widget Function(BuildContext context, Zoomable<Input, Output> zoomable) builder;
+final class _ZoomableStatelessWidget<Input> extends StatelessWidget {
+  final Widget Function(BuildContext context, Zoomable<Input> zoomable) builder;
 
   const _ZoomableStatelessWidget({
     super.key,
@@ -35,12 +33,11 @@ final class _ZoomableStatelessWidget<Input, Output> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final zoomable = Zoomable<Input, Output>._((context) {
-      final widget = ZoomableWidget._of<Input, Output>(context);
+    final zoomable = Zoomable<Input>._((context) {
+      final widget = ZoomableWidget._of<Input>(context);
       final input = widget.input;
-      final update = widget.update;
 
-      return (input, update);
+      return input;
     });
 
     return builder(context, zoomable);

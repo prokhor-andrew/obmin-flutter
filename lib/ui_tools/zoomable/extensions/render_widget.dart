@@ -4,18 +4,18 @@
 
 part of '../zoomable_lib.dart';
 
-extension RenderWidgetExtension<State, Event> on Zoomable<State, Event> {
+extension RenderWidgetExtension<State> on Zoomable<State> {
   Widget render({
     Key? key,
-    required Widget Function(BuildContext context, State state, void Function(Event event) update) builder,
+    required Widget Function(BuildContext context, State state) builder,
   }) {
-    return RenderWidget<State, Event>(this, key: key, builder: builder);
+    return RenderWidget<State>(this, key: key, builder: builder);
   }
 }
 
-final class RenderWidget<State, Event> extends StatelessWidget {
-  final Zoomable<State, Event> zoomable;
-  final Widget Function(BuildContext context, State state, void Function(Event event) update) builder;
+final class RenderWidget<State> extends StatelessWidget {
+  final Zoomable<State> zoomable;
+  final Widget Function(BuildContext context, State state) builder;
 
   const RenderWidget(
     this.zoomable, {
@@ -25,13 +25,13 @@ final class RenderWidget<State, Event> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return zoomable.consume<(State, void Function(Event))>(
+    return zoomable.consume<State>(
       key: key,
-      processor: (context, state, input, update) {
-        return (input, update);
+      processor: (context, state, input) {
+        return input;
       },
       builder: (context, state) {
-        return builder(context, state.$1, state.$2);
+        return builder(context, state);
       },
     );
   }

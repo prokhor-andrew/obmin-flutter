@@ -4,13 +4,13 @@
 
 part of '../zoomable_lib.dart';
 
-extension CalculatorWidgetExtension<State, Event> on Zoomable<State, Event> {
+extension CalculatorWidgetExtension<State> on Zoomable<State> {
   Widget calculator({
     Key? key,
-    required void Function(BuildContext context, Optional<State> oldState, State newState, void Function(Event event) update) calculate,
+    required void Function(BuildContext context, Optional<State> oldState, State newState) calculate,
     required Widget child,
   }) {
-    return CalculatorWidget<State, Event>(
+    return CalculatorWidget<State>(
       this,
       key: key,
       calculate: calculate,
@@ -19,9 +19,9 @@ extension CalculatorWidgetExtension<State, Event> on Zoomable<State, Event> {
   }
 }
 
-final class CalculatorWidget<State, Event> extends StatelessWidget {
-  final Zoomable<State, Event> zoomable;
-  final void Function(BuildContext context, Optional<State> oldState, State newState, void Function(Event event) update) calculate;
+final class CalculatorWidget<State> extends StatelessWidget {
+  final Zoomable<State> zoomable;
+  final void Function(BuildContext context, Optional<State> oldState, State newState) calculate;
   final Widget child;
 
   const CalculatorWidget(
@@ -35,11 +35,11 @@ final class CalculatorWidget<State, Event> extends StatelessWidget {
   Widget build(BuildContext context) {
     return zoomable.consume<State>(
       key: key,
-      processor: (context, state, input, update) {
+      processor: (context, state, input) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final ctx = context();
           if (ctx != null) {
-            calculate(ctx, state, input, update);
+            calculate(ctx, state, input);
           }
         });
 

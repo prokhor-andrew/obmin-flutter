@@ -4,13 +4,13 @@
 
 part of 'zoomable_lib.dart';
 
-extension ZoomableConsumerWidgetExtension<Input, Output> on Zoomable<Input, Output> {
+extension ZoomableConsumerWidgetExtension<Input> on Zoomable<Input> {
   Widget consume<S>({
     Key? key,
-    required S Function(BuildContext? Function() context, Optional<S> state, Input input, void Function(Output output) update) processor,
+    required S Function(BuildContext? Function() context, Optional<S> state, Input input) processor,
     required Widget Function(BuildContext context, S state) builder,
   }) {
-    return ZoomableConsumerWidget<S, Input, Output>(
+    return ZoomableConsumerWidget<S, Input>(
       key: key,
       zoomable: this,
       processor: processor,
@@ -19,9 +19,9 @@ extension ZoomableConsumerWidgetExtension<Input, Output> on Zoomable<Input, Outp
   }
 }
 
-final class ZoomableConsumerWidget<S, Input, Output> extends StatefulWidget {
-  final Zoomable<Input, Output> zoomable;
-  final S Function(BuildContext? Function() context, Optional<S> state, Input input, void Function(Output output) update) processor;
+final class ZoomableConsumerWidget<S, Input> extends StatefulWidget {
+  final Zoomable<Input> zoomable;
+  final S Function(BuildContext? Function() context, Optional<S> state, Input input) processor;
   final Widget Function(BuildContext context, S state) builder;
 
   const ZoomableConsumerWidget({
@@ -32,18 +32,18 @@ final class ZoomableConsumerWidget<S, Input, Output> extends StatefulWidget {
   });
 
   @override
-  State<ZoomableConsumerWidget<S, Input, Output>> createState() => _ConsumerZoomableWidgetState<S, Input, Output>();
+  State<ZoomableConsumerWidget<S, Input>> createState() => _ConsumerZoomableWidgetState<S, Input>();
 }
 
-final class _ConsumerZoomableWidgetState<S, Input, Output> extends State<ZoomableConsumerWidget<S, Input, Output>> {
+final class _ConsumerZoomableWidgetState<S, Input> extends State<ZoomableConsumerWidget<S, Input>> {
   Optional<S> _state = Optional<S>.none();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final (input, update) = widget.zoomable._data(context);
+    final input = widget.zoomable._data(context);
 
-    _state = Optional<S>.some(widget.processor(() => mounted ? context : null, _state, input, update));
+    _state = Optional<S>.some(widget.processor(() => mounted ? context : null, _state, input));
   }
 
   @override
