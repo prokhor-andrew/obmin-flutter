@@ -7,9 +7,9 @@ part of 'zoomable_lib.dart';
 final class ZoomableWidget<Input> extends InheritedWidget {
   final Input input;
 
-  ZoomableWidget({
+  ZoomableWidget(
+    this.input, {
     super.key,
-    required this.input,
     required Widget Function(BuildContext context, Zoomable<Input> zoomable) builder,
   }) : super(child: _ZoomableStatelessWidget<Input>(builder: builder));
 
