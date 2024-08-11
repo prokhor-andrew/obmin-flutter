@@ -41,7 +41,9 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
       machines: (state) {
         final Machine<Input, Output> uiMachine = widget.uiMachine._machine(() => mounted, (set) {
           setState(() {
-            _state = set(_state);
+            if (mounted) {
+              _state = set(_state);
+            }
           });
         });
 
