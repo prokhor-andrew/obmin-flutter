@@ -4,27 +4,27 @@
 
 part of 'zoomable_lib.dart';
 
-final class ZoomableWidget<Input> extends InheritedWidget {
-  final Input input;
+final class ZoomableWidget<T> extends InheritedWidget {
+  final T value;
 
   ZoomableWidget(
-    this.input, {
+    this.value, {
     super.key,
-    required Widget Function(BuildContext context, Zoomable<Input> zoomable) builder,
-  }) : super(child: _ZoomableStatelessWidget<Input>(builder: builder));
+    required Widget Function(BuildContext context, Zoomable<T> zoomable) builder,
+  }) : super(child: _ZoomableStatelessWidget<T>(builder: builder));
 
   static ZoomableWidget<Input> _of<Input>(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<ZoomableWidget<Input>>()!;
   }
 
   @override
-  bool updateShouldNotify(ZoomableWidget<Input> oldWidget) {
-    return input != oldWidget.input;
+  bool updateShouldNotify(ZoomableWidget<T> oldWidget) {
+    return value != oldWidget.value;
   }
 }
 
-final class _ZoomableStatelessWidget<Input> extends StatelessWidget {
-  final Widget Function(BuildContext context, Zoomable<Input> zoomable) builder;
+final class _ZoomableStatelessWidget<T> extends StatelessWidget {
+  final Widget Function(BuildContext context, Zoomable<T> zoomable) builder;
 
   const _ZoomableStatelessWidget({
     super.key,
@@ -33,9 +33,9 @@ final class _ZoomableStatelessWidget<Input> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final zoomable = Zoomable<Input>._((context) {
-      final widget = ZoomableWidget._of<Input>(context);
-      final input = widget.input;
+    final zoomable = Zoomable<T>._((context) {
+      final widget = ZoomableWidget._of<T>(context);
+      final input = widget.value;
 
       return input;
     });
