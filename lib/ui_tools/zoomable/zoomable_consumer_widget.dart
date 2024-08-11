@@ -4,13 +4,13 @@
 
 part of 'zoomable_lib.dart';
 
-extension ZoomableConsumerWidgetExtension<Input> on Zoomable<Input> {
+extension ZoomableConsumerWidgetExtension<T> on Zoomable<T> {
   Widget consume<S>({
     Key? key,
-    required S Function(BuildContext? Function() context, Optional<S> state, Input input) processor,
+    required S Function(BuildContext? Function() context, Optional<S> state, T value) processor,
     required Widget Function(BuildContext context, S state) builder,
   }) {
-    return ZoomableConsumerWidget<S, Input>(
+    return ZoomableConsumerWidget<S, T>(
       key: key,
       zoomable: this,
       processor: processor,
@@ -19,9 +19,9 @@ extension ZoomableConsumerWidgetExtension<Input> on Zoomable<Input> {
   }
 }
 
-final class ZoomableConsumerWidget<S, Input> extends StatefulWidget {
-  final Zoomable<Input> zoomable;
-  final S Function(BuildContext? Function() context, Optional<S> state, Input input) processor;
+final class ZoomableConsumerWidget<S, T> extends StatefulWidget {
+  final Zoomable<T> zoomable;
+  final S Function(BuildContext? Function() context, Optional<S> state, T value) processor;
   final Widget Function(BuildContext context, S state) builder;
 
   const ZoomableConsumerWidget({
@@ -32,18 +32,18 @@ final class ZoomableConsumerWidget<S, Input> extends StatefulWidget {
   });
 
   @override
-  State<ZoomableConsumerWidget<S, Input>> createState() => _ConsumerZoomableWidgetState<S, Input>();
+  State<ZoomableConsumerWidget<S, T>> createState() => _ConsumerZoomableWidgetState<S, T>();
 }
 
-final class _ConsumerZoomableWidgetState<S, Input> extends State<ZoomableConsumerWidget<S, Input>> {
+final class _ConsumerZoomableWidgetState<S, T> extends State<ZoomableConsumerWidget<S, T>> {
   Optional<S> _state = Optional<S>.none();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final input = widget.zoomable._data(context);
+    final value = widget.zoomable._data(context);
 
-    _state = Optional<S>.some(widget.processor(() => mounted ? context : null, _state, input));
+    _state = Optional<S>.some(widget.processor(() => mounted ? context : null, _state, value));
   }
 
   @override
