@@ -39,7 +39,7 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
         return coreScene;
       },
       machines: (state) {
-        final Machine<Input, Output> uiMachine = widget.uiMachine._machine(() => mounted, (set) {
+        final Machine<Input, Output> uiMachine = widget.uiMachine._machine((set) {
           setState(() {
             if (mounted) {
               _state = set(_state);
@@ -70,12 +70,12 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
 
 final class WidgetMachine<State, Input, Output> {
   final Object Function(State state) _init;
-  final Machine<Input, Output> Function(bool Function() getIsMounted, void Function(Object Function(Object)) setState) _machine;
+  final Machine<Input, Output> Function(void Function(Object Function(Object)) setState) _machine;
   final Widget Function(BuildContext context, Object state) _build;
 
   const WidgetMachine._({
     required Object Function(State state) init,
-    required Machine<Input, Output> Function(bool Function() getIsMounted, void Function(Object Function(Object)) setState) machine,
+    required Machine<Input, Output> Function(void Function(Object Function(Object)) setState) machine,
     required Widget Function(BuildContext context, Object state) build,
   })  : _init = init,
         _machine = machine,
@@ -85,8 +85,8 @@ final class WidgetMachine<State, Input, Output> {
     return WidgetMachine._(
       init: _init,
       build: _build,
-      machine: (getIsMounted, setState) {
-        return function(_machine(getIsMounted, setState));
+      machine: (setState) {
+        return function(_machine(setState));
       },
     );
   }
@@ -102,7 +102,7 @@ final class WidgetMachine<State, Input, Output> {
       init: (state) {
         return init(state) as Object;
       },
-      machine: (getIsMounted, setState) {
+      machine: (setState) {
         return MachineFactory.shared.basic<(), Input, Output>(
           id: id,
           onCreate: (id) {
@@ -110,21 +110,17 @@ final class WidgetMachine<State, Input, Output> {
           },
           onChange: (_, callback) async {
             if (callback != null) {
-              if (getIsMounted()) {
-                setState((state) {
-                  return activate(state as UiState, (output) async {
-                    await callback(output).future;
-                  }) as Object;
-                });
-              }
+              setState((state) {
+                return activate(state as UiState, (output) async {
+                  await callback(output).future;
+                }) as Object;
+              });
             }
           },
           onProcess: (_, input) async {
-            if (getIsMounted()) {
-              setState((state) {
-                return process(state as UiState, input) as Object;
-              });
-            }
+            setState((state) {
+              return process(state as UiState, input) as Object;
+            });
           },
         );
       },
