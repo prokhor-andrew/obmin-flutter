@@ -4,17 +4,23 @@
 
 import 'package:obmin/optics/fold.dart';
 import 'package:obmin/optics/getter.dart';
-import 'package:obmin/optics/preview.dart';
 import 'package:obmin/optics/mutable/bi_preview.dart';
 import 'package:obmin/optics/mutable/iso.dart';
 import 'package:obmin/optics/mutable/prism.dart';
 import 'package:obmin/optics/mutable/reflector.dart';
+import 'package:obmin/optics/preview.dart';
 import 'package:obmin/types/update.dart';
+import 'package:obmin/utils/function_args_swapped.dart';
+import 'package:obmin/utils/function_curry.dart';
 
 final class Mutator<Whole, Part> {
   final Whole Function(Whole whole, Update<Part> update) apply;
 
   const Mutator(this.apply);
+
+  Whole Function(Whole) Function(Update<Part> update) get curriedApply => apply.argsSwapped.curried;
+
+  Whole Function(Whole) Function(Part part) get curriedSet => set.argsSwapped.curried;
 
   Mutator<Whole, Sub> compose<Sub>(Mutator<Part, Sub> other) {
     return Mutator((whole, update) {
