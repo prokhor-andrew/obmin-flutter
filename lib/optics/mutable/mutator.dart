@@ -68,6 +68,10 @@ final class Mutator<Whole, Part> {
     });
   }
 
+  Mutator<Whole, Part> composeWithBiEqv(BiEqv<Part> other) {
+    return compose(other.asMutator());
+  }
+
   Mutator<Whole, Sub> composeWithIso<Sub>(Iso<Part, Sub> other) {
     return compose(other.asMutator());
   }
