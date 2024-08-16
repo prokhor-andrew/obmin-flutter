@@ -2,12 +2,13 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/optics/readonly/fold.dart';
-import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/bidirect/bi_eqv.dart';
 import 'package:obmin/optics/bidirect/bi_preview.dart';
 import 'package:obmin/optics/bidirect/iso.dart';
 import 'package:obmin/optics/bidirect/prism.dart';
 import 'package:obmin/optics/bidirect/reflector.dart';
+import 'package:obmin/optics/readonly/fold.dart';
+import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/update.dart';
 import 'package:obmin/utils/function_args_swapped.dart';
@@ -81,6 +82,12 @@ final class Mutator<Whole, Part> {
 
   Mutator<Whole, Sub> composeWithBiPreview<Sub>(BiPreview<Part, Sub> other) {
     return compose(other.asMutator());
+  }
+}
+
+extension BiEqvAsMutatorExtension<T> on BiEqv<T> {
+  Mutator<T, T> asMutator() {
+    return asIso().asMutator();
   }
 }
 
