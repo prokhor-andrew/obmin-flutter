@@ -2,9 +2,9 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/optics/fold.dart';
-import 'package:obmin/optics/getter.dart';
-import 'package:obmin/optics/preview.dart';
+import 'package:obmin/optics/readonly/fold.dart';
+import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/readonly/preview.dart';
 
 final class Eqv<T> {
   const Eqv();

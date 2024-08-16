@@ -2,13 +2,13 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/optics/fold.dart';
-import 'package:obmin/optics/getter.dart';
-import 'package:obmin/optics/mutable/bi_preview.dart';
-import 'package:obmin/optics/mutable/iso.dart';
-import 'package:obmin/optics/mutable/prism.dart';
-import 'package:obmin/optics/mutable/reflector.dart';
-import 'package:obmin/optics/preview.dart';
+import 'package:obmin/optics/readonly/fold.dart';
+import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/bidirect/bi_preview.dart';
+import 'package:obmin/optics/bidirect/iso.dart';
+import 'package:obmin/optics/bidirect/prism.dart';
+import 'package:obmin/optics/bidirect/reflector.dart';
+import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/update.dart';
 import 'package:obmin/utils/function_args_swapped.dart';
 import 'package:obmin/utils/function_curry.dart';
@@ -100,9 +100,9 @@ extension PrismAsMutatorExtension<Whole, Part> on Prism<Whole, Part> {
   Mutator<Whole, Part> asMutator() {
     return Mutator(
       (whole, update) {
-        final partOrNone = tryGet.preview(whole);
+        final partOrNone = forward.preview(whole);
         final updatedOrNone = partOrNone.map(update);
-        return updatedOrNone.map(inject.get).valueOr(whole);
+        return updatedOrNone.map(backward.get).valueOr(whole);
       },
     );
   }
@@ -112,9 +112,9 @@ extension ReflectorAsMutatorExtension<Whole, Part> on Reflector<Whole, Part> {
   Mutator<Whole, Part> asMutator() {
     return Mutator(
       (whole, update) {
-        final part = getter.get(whole);
+        final part = forward.get(whole);
         final updated = update(part);
-        return preview.preview(updated).valueOr(whole);
+        return backward.preview(updated).valueOr(whole);
       },
     );
   }

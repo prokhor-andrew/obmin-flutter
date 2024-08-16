@@ -3,15 +3,15 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:collection/collection.dart';
-import 'package:obmin/optics/eqv.dart';
-import 'package:obmin/optics/fold.dart';
-import 'package:obmin/optics/getter.dart';
-import 'package:obmin/optics/mutable/bi_preview.dart';
-import 'package:obmin/optics/mutable/iso.dart';
+import 'package:obmin/optics/readonly/eqv.dart';
+import 'package:obmin/optics/readonly/fold.dart';
+import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/bidirect/bi_preview.dart';
+import 'package:obmin/optics/bidirect/iso.dart';
 import 'package:obmin/optics/mutable/mutator.dart';
-import 'package:obmin/optics/mutable/prism.dart';
-import 'package:obmin/optics/mutable/reflector.dart';
-import 'package:obmin/optics/preview.dart';
+import 'package:obmin/optics/bidirect/prism.dart';
+import 'package:obmin/optics/bidirect/reflector.dart';
+import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/optional.dart';
 
 extension IterableOpticsEqvExtension<T> on Eqv<Iterable<T>> {

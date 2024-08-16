@@ -2,10 +2,10 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/optics/getter.dart';
-import 'package:obmin/optics/mutable/bi_preview.dart';
-import 'package:obmin/optics/mutable/prism.dart';
-import 'package:obmin/optics/mutable/reflector.dart';
+import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/bidirect/bi_preview.dart';
+import 'package:obmin/optics/bidirect/prism.dart';
+import 'package:obmin/optics/bidirect/reflector.dart';
 
 final class Iso<T1, T2> {
   final Getter<T1, T2> forward;

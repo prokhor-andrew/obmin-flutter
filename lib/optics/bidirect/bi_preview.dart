@@ -2,10 +2,10 @@
 // This file is T2 of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/optics/preview.dart';
-import 'package:obmin/optics/mutable/iso.dart';
-import 'package:obmin/optics/mutable/prism.dart';
-import 'package:obmin/optics/mutable/reflector.dart';
+import 'package:obmin/optics/readonly/preview.dart';
+import 'package:obmin/optics/bidirect/iso.dart';
+import 'package:obmin/optics/bidirect/prism.dart';
+import 'package:obmin/optics/bidirect/reflector.dart';
 
 final class BiPreview<T1, T2> {
   final Preview<T1, T2> forward;

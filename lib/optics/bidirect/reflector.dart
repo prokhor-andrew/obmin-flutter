@@ -2,22 +2,22 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/optics/getter.dart';
-import 'package:obmin/optics/preview.dart';
-import 'package:obmin/optics/mutable/bi_preview.dart';
-import 'package:obmin/optics/mutable/iso.dart';
-import 'package:obmin/optics/mutable/prism.dart';
+import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/readonly/preview.dart';
+import 'package:obmin/optics/bidirect/bi_preview.dart';
+import 'package:obmin/optics/bidirect/iso.dart';
+import 'package:obmin/optics/bidirect/prism.dart';
 
 final class Reflector<Whole, Part> {
-  final Getter<Whole, Part> getter;
-  final Preview<Part, Whole> preview;
+  final Getter<Whole, Part> forward;
+  final Preview<Part, Whole> backward;
 
-  const Reflector(this.getter, this.preview);
+  const Reflector(this.forward, this.backward);
 
   Reflector<Whole, Sub> compose<Sub>(Reflector<Part, Sub> other) {
     return Reflector(
-      getter.compose(other.getter),
-      other.preview.compose(preview),
+      forward.compose(other.forward),
+      other.backward.compose(backward),
     );
   }
 
@@ -40,15 +40,15 @@ final class Reflector<Whole, Part> {
 
   BiPreview<Whole, Part> asBiPreview() {
     return BiPreview(
-      getter.asPreview(),
-      preview,
+      forward.asPreview(),
+      backward,
     );
   }
 
   Prism<Part, Whole> flipped() {
     return Prism(
-      preview,
-      getter,
+      backward,
+      forward,
     );
   }
 }
