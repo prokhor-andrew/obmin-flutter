@@ -46,25 +46,25 @@ final class Mutator<Whole, Part> {
     });
   }
 
-  static Mutator<Whole, Part> lens<Whole, Part>(Getter<Whole, Part> get, Whole Function(Whole, Part) mutate) {
+  static Mutator<Whole, Part> lens<Whole, Part>(Getter<Whole, Part> get, Whole Function(Whole, Part) reconstruct) {
     return Mutator((whole, modify) {
       final part = modify(get.get(whole));
-      return mutate(whole, part);
+      return reconstruct(whole, part);
     });
   }
 
-  static Mutator<Whole, Part> affine<Whole, Part>(Preview<Whole, Part> preview, Whole Function(Whole, Part) mutate) {
+  static Mutator<Whole, Part> affine<Whole, Part>(Preview<Whole, Part> preview, Whole Function(Whole, Part) reconstruct) {
     return Mutator((whole, modify) {
       return preview.preview(whole).map(modify).map((part) {
-        return mutate(whole, part);
+        return reconstruct(whole, part);
       }).valueOr(whole);
     });
   }
 
-  static Mutator<Whole, Part> traversal<Whole, Part>(Fold<Whole, Part> fold, Whole Function(Whole, Iterable<Part>) mutate) {
+  static Mutator<Whole, Part> traversal<Whole, Part>(Fold<Whole, Part> fold, Whole Function(Whole, Iterable<Part>) reconstruct) {
     return Mutator((whole, modify) {
       final list = fold.fold(whole).map(modify);
-      return mutate(whole, list);
+      return reconstruct(whole, list);
     });
   }
 
