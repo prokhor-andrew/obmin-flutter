@@ -97,37 +97,19 @@ extension BiEqvAsMutatorExtension<T> on BiEqv<T> {
 
 extension IsoAsMutatorExtension<T1, T2> on Iso<T1, T2> {
   Mutator<T1, T2> asMutator() {
-    return Mutator(
-      (whole, update) {
-        final t2 = forward.get(whole);
-        final updated = update(t2);
-        return backward.get(updated);
-      },
-    );
+    return asBiPreview().asMutator();
   }
 }
 
 extension PrismAsMutatorExtension<Whole, Part> on Prism<Whole, Part> {
   Mutator<Whole, Part> asMutator() {
-    return Mutator(
-      (whole, update) {
-        final partOrNone = forward.preview(whole);
-        final updatedOrNone = partOrNone.map(update);
-        return updatedOrNone.map(backward.get).valueOr(whole);
-      },
-    );
+    return asBiPreview().asMutator();
   }
 }
 
 extension ReflectorAsMutatorExtension<Whole, Part> on Reflector<Whole, Part> {
   Mutator<Whole, Part> asMutator() {
-    return Mutator(
-      (whole, update) {
-        final part = forward.get(whole);
-        final updated = update(part);
-        return backward.preview(updated).valueOr(whole);
-      },
-    );
+    return asBiPreview().asMutator();
   }
 }
 
