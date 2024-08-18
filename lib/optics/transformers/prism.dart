@@ -4,9 +4,9 @@
 
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/bidirect/bi_preview.dart';
-import 'package:obmin/optics/bidirect/iso.dart';
-import 'package:obmin/optics/bidirect/reflector.dart';
+import 'package:obmin/optics/transformers/bi_preview.dart';
+import 'package:obmin/optics/transformers/iso.dart';
+import 'package:obmin/optics/transformers/reflector.dart';
 
 final class Prism<Whole, Part> {
   final Preview<Whole, Part> forward;

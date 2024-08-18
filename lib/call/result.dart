@@ -5,11 +5,11 @@
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold.dart';
 import 'package:obmin/optics/readonly/getter.dart';
-import 'package:obmin/optics/bidirect/bi_preview.dart';
-import 'package:obmin/optics/bidirect/iso.dart';
+import 'package:obmin/optics/transformers/bi_preview.dart';
+import 'package:obmin/optics/transformers/iso.dart';
 import 'package:obmin/optics/mutable/mutator.dart';
-import 'package:obmin/optics/bidirect/prism.dart';
-import 'package:obmin/optics/bidirect/reflector.dart';
+import 'package:obmin/optics/transformers/prism.dart';
+import 'package:obmin/optics/transformers/reflector.dart';
 import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/utils/bool_fold.dart';

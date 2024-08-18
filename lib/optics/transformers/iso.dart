@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/getter.dart';
-import 'package:obmin/optics/bidirect/bi_preview.dart';
-import 'package:obmin/optics/bidirect/prism.dart';
-import 'package:obmin/optics/bidirect/reflector.dart';
+import 'package:obmin/optics/transformers/bi_preview.dart';
+import 'package:obmin/optics/transformers/prism.dart';
+import 'package:obmin/optics/transformers/reflector.dart';
 
 final class Iso<T1, T2> {
   final Getter<T1, T2> forward;

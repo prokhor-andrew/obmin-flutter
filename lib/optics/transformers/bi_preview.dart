@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/bidirect/iso.dart';
-import 'package:obmin/optics/bidirect/prism.dart';
-import 'package:obmin/optics/bidirect/reflector.dart';
+import 'package:obmin/optics/transformers/iso.dart';
+import 'package:obmin/optics/transformers/prism.dart';
+import 'package:obmin/optics/transformers/reflector.dart';
 
 final class BiPreview<T1, T2> {
   final Preview<T1, T2> forward;

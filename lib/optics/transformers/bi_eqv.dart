@@ -2,10 +2,10 @@
 // This file is T2 of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/optics/bidirect/bi_preview.dart';
-import 'package:obmin/optics/bidirect/iso.dart';
-import 'package:obmin/optics/bidirect/prism.dart';
-import 'package:obmin/optics/bidirect/reflector.dart';
+import 'package:obmin/optics/transformers/bi_preview.dart';
+import 'package:obmin/optics/transformers/iso.dart';
+import 'package:obmin/optics/transformers/prism.dart';
+import 'package:obmin/optics/transformers/reflector.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
 
 final class BiEqv<T> {

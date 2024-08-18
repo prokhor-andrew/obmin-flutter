@@ -4,9 +4,9 @@
 
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/bidirect/bi_preview.dart';
-import 'package:obmin/optics/bidirect/iso.dart';
-import 'package:obmin/optics/bidirect/prism.dart';
+import 'package:obmin/optics/transformers/bi_preview.dart';
+import 'package:obmin/optics/transformers/iso.dart';
+import 'package:obmin/optics/transformers/prism.dart';
 
 final class Reflector<Whole, Part> {
   final Getter<Whole, Part> forward;
