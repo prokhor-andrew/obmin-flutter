@@ -7,13 +7,13 @@ import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/types/optional.dart';
 
 final class Preview<Whole, Part> {
-  final Optional<Part> Function(Whole whole) preview;
+  final Optional<Part> Function(Whole whole) get;
 
-  const Preview(this.preview);
+  const Preview(this.get);
 
   Preview<Whole, Sub> compose<Sub>(Preview<Part, Sub> other) {
     return Preview((whole) {
-      return preview(whole).bind(other.preview);
+      return get(whole).bind(other.get);
     });
   }
 
@@ -32,7 +32,7 @@ final class Preview<Whole, Part> {
 
   Fold<Whole, Part> asFold() {
     return Fold((whole) {
-      return preview(whole).map((value) => [value]).valueOr([]);
+      return get(whole).map((value) => [value]).valueOr([]);
     });
   }
 }

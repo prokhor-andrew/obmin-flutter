@@ -6,13 +6,13 @@ import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
 
 final class Fold<Whole, Part> {
-  final Iterable<Part> Function(Whole whole) fold;
+  final Iterable<Part> Function(Whole whole) get;
 
-  const Fold(this.fold);
+  const Fold(this.get);
 
   Fold<Whole, Sub> compose<Sub>(Fold<Part, Sub> other) {
     return Fold((whole) {
-      return fold(whole).expand(other.fold);
+      return get(whole).expand(other.get);
     });
   }
 

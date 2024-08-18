@@ -62,7 +62,7 @@ final class Mutator<Whole, Part> {
     Whole Function(Whole, Part) reconstruct,
   ) {
     return Mutator((whole, modify) {
-      return preview.preview(whole).map(modify).map((part) {
+      return preview.get(whole).map(modify).map((part) {
         return reconstruct(whole, part);
       }).valueOr(whole);
     });
@@ -73,7 +73,7 @@ final class Mutator<Whole, Part> {
     Whole Function(Whole, Iterable<Part>) reconstruct, // Iterable<Part> is never empty
   ) {
     return Mutator((whole, modify) {
-      final zoomed = fold.fold(whole);
+      final zoomed = fold.get(whole);
       if (zoomed.isEmpty) {
         return whole;
       }
@@ -132,9 +132,9 @@ extension BiPreviewAsMutatorExtension<T1, T2> on BiPreview<T1, T2> {
   Mutator<T1, T2> asMutator() {
     return Mutator(
       (whole, update) {
-        final partOrNone = forward.preview(whole);
+        final partOrNone = forward.get(whole);
         final updatedOrNone = partOrNone.map(update);
-        final wholeOrNone = updatedOrNone.bind(backward.preview);
+        final wholeOrNone = updatedOrNone.bind(backward.get);
         return wholeOrNone.valueOr(whole);
       },
     );
