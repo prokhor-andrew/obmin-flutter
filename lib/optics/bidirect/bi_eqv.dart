@@ -6,21 +6,24 @@ import 'package:obmin/optics/bidirect/bi_preview.dart';
 import 'package:obmin/optics/bidirect/iso.dart';
 import 'package:obmin/optics/bidirect/prism.dart';
 import 'package:obmin/optics/bidirect/reflector.dart';
-import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/readonly/eqv.dart';
 
 final class BiEqv<T> {
-  Getter<T, T> get forward => Getter((value) => value);
 
-  Getter<T, T> get backward => forward;
+  Eqv<T> get forward => Eqv();
+  Eqv<T> get backward => Eqv();
 
   const BiEqv();
 
   BiEqv<T> compose(BiEqv<T> other) {
-    return other;
+    return const BiEqv();
   }
 
   Iso<T, T> asIso() {
-    return Iso(forward, backward);
+    return Iso(
+      forward.asGetter(),
+      backward.asGetter(),
+    );
   }
 
   Prism<T, T> asPrism() {
