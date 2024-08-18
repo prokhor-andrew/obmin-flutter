@@ -124,7 +124,7 @@ final class Result<Res, Err> {
 
   static Eqv<Result<L, R>> eqv<L, R>() => Eqv<Result<L, R>>();
 
-  static Mutator<Result<L, R>, Result<L, R>> setter<L, R>() => Mutator.setter<Result<L, R>>();
+  static Mutator<Result<L, R>, Result<L, R>> reducer<L, R>() => Mutator.reducer<Result<L, R>>();
 }
 
 extension ResultObminOpticEqvExtension<Res, Err> on Eqv<Result<Res, Err>> {

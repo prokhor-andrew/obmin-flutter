@@ -135,7 +135,7 @@ final class Either<L, R> {
 
   static Eqv<Either<L, R>> eqv<L, R>() => Eqv<Either<L, R>>();
 
-  static Mutator<Either<L, R>, Either<L, R>> setter<L, R>() => Mutator.setter<Either<L, R>>();
+  static Mutator<Either<L, R>, Either<L, R>> reducer<L, R>() => Mutator.reducer<Either<L, R>>();
 }
 
 extension EitherValueWhenBothExtension<T> on Either<T, T> {

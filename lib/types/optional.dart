@@ -112,7 +112,7 @@ final class Optional<T> {
 
   static Eqv<Optional<T>> eqv<T>() => Eqv<Optional<T>>();
 
-  static Mutator<Optional<T>, Optional<T>> setter<T>() => Mutator.setter<Optional<T>>();
+  static Mutator<Optional<T>, Optional<T>> reducer<T>() => Mutator.reducer<Optional<T>>();
 }
 
 extension EitherToOptionalExtension<T> on Either<T, ()> {

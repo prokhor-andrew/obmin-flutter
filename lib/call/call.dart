@@ -124,7 +124,7 @@ final class Call<Req, Res> {
 
   static Eqv<Call<L, R>> eqv<L, R>() => Eqv<Call<L, R>>();
 
-  static Mutator<Call<L, R>, Call<L, R>> setter<L, R>() => Mutator.setter<Call<L, R>>();
+  static Mutator<Call<L, R>, Call<L, R>> reducer<L, R>() => Mutator.reducer<Call<L, R>>();
 }
 
 extension CallObminOpticEqvExtension<Req, Res> on Eqv<Call<Req, Res>> {

@@ -40,7 +40,7 @@ final class Mutator<Whole, Part> {
     return "Mutator<$Whole, $Part>";
   }
 
-  static Mutator<Whole, Whole> setter<Whole>() {
+  static Mutator<Whole, Whole> reducer<Whole>() {
     return Mutator((whole, modify) {
       return modify(whole);
     });

@@ -45,7 +45,7 @@ final class Product<T1, T2> {
 
   static Eqv<Product<T1, T2>> eqv<T1, T2>() => Eqv<Product<T1, T2>>();
 
-  static Mutator<Product<T1, T2>, Product<T1, T2>> setter<T1, T2>() => Mutator.setter<Product<T1, T2>>();
+  static Mutator<Product<T1, T2>, Product<T1, T2>> reducer<T1, T2>() => Mutator.reducer<Product<T1, T2>>();
 }
 
 extension ProductObminOpticToolMethodsExtension<T1, T2> on Product<T1, T2> {
