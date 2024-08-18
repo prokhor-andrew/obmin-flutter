@@ -46,14 +46,21 @@ final class Mutator<Whole, Part> {
     });
   }
 
-  static Mutator<Whole, Part> lens<Whole, Part>(Getter<Whole, Part> get, Whole Function(Whole, Part) reconstruct) {
+  static Mutator<Whole, Part> lens<Whole, Part>(
+    Getter<Whole, Part> get,
+    Whole Function(Whole, Part) reconstruct,
+  ) {
     return Mutator((whole, modify) {
-      final part = modify(get.get(whole));
-      return reconstruct(whole, part);
+      final zoomed = get.get(whole);
+      final modified = modify(zoomed);
+      return reconstruct(whole, modified);
     });
   }
 
-  static Mutator<Whole, Part> affine<Whole, Part>(Preview<Whole, Part> preview, Whole Function(Whole, Part) reconstruct) {
+  static Mutator<Whole, Part> affine<Whole, Part>(
+    Preview<Whole, Part> preview,
+    Whole Function(Whole, Part) reconstruct,
+  ) {
     return Mutator((whole, modify) {
       return preview.preview(whole).map(modify).map((part) {
         return reconstruct(whole, part);
@@ -61,10 +68,18 @@ final class Mutator<Whole, Part> {
     });
   }
 
-  static Mutator<Whole, Part> traversal<Whole, Part>(Fold<Whole, Part> fold, Whole Function(Whole, Iterable<Part>) reconstruct) {
+  static Mutator<Whole, Part> traversal<Whole, Part>(
+    Fold<Whole, Part> fold,
+    Whole Function(Whole, Iterable<Part>) reconstruct, // Iterable<Part> is never empty
+  ) {
     return Mutator((whole, modify) {
-      final list = fold.fold(whole).map(modify);
-      return reconstruct(whole, list);
+      final zoomed = fold.fold(whole);
+      if (zoomed.isEmpty) {
+        return whole;
+      }
+      final modified = zoomed.map(modify);
+
+      return reconstruct(whole, modified);
     });
   }
 
