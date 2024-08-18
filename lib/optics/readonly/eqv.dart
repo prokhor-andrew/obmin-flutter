@@ -11,6 +11,10 @@ final class Eqv<T> {
 
   T identity(T value) => value;
 
+  Eqv<T> compose(Eqv<T> other) {
+    return const Eqv();
+  }
+
   Getter<T, T> asGetter() {
     return Getter(identity);
   }
