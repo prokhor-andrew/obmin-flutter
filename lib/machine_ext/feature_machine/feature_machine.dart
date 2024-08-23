@@ -14,6 +14,7 @@ extension FeatureMachineExtension on MachineFactory {
     required String id,
     required Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() onCreateFeature,
     required Future<void> Function(State state) onDestroyFeature,
+    bool shouldWaitOnEffects = true,
     void Function(String loggable)? onLog,
     ChannelBufferStrategy<ExtTrigger>? inputBufferStrategy,
     ChannelBufferStrategy<ExtEffect>? outputBufferStrategy,
@@ -29,6 +30,7 @@ extension FeatureMachineExtension on MachineFactory {
           bufferStrategy: internalBufferStrategy,
           onCreate: onCreateFeature,
           onDestroy: onDestroyFeature,
+          shouldWaitOnEffects: shouldWaitOnEffects,
           onLog: onLog,
         );
       },
@@ -47,6 +49,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
   final Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() _onCreate;
   final Future<void> Function(State state) _onDestroy;
   final void Function(String loggable)? _onLog;
+  final bool shouldWaitOnEffects;
 
   bool _isCancelled = false;
 
@@ -71,6 +74,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
     required Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() onCreate,
     required Future<void> Function(State state) onDestroy,
     required void Function(String loggable)? onLog,
+    required this.shouldWaitOnEffects,
   })  : _id = id,
         _onCreate = onCreate,
         _onDestroy = onDestroy,
@@ -212,7 +216,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
 
     final effects = transition.effects;
 
-    await Future.wait([
+    final effectsFuture = Future.wait<void>([
       Future(() async {
         for (final effect in effects) {
           switch (effect) {
@@ -243,5 +247,9 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
         }),
       ),
     ]);
+
+    if (shouldWaitOnEffects) {
+      await effectsFuture;
+    }
   }
 }

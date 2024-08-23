@@ -11,7 +11,9 @@ import 'package:obmin/machine_ext/feature_machine/outline.dart';
 import 'package:obmin/types/optional.dart';
 
 extension DistinctUntilChangedMachineExtension<Input, Output> on Machine<Input, Output> {
+
   Machine<Input, Output> distinctUntilChangedInput({
+    bool shouldWaitOnEffects = false,
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<Output, Input>>? internalBufferStrategy,
@@ -44,6 +46,7 @@ extension DistinctUntilChangedMachineExtension<Input, Output> on Machine<Input, 
         return outline(const Optional.none()).asFeature({this});
       },
       onDestroyFeature: (_) async {},
+      shouldWaitOnEffects: shouldWaitOnEffects,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
@@ -51,6 +54,7 @@ extension DistinctUntilChangedMachineExtension<Input, Output> on Machine<Input, 
   }
 
   Machine<Input, Output> distinctUntilChangedOutput({
+    required bool shouldWaitOnEffects,
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<Output, Input>>? internalBufferStrategy,
@@ -84,6 +88,7 @@ extension DistinctUntilChangedMachineExtension<Input, Output> on Machine<Input, 
         return outline(const Optional.none()).asFeature({this});
       },
       onDestroyFeature: (_) async {},
+      shouldWaitOnEffects: shouldWaitOnEffects,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,

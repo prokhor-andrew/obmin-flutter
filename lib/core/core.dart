@@ -34,6 +34,7 @@ final class Core<State, Input, Output> {
             return aScene.asIntTriggerIntEffect<void, void>().asFeature(aMachines);
           },
           onDestroyFeature: (_) async {},
+          shouldWaitOnEffects: false,
         )
         .run(
           onChange: (_) async {},

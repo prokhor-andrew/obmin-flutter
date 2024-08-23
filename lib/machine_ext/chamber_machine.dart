@@ -18,6 +18,7 @@ extension ChamberMachineExtension on MachineFactory {
     required Future<void> Function(Helper helper) onDestroyHelper,
     required Set<Silo<Output>> Function(Helper helper) initial,
     required Set<Silo<Output>> Function(Helper helper, Input input) map,
+    bool shouldWaitOnEffects = true,
     void Function(String loggable)? onLog,
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,
@@ -43,6 +44,7 @@ extension ChamberMachineExtension on MachineFactory {
 
     return MachineFactory.shared.feature(
       id: id,
+      shouldWaitOnEffects: shouldWaitOnEffects,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
@@ -65,6 +67,7 @@ extension ChamberMachineExtension on MachineFactory {
     required State initial,
     required Set<Silo<Update<State>>> Function(Helper helper, State state) map,
     bool isDistinctUntilChangedOn = true,
+    bool shouldWaitOnEffects = true,
     void Function(String loggable)? onLog,
     ChannelBufferStrategy<State>? inputBufferStrategy,
     ChannelBufferStrategy<Update<State>>? outputBufferStrategy,
@@ -78,11 +81,12 @@ extension ChamberMachineExtension on MachineFactory {
         return map(helper, initial);
       },
       map: map,
+      shouldWaitOnEffects: shouldWaitOnEffects,
       onLog: onLog,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
     );
-    return isDistinctUntilChangedOn ? machine.distinctUntilChangedInput() : machine;
+    return isDistinctUntilChangedOn ? machine.distinctUntilChangedInput(shouldWaitOnEffects: false) : machine;
   }
 }

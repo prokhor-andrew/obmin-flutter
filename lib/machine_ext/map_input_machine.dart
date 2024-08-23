@@ -9,8 +9,11 @@ import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/outline.dart';
 import 'package:obmin/channel/channel_lib.dart';
 
+
 extension MapInputMachineExtension<Input, Output> on Machine<Input, Output> {
-  Machine<R, Output> mapInput<R>(Input Function(R input) function, {
+  Machine<R, Output> mapInput<R>(
+    Input Function(R input) function, {
+    bool shouldWaitOnEffects = false,
     ChannelBufferStrategy<R>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<Output, R>>? internalBufferStrategy,
@@ -48,6 +51,7 @@ extension MapInputMachineExtension<Input, Output> on Machine<Input, Output> {
         return outline().asFeature({this});
       },
       onDestroyFeature: (_) async {},
+      shouldWaitOnEffects: shouldWaitOnEffects,
     );
   }
 }

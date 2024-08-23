@@ -28,6 +28,6 @@ WidgetMachine<State, State, Event> WidgetMachineX<State, Event>({
       return builder(context, state, update);
     },
   ).transform((machine) {
-    return isDistinctUntilChanged ? machine.distinctUntilChangedInput() : machine;
+    return isDistinctUntilChanged ? machine.distinctUntilChangedInput(shouldWaitOnEffects: false) : machine;
   });
 }

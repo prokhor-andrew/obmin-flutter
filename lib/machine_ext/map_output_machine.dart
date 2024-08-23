@@ -13,6 +13,7 @@ import 'package:obmin/machine_ext/silo_machine.dart';
 extension MapOutputMachineExtension<Input, Output> on Machine<Input, Output> {
   Machine<Input, R> mapOutput<R>(
     R Function(Output output) function, {
+    bool shouldWaitOnEffects = false,
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<R>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<Output, Input>>? internalBufferStrategy,
@@ -50,6 +51,7 @@ extension MapOutputMachineExtension<Input, Output> on Machine<Input, Output> {
         return outline().asFeature({this});
       },
       onDestroyFeature: (_) async {},
+      shouldWaitOnEffects: shouldWaitOnEffects,
     );
   }
 }
@@ -57,12 +59,14 @@ extension MapOutputMachineExtension<Input, Output> on Machine<Input, Output> {
 extension MapSiloExtension<T> on Silo<T> {
   Silo<R> map<R>(
     R Function(T value) function, {
+    required bool shouldWaitOnEffects,
     ChannelBufferStrategy<()>? inputBufferStrategy,
     ChannelBufferStrategy<R>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<T, ()>>? internalBufferStrategy,
   }) {
     return mapOutput<R>(
       function,
+      shouldWaitOnEffects: shouldWaitOnEffects,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
