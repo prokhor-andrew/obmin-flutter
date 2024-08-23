@@ -59,7 +59,7 @@ extension MapOutputMachineExtension<Input, Output> on Machine<Input, Output> {
 extension MapSiloExtension<T> on Silo<T> {
   Silo<R> map<R>(
     R Function(T value) function, {
-    required bool shouldWaitOnEffects,
+    bool shouldWaitOnEffects = false,
     ChannelBufferStrategy<()>? inputBufferStrategy,
     ChannelBufferStrategy<R>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<T, ()>>? internalBufferStrategy,
