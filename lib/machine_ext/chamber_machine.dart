@@ -19,7 +19,6 @@ extension ChamberMachineExtension on MachineFactory {
     required Set<Silo<Output>> Function(Helper helper) initial,
     required Set<Silo<Output>> Function(Helper helper, Input input) map,
     bool shouldWaitOnEffects = true,
-    void Function(String loggable)? onLog,
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<Output, Input>>? internalBufferStrategy,
@@ -56,7 +55,6 @@ extension ChamberMachineExtension on MachineFactory {
       onDestroyFeature: (helper) async {
         await onDestroyHelper(helper);
       },
-      onLog: onLog,
     );
   }
 
@@ -68,7 +66,6 @@ extension ChamberMachineExtension on MachineFactory {
     required Set<Silo<Update<State>>> Function(Helper helper, State state) map,
     bool isDistinctUntilChangedOn = true,
     bool shouldWaitOnEffects = true,
-    void Function(String loggable)? onLog,
     ChannelBufferStrategy<State>? inputBufferStrategy,
     ChannelBufferStrategy<Update<State>>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<Update<State>, State>>? internalBufferStrategy,
@@ -82,7 +79,6 @@ extension ChamberMachineExtension on MachineFactory {
       },
       map: map,
       shouldWaitOnEffects: shouldWaitOnEffects,
-      onLog: onLog,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,

@@ -15,7 +15,6 @@ extension FeatureMachineExtension on MachineFactory {
     required Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() onCreateFeature,
     required Future<void> Function(State state) onDestroyFeature,
     bool shouldWaitOnEffects = true,
-    void Function(String loggable)? onLog,
     ChannelBufferStrategy<ExtTrigger>? inputBufferStrategy,
     ChannelBufferStrategy<ExtEffect>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<IntTrigger, ExtTrigger>>? internalBufferStrategy,
@@ -31,7 +30,6 @@ extension FeatureMachineExtension on MachineFactory {
           onCreate: onCreateFeature,
           onDestroy: onDestroyFeature,
           shouldWaitOnEffects: shouldWaitOnEffects,
-          onLog: onLog,
         );
       },
       onChange: (object, callback) async {
@@ -48,7 +46,6 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
   final String _id;
   final Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() _onCreate;
   final Future<void> Function(State state) _onDestroy;
-  final void Function(String loggable)? _onLog;
   final bool shouldWaitOnEffects;
 
   bool _isCancelled = false;
@@ -73,22 +70,13 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
     ChannelBufferStrategy<FeatureEvent<IntTrigger, ExtTrigger>>? bufferStrategy,
     required Future<Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() onCreate,
     required Future<void> Function(State state) onDestroy,
-    required void Function(String loggable)? onLog,
     required this.shouldWaitOnEffects,
   })  : _id = id,
         _onCreate = onCreate,
         _onDestroy = onDestroy,
-        _onLog = onLog,
         _channel = Channel(
           bufferStrategy: bufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default"),
         );
-
-  void _log() {
-    final onLog = _onLog;
-    if (onLog != null) {
-      onLog("FeatureMachine<$State, $IntTrigger, $IntEffect, $ExtTrigger, $ExtEffect> { id=$_id, state=$_state, process=$_processes }");
-    }
-  }
 
   Future<void> onChange(ChannelTask<bool> Function(ExtEffect effect)? callback) async {
     this._callback = callback;
@@ -112,8 +100,6 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
           },
         );
       }).toSet();
-
-      _log();
 
       Future(() async {
         while (true) {
@@ -143,7 +129,6 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
 
       await _onDestroy(_state);
 
-      _log();
     }
   }
 
@@ -211,8 +196,6 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
     _processes = processesToAdd.union(processesToKeep);
     _state = transition.feature.state;
     _transit = transition.feature.transit;
-
-    _log();
 
     final effects = transition.effects;
 
