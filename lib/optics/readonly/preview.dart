@@ -30,6 +30,10 @@ final class Preview<Whole, Part> {
     return "Preview<$Whole, $Part>";
   }
 
+  Getter<Whole, Optional<Part>> asGetter() {
+    return Getter(get);
+  }
+
   Fold<Whole, Part> asFold() {
     return Fold((whole) {
       return get(whole).map((value) => [value]).valueOr([]);

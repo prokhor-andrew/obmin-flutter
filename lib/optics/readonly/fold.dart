@@ -4,6 +4,8 @@
 
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
+import 'package:obmin/types/optional.dart';
+import 'package:obmin/utils/bool_fold.dart';
 
 final class Fold<Whole, Part> {
   final Iterable<Part> Function(Whole whole) get;
@@ -27,5 +29,19 @@ final class Fold<Whole, Part> {
   @override
   String toString() {
     return "Fold<$Whole, $Part>";
+  }
+
+  Preview<Whole, Iterable<Part>> asPreview() {
+    return Preview((whole) {
+      final iterable = get(whole);
+
+      return iterable.isEmpty.fold(Optional.none, () {
+        return Optional.some(iterable);
+      });
+    });
+  }
+
+  Getter<Whole, Iterable<Part>> asGetter() {
+    return Getter(get);
   }
 }
