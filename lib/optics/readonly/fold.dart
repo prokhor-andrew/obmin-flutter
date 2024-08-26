@@ -5,6 +5,7 @@
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
+import 'package:obmin/types/non_empty_iterable.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/utils/bool_fold.dart';
 
