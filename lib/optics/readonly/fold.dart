@@ -6,8 +6,6 @@ import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/non_empty_iterable.dart';
-import 'package:obmin/types/optional.dart';
-import 'package:obmin/utils/bool_fold.dart';
 
 final class Fold<Whole, Part> {
   final Iterable<Part> Function(Whole whole) get;
@@ -81,13 +79,9 @@ final class Fold<Whole, Part> {
     return "Fold<$Whole, $Part>";
   }
 
-  Preview<Whole, Iterable<Part>> asPreview() {
+  Preview<Whole, NonEmptyIterable<Part>> asPreview() {
     return Preview((whole) {
-      final iterable = get(whole);
-
-      return iterable.isEmpty.fold(Optional.none, () {
-        return Optional.some(iterable);
-      });
+      return NonEmptyIterable.fromIterable(get(whole));
     });
   }
 
