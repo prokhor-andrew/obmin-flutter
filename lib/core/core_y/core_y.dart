@@ -14,7 +14,7 @@ Core<State, State, Update<State>> CoreY<State>({
   return CoreX(
     state: state,
     reducer: (state, reducer) {
-      return reducer(state);
+      return reducer.get(state);
     },
     machines: machines,
   );

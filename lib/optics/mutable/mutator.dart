@@ -14,6 +14,8 @@ import 'package:obmin/types/update.dart';
 import 'package:obmin/utils/function_args_swapped.dart';
 import 'package:obmin/utils/function_curry.dart';
 
+// TODO: apply as optics
+
 final class Mutator<Whole, Part> {
   final Whole Function(Whole whole, Update<Part> update) apply;
 
@@ -25,14 +27,14 @@ final class Mutator<Whole, Part> {
 
   Mutator<Whole, Sub> compose<Sub>(Mutator<Part, Sub> other) {
     return Mutator((whole, update) {
-      return apply(whole, (part) {
+      return apply(whole, Getter((part) {
         return other.apply(part, update);
-      });
+      }));
     });
   }
 
   Whole set(Whole whole, Part part) {
-    return apply(whole, (_) => part);
+    return apply(whole, Getter((_) => part));
   }
 
   @override
@@ -42,7 +44,7 @@ final class Mutator<Whole, Part> {
 
   static Mutator<Whole, Whole> reducer<Whole>() {
     return Mutator((whole, modify) {
-      return modify(whole);
+      return modify.get(whole);
     });
   }
 
@@ -52,7 +54,7 @@ final class Mutator<Whole, Part> {
   ) {
     return Mutator((whole, modify) {
       final zoomed = get.get(whole);
-      final modified = modify(zoomed);
+      final modified = modify.get(zoomed);
       return reconstruct(whole, modified);
     });
   }
@@ -62,7 +64,7 @@ final class Mutator<Whole, Part> {
     Whole Function(Whole, Part) reconstruct,
   ) {
     return Mutator((whole, modify) {
-      return preview.get(whole).map(modify).map((part) {
+      return preview.get(whole).map(modify.get).map((part) {
         return reconstruct(whole, part);
       }).valueOr(whole);
     });
@@ -77,7 +79,7 @@ final class Mutator<Whole, Part> {
       if (zoomed.isEmpty) {
         return whole;
       }
-      final modified = zoomed.map(modify);
+      final modified = zoomed.map(modify.get);
 
       return reconstruct(whole, modified);
     });
@@ -133,7 +135,7 @@ extension BiPreviewAsMutatorExtension<T1, T2> on BiPreview<T1, T2> {
     return Mutator(
       (whole, update) {
         final partOrNone = forward.get(whole);
-        final updatedOrNone = partOrNone.map(update);
+        final updatedOrNone = partOrNone.map(update.get);
         final wholeOrNone = updatedOrNone.bind(backward.get);
         return wholeOrNone.valueOr(whole);
       },
