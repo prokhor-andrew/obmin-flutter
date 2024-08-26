@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/types/optional.dart';
@@ -15,6 +16,10 @@ final class Preview<Whole, Part> {
     return Preview((whole) {
       return get(whole).bind(other.get);
     });
+  }
+
+  Preview<Whole, Part> composeWithEqv(Eqv<Part> other) {
+    return compose(other.asPreview());
   }
 
   Preview<Whole, Sub> composeWithGetter<Sub>(Getter<Part, Sub> other) {
