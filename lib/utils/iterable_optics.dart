@@ -3,15 +3,15 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:collection/collection.dart';
+import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold.dart';
 import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/transformers/prism.dart';
 import 'package:obmin/optics/transformers/reflector.dart';
-import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/optional.dart';
 
 extension IterableOpticsEqvExtension<T> on Eqv<Iterable<T>> {
@@ -80,33 +80,34 @@ extension IterableOpticsMutatorExtension<Whole, T> on Mutator<Whole, Iterable<T>
   Mutator<Whole, T> get traversed => compose(
         Mutator.traversal<Iterable<T>, T>(
           Fold<Iterable<T>, T>((whole) => whole),
-          (whole, part) => part,
+          Getter((part) => Getter((_) => part.asIterable())),
         ),
       );
 
   Mutator<Whole, T> find(bool Function(T element) function) {
     return compose(
-      Mutator.affine(
-        Preview<Iterable<T>, T>((whole) {
-          final found = whole.firstWhereOrNull(function);
-          if (found == null) {
-            return Optional<T>.none();
-          } else {
-            return Optional<T>.some(found);
-          }
-        }),
-        (whole, part) {
-          final copy = whole.toList();
-          final index = copy.indexWhere(function);
-          if (index == -1) {
-            return whole;
-          }
+      Mutator.affine(Preview<Iterable<T>, T>((whole) {
+        final found = whole.firstWhereOrNull(function);
+        if (found == null) {
+          return Optional<T>.none();
+        } else {
+          return Optional<T>.some(found);
+        }
+      }), Getter(
+        (part) {
+          return Getter((whole) {
+            final copy = whole.toList();
+            final index = copy.indexWhere(function);
+            if (index == -1) {
+              return whole;
+            }
 
-          copy.removeAt(index);
-          copy.insert(index, part);
-          return copy;
+            copy.removeAt(index);
+            copy.insert(index, part);
+            return copy;
+          });
         },
-      ),
+      )),
     );
   }
 }
@@ -247,50 +248,52 @@ extension ListOpticsFoldExtension<Whole, T> on Fold<Whole, List<T>> {
 
 extension ListOpticsMutatorExtension<Whole, T> on Mutator<Whole, List<T>> {
   Mutator<Whole, T> get last => compose(
-        Mutator.affine<List<T>, T>(
-          Preview<List<T>, T>((whole) {
-            if (whole.isEmpty) {
-              return Optional<T>.none();
-            } else {
-              return Optional<T>.some(whole.last);
-            }
-          }),
-          (whole, part) {
-            if (whole.isEmpty) {
-              return whole;
-            }
-            final copy = whole.toList();
+        Mutator.affine<List<T>, T>(Preview<List<T>, T>((whole) {
+          if (whole.isEmpty) {
+            return Optional<T>.none();
+          } else {
+            return Optional<T>.some(whole.last);
+          }
+        }), Getter(
+          (part) {
+            return Getter((whole) {
+              if (whole.isEmpty) {
+                return whole;
+              }
+              final copy = whole.toList();
 
-            final indexOfLastElement = whole.length - 1;
-            copy.removeAt(indexOfLastElement);
-            copy.insert(indexOfLastElement, part);
+              final indexOfLastElement = whole.length - 1;
+              copy.removeAt(indexOfLastElement);
+              copy.insert(indexOfLastElement, part);
 
-            return copy;
+              return copy;
+            });
           },
-        ),
+        )),
       );
 
   Mutator<Whole, T> get first => compose(
-        Mutator.affine<List<T>, T>(
-          Preview<List<T>, T>((whole) {
-            if (whole.isEmpty) {
-              return Optional<T>.none();
-            } else {
-              return Optional<T>.some(whole.last);
-            }
-          }),
-          (whole, part) {
-            if (whole.isEmpty) {
-              return whole;
-            }
-            final copy = whole.toList();
+        Mutator.affine<List<T>, T>(Preview<List<T>, T>((whole) {
+          if (whole.isEmpty) {
+            return Optional<T>.none();
+          } else {
+            return Optional<T>.some(whole.last);
+          }
+        }), Getter(
+          (part) {
+            return Getter((whole) {
+              if (whole.isEmpty) {
+                return whole;
+              }
+              final copy = whole.toList();
 
-            copy.removeAt(0);
-            copy.insert(0, part);
+              copy.removeAt(0);
+              copy.insert(0, part);
 
-            return copy;
+              return copy;
+            });
           },
-        ),
+        )),
       );
 
   Mutator<Whole, T> at(int index) {
@@ -303,16 +306,18 @@ extension ListOpticsMutatorExtension<Whole, T> on Mutator<Whole, List<T>> {
             return Optional<T>.some(whole.last);
           }
         }),
-        (whole, part) {
-          if (index < 0 || index >= whole.length) {
-            return whole;
-          }
+        Getter((part) {
+          return Getter((whole) {
+            if (index < 0 || index >= whole.length) {
+              return whole;
+            }
 
-          final copy = whole.toList();
-          copy.removeAt(index);
-          copy.insert(index, part);
-          return copy;
-        },
+            final copy = whole.toList();
+            copy.removeAt(index);
+            copy.insert(index, part);
+            return copy;
+          });
+        }),
       ),
     );
   }
@@ -376,14 +381,16 @@ extension MapOpticsMutatorExtension<Whole, Key, T> on Mutator<Whole, Map<Key, T>
             return Optional<T>.some(element);
           }
         }),
-        (whole, part) {
-          if (whole.isEmpty) {
-            return whole;
-          }
+        Getter((part) {
+          return Getter((whole) {
+            if (whole.isEmpty) {
+              return whole;
+            }
 
-          whole[key] = part;
-          return whole;
-        },
+            whole[key] = part;
+            return whole;
+          });
+        }),
       ),
     );
   }

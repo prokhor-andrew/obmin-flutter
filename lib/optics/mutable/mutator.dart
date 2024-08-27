@@ -10,6 +10,7 @@ import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
 import 'package:obmin/optics/transformers/prism.dart';
 import 'package:obmin/optics/transformers/reflector.dart';
+import 'package:obmin/types/non_empty_iterable.dart';
 import 'package:obmin/types/update.dart';
 
 final class Mutator<Whole, Part> {
@@ -57,12 +58,12 @@ final class Mutator<Whole, Part> {
 
   static Mutator<Whole, Part> affine<Whole, Part>(
     Preview<Whole, Part> preview,
-    Whole Function(Whole, Part) reconstruct,
+      Getter<Part, Update<Whole>> reconstruct,
   ) {
     return Mutator(Getter((modify) {
       return Getter((whole) {
         return preview.get(whole).map(modify.get).map((part) {
-          return reconstruct(whole, part);
+          return reconstruct.get(part).get(whole);
         }).valueOr(whole);
       });
     }));
@@ -70,17 +71,15 @@ final class Mutator<Whole, Part> {
 
   static Mutator<Whole, Part> traversal<Whole, Part>(
     Fold<Whole, Part> fold,
-    Whole Function(Whole, Iterable<Part>) reconstruct, // Iterable<Part> is never empty
+      Getter<NonEmptyIterable<Part>, Update<Whole>> reconstruct,
   ) {
     return Mutator(Getter((modify) {
       return Getter((whole) {
-        final zoomed = fold.get(whole);
-        if (zoomed.isEmpty) {
-          return whole;
-        }
-        final modified = zoomed.map(modify.get);
-
-        return reconstruct(whole, modified);
+        final zoomedOrNone = NonEmptyIterable.fromIterable(fold.get(whole));
+        return zoomedOrNone.map((zoomed) {
+          final modified = zoomed.map(modify.get);
+          return reconstruct.get(modified).get(whole);
+        }).valueOr(whole);
       });
     }));
   }
