@@ -29,6 +29,12 @@ final class NonEmptyIterable<T> {
     );
   }
 
+  NonEmptyIterable<R> map<R>(R Function(T value) function) {
+    final mappedHead = function(head);
+    final mappedTail = tail.map(function);
+    return NonEmptyIterable(head: mappedHead, tail: mappedTail);
+  }
+
   Iterable<T> asIterable() {
     return [head].plusMultiple(tail.toList());
   }
