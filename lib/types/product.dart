@@ -2,15 +2,15 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold.dart';
 import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/transformers/prism.dart';
 import 'package:obmin/optics/transformers/reflector.dart';
-import 'package:obmin/optics/readonly/preview.dart';
 
 final class Product<T1, T2> {
   final T1 value1;
@@ -106,14 +106,14 @@ extension ProductObminOpticMutatorExtension<Whole, T1, T2> on Mutator<Whole, Pro
   Mutator<Whole, T1> get value1 => compose(
         Mutator.lens<Product<T1, T2>, T1>(
           Getter<Product<T1, T2>, T1>((whole) => whole.value1),
-          (whole, part) => whole.mapValue1To(part),
+          Getter((part) => Getter((whole) => whole.mapValue1To(part))),
         ),
       );
 
   Mutator<Whole, T2> get value2 => compose(
         Mutator.lens<Product<T1, T2>, T2>(
           Getter<Product<T1, T2>, T2>((whole) => whole.value2),
-          (whole, part) => whole.mapValue2To(part),
+          Getter((part) => Getter((whole) => whole.mapValue2To(part))),
         ),
       );
 }
@@ -122,14 +122,14 @@ extension ProductObminOpticIsoExtension<Whole, T1, T2> on Iso<Whole, Product<T1,
   Mutator<Whole, T1> get value1 => asMutator().compose(
         Mutator.lens<Product<T1, T2>, T1>(
           Getter<Product<T1, T2>, T1>((whole) => whole.value1),
-          (whole, part) => whole.mapValue1To(part),
+          Getter((part) => Getter((whole) => whole.mapValue1To(part))),
         ),
       );
 
   Mutator<Whole, T2> get value2 => asMutator().compose(
         Mutator.lens<Product<T1, T2>, T2>(
           Getter<Product<T1, T2>, T2>((whole) => whole.value2),
-          (whole, part) => whole.mapValue2To(part),
+          Getter((part) => Getter((whole) => whole.mapValue2To(part))),
         ),
       );
 }
@@ -138,14 +138,14 @@ extension ProductObminOpticPrismExtension<Whole, T1, T2> on Prism<Whole, Product
   Mutator<Whole, T1> get value1 => asMutator().compose(
         Mutator.lens<Product<T1, T2>, T1>(
           Getter<Product<T1, T2>, T1>((whole) => whole.value1),
-          (whole, part) => whole.mapValue1To(part),
+          Getter((part) => Getter((whole) => whole.mapValue1To(part))),
         ),
       );
 
   Mutator<Whole, T2> get value2 => asMutator().compose(
         Mutator.lens<Product<T1, T2>, T2>(
           Getter<Product<T1, T2>, T2>((whole) => whole.value2),
-          (whole, part) => whole.mapValue2To(part),
+          Getter((part) => Getter((whole) => whole.mapValue2To(part))),
         ),
       );
 }
@@ -154,14 +154,14 @@ extension ProductObminOpticReflectorExtension<Whole, T1, T2> on Reflector<Whole,
   Mutator<Whole, T1> get value1 => asMutator().compose(
         Mutator.lens<Product<T1, T2>, T1>(
           Getter<Product<T1, T2>, T1>((whole) => whole.value1),
-          (whole, part) => whole.mapValue1To(part),
+          Getter((part) => Getter((whole) => whole.mapValue1To(part))),
         ),
       );
 
   Mutator<Whole, T2> get value2 => asMutator().compose(
         Mutator.lens<Product<T1, T2>, T2>(
           Getter<Product<T1, T2>, T2>((whole) => whole.value2),
-          (whole, part) => whole.mapValue2To(part),
+          Getter((part) => Getter((whole) => whole.mapValue2To(part))),
         ),
       );
 }
@@ -170,14 +170,14 @@ extension ProductObminOpticBiPreviewExtension<Whole, T1, T2> on BiPreview<Whole,
   Mutator<Whole, T1> get value1 => asMutator().compose(
         Mutator.lens<Product<T1, T2>, T1>(
           Getter<Product<T1, T2>, T1>((whole) => whole.value1),
-          (whole, part) => whole.mapValue1To(part),
+          Getter((part) => Getter((whole) => whole.mapValue1To(part))),
         ),
       );
 
   Mutator<Whole, T2> get value2 => asMutator().compose(
         Mutator.lens<Product<T1, T2>, T2>(
           Getter<Product<T1, T2>, T2>((whole) => whole.value2),
-          (whole, part) => whole.mapValue2To(part),
+          Getter((part) => Getter((whole) => whole.mapValue2To(part))),
         ),
       );
 }
