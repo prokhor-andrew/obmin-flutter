@@ -28,8 +28,8 @@ final class Mutator<Whole, Part> {
     }));
   }
 
-  Update<Whole> apply(Update<Part> update) {
-    return applier.get(Getter(update.get));
+  Update<Whole> apply(Part Function(Part) update) {
+    return applier.get(Getter(update));
   }
 
   Update<Whole> set(Part part) {
