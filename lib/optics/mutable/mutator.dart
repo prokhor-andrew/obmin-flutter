@@ -28,7 +28,7 @@ final class Mutator<Whole, Part> {
     }));
   }
 
-  Update<Whole> apply(Part Function(Part) update) {
+  Update<Whole> apply(Part Function(Part part) update) {
     return applier.get(Getter(update));
   }
 
