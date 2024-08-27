@@ -262,7 +262,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => compose(");
         buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
         buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
-        buffer.writeln("      (whole, part) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part),");
+        buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
         buffer.writeln("    ),");
         buffer.writeln("  );");
       }
@@ -283,7 +283,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
         buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
         buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
-        buffer.writeln("      (whole, part) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part),");
+        buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
         buffer.writeln("    ),");
         buffer.writeln("  );");
       }
@@ -304,7 +304,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
         buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
         buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
-        buffer.writeln("      (whole, part) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part),");
+        buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
         buffer.writeln("    ),");
         buffer.writeln("  );");
       }
@@ -325,7 +325,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
         buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
         buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
-        buffer.writeln("      (whole, part) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part),");
+        buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
         buffer.writeln("    ),");
         buffer.writeln("  );");
       }
@@ -346,7 +346,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
         buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
         buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
-        buffer.writeln("      (whole, part) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part),");
+        buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
         buffer.writeln("    ),");
         buffer.writeln("  );");
       }
@@ -908,7 +908,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
       buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => compose(");
       buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
       buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
-      buffer.writeln("      (whole, part) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part),");
+      buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
       buffer.writeln("    ),");
       buffer.writeln("  );");
     }
@@ -929,7 +929,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
       buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
       buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
       buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
-      buffer.writeln("      (whole, part) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part),");
+      buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
       buffer.writeln("    ),");
       buffer.writeln("  );");
     }
@@ -950,7 +950,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
       buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
       buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
       buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
-      buffer.writeln("      (whole, part) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part),");
+      buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
       buffer.writeln("    ),");
       buffer.writeln("  );");
     }
@@ -971,7 +971,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
       buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
       buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
       buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
-      buffer.writeln("      (whole, part) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part),");
+      buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
       buffer.writeln("    ),");
       buffer.writeln("  );");
     }
@@ -992,7 +992,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
       buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
       buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
       buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
-      buffer.writeln("      (whole, part) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part),");
+      buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
       buffer.writeln("    ),");
       buffer.writeln("  );");
     }
