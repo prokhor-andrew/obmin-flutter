@@ -14,22 +14,26 @@ import 'package:obmin/types/non_empty_iterable.dart';
 import 'package:obmin/types/update.dart';
 
 final class Mutator<Whole, Part> {
-  final Getter<Update<Part>, Update<Whole>> apply;
+  final Getter<Update<Part>, Update<Whole>> applier;
 
-  const Mutator(this.apply);
+  const Mutator(this.applier);
 
   Mutator<Whole, Sub> compose<Sub>(Mutator<Part, Sub> other) {
     return Mutator(Getter((update) {
       return Getter((whole) {
-        return apply.get(Getter((part) {
-          return other.apply.get(update).get(part);
+        return applier.get(Getter((part) {
+          return other.applier.get(update).get(part);
         })).get(whole);
       });
     }));
   }
 
+  Update<Whole> apply(Update<Part> update) {
+    return applier.get(Getter(update.get));
+  }
+
   Update<Whole> set(Part part) {
-    return apply.get(Update((_) => part));
+    return applier.get(Update((_) => part));
   }
 
   @override
@@ -58,7 +62,7 @@ final class Mutator<Whole, Part> {
 
   static Mutator<Whole, Part> affine<Whole, Part>(
     Preview<Whole, Part> preview,
-      Getter<Part, Update<Whole>> reconstruct,
+    Getter<Part, Update<Whole>> reconstruct,
   ) {
     return Mutator(Getter((modify) {
       return Getter((whole) {
@@ -71,7 +75,7 @@ final class Mutator<Whole, Part> {
 
   static Mutator<Whole, Part> traversal<Whole, Part>(
     Fold<Whole, Part> fold,
-      Getter<NonEmptyIterable<Part>, Update<Whole>> reconstruct,
+    Getter<NonEmptyIterable<Part>, Update<Whole>> reconstruct,
   ) {
     return Mutator(Getter((modify) {
       return Getter((whole) {
