@@ -2,6 +2,8 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core.dart';
 import 'package:obmin/machine/machine.dart';
@@ -23,7 +25,10 @@ final class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
 }
 
 final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidget<DomainState, Input, Output>> {
-  late Object _state;
+  final StreamController<Input> _controller = StreamController.broadcast();
+
+  void Function(Output)? _callback;
+
   Core<DomainState, Input, Output>? _core;
 
   @override
@@ -32,20 +37,22 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
     final coreScene = widget._initialCore.scene();
     final coreMachines = widget._initialCore.machines(coreScene.state);
 
-    _state = widget.uiMachine._init(coreScene.state);
-
     _core = Core<DomainState, Input, Output>(
       scene: () {
         return coreScene;
       },
       machines: (state) {
-        final Machine<Input, Output> uiMachine = widget.uiMachine._machine((set) {
-          setState(() {
+        final Machine<Input, Output> uiMachine = widget.uiMachine._machine(
+          (input) {
+            _controller.add(input);
+          },
+          (callback) {
+            _callback = callback;
             if (mounted) {
-              _state = set(_state);
+              setState(() {});
             }
-          });
-        });
+          },
+        );
 
         return coreMachines.union({
           uiMachine,
@@ -64,68 +71,58 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
 
   @override
   Widget build(BuildContext context) {
-    return widget.uiMachine._build(context, _state);
+    final callback = _callback;
+    if (callback != null) {
+      return widget.uiMachine.started(
+        context,
+        () => _controller.stream,
+        callback,
+      );
+    } else {
+      return widget.uiMachine.stopped(context);
+    }
   }
 }
 
 final class WidgetMachine<State, Input, Output> {
-  final Object Function(State state) _init;
-  final Machine<Input, Output> Function(void Function(Object Function(Object)) setState) _machine;
-  final Widget Function(BuildContext context, Object state) _build;
+  final Machine<Input, Output> Function(
+    void Function(Input input) sendInput,
+    void Function(void Function(Output output)? callback) setCallback,
+  ) _machine;
+
+  final Widget Function(BuildContext context) stopped;
+  final Widget Function(BuildContext context, Stream<Input> Function() inputs, void Function(Output output) callback) started;
 
   const WidgetMachine._({
-    required Object Function(State state) init,
-    required Machine<Input, Output> Function(void Function(Object Function(Object)) setState) machine,
-    required Widget Function(BuildContext context, Object state) build,
-  })  : _init = init,
-        _machine = machine,
-        _build = build;
+    required this.started,
+    required this.stopped,
+    required Machine<Input, Output> Function(
+      void Function(Input input) sendInput,
+      void Function(void Function(Output output)? callback) setCallback,
+    ) machine,
+  }) : _machine = machine;
 
-  WidgetMachine<State, RInput, ROutput> transform<RInput, ROutput>(Machine<RInput, ROutput> Function(Machine<Input, Output> machine) function) {
-    return WidgetMachine._(
-      init: _init,
-      build: _build,
-      machine: (setState) {
-        return function(_machine(setState));
-      },
-    );
-  }
-
-  static WidgetMachine<State, Input, Output> create<UiState, State, Input, Output>({
+  static WidgetMachine<State, Input, Output> create<State, Input, Output>({
     required String id,
-    required UiState Function(State state) init,
-    required UiState Function(UiState state, void Function(Output output) callback) activate,
-    required UiState Function(UiState state, Input input) process,
-    required Widget Function(BuildContext context, UiState state) build,
+    required Widget Function(BuildContext context) stopped,
+    required Widget Function(BuildContext context, Stream<Input> Function() inputs, void Function(Output output) callback) started,
   }) {
     return WidgetMachine<State, Input, Output>._(
-      init: (state) {
-        return init(state) as Object;
-      },
-      machine: (setState) {
+      started: started,
+      stopped: stopped,
+      machine: (sendInput, setCallback) {
         return MachineFactory.shared.basic<(), Input, Output>(
           id: id,
           onCreate: (id) {
             return ();
           },
           onChange: (_, callback) async {
-            if (callback != null) {
-              setState((state) {
-                return activate(state as UiState, (output) async {
-                  await callback(output).future;
-                }) as Object;
-              });
-            }
+            setCallback(callback);
           },
           onProcess: (_, input) async {
-            setState((state) {
-              return process(state as UiState, input) as Object;
-            });
+            sendInput(input);
           },
         );
-      },
-      build: (context, state) {
-        return build(context, state as UiState);
       },
     );
   }
