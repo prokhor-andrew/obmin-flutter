@@ -64,6 +64,7 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
 
   @override
   void dispose() {
+    _controller.close();
     _core?.stop();
     _core = null;
     super.dispose();
