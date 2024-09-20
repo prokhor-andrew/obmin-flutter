@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/eqv.dart';
+import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/non_empty_list.dart';
@@ -17,9 +18,12 @@ final class FoldList<Whole, Part> {
       return get(whole).expand(other.get).toList();
     });
   }
-
   FoldList<Whole, Part> composeWithEqv(Eqv<Part> other) {
     return compose(other.asFoldList());
+  }
+
+  FoldSet<Whole, Sub> composeWithFoldSet<Sub>(FoldSet<Part, Sub> other) {
+    return asFoldSet().compose(other);
   }
 
   FoldList<Whole, Sub> composeWithGetter<Sub>(Getter<Part, Sub> other) {
@@ -87,5 +91,14 @@ final class FoldList<Whole, Part> {
 
   Getter<Whole, List<Part>> asGetter() {
     return Getter(get);
+  }
+
+  // there is no asFoldList method in FoldSet
+  // as conversion from Set to List will always give random order
+  // thus making such function impure
+  FoldSet<Whole, Part> asFoldSet() {
+    return FoldSet((whole) {
+      return get(whole).toSet();
+    });
   }
 }

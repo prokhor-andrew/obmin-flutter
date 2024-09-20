@@ -5,6 +5,7 @@
 import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_list.dart';
+import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
@@ -27,6 +28,10 @@ extension OptionalOpticsPreviewExtension<Whole, T> on Preview<Whole, Optional<T>
 
 extension OptionalOpticsFoldListExtension<Whole, T> on FoldList<Whole, Optional<T>> {
   FoldList<Whole, T> get previewed => composeWithPreview(Preview((whole) => whole));
+}
+
+extension OptionalOpticsFoldSetExtension<Whole, T> on FoldSet<Whole, Optional<T>> {
+  FoldSet<Whole, T> get previewed => composeWithPreview(Preview((whole) => whole));
 }
 
 extension OptionalOpticsMutatorExtension<Whole, T> on Mutator<Whole, Optional<T>> {

@@ -3,9 +3,11 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/fold_list.dart';
+import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/non_empty_list.dart';
+import 'package:obmin/types/non_empty_set.dart';
 
 final class Eqv<T> {
   const Eqv();
@@ -39,6 +41,15 @@ final class Eqv<T> {
     });
   }
 
+  FoldSet<T, R> zipWithFoldSet<Part, R>(
+    FoldSet<T, Part> other,
+    NonEmptySet<R> Function(T value1, NonEmptySet<Part> value2) function,
+  ) {
+    return asFoldSet().zipWith(other, (value1, value2) {
+      return function(value1.any, value2);
+    });
+  }
+
   Getter<T, R> composeWithGetter<R>(Getter<T, R> other) {
     return asGetter().compose(other);
   }
@@ -51,6 +62,10 @@ final class Eqv<T> {
     return asFoldList().compose(other);
   }
 
+  FoldSet<T, R> composeWithFoldSet<R>(FoldSet<T, R> other) {
+    return asFoldSet().compose(other);
+  }
+
   Getter<T, T> asGetter() {
     return Getter(identity);
   }
@@ -61,6 +76,10 @@ final class Eqv<T> {
 
   FoldList<T, T> asFoldList() {
     return asGetter().asFoldList();
+  }
+
+  FoldSet<T, T> asFoldSet() {
+    return asGetter().asFoldSet();
   }
 
   @override

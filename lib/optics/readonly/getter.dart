@@ -4,8 +4,10 @@
 
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_list.dart';
+import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/non_empty_list.dart';
+import 'package:obmin/types/non_empty_set.dart';
 import 'package:obmin/types/optional.dart';
 
 final class Getter<Whole, Part> {
@@ -29,6 +31,10 @@ final class Getter<Whole, Part> {
 
   FoldList<Whole, Sub> composeWithFoldList<Sub>(FoldList<Part, Sub> other) {
     return asFoldList().compose(other);
+  }
+
+  FoldSet<Whole, Sub> composeWithFoldSet<Sub>(FoldSet<Part, Sub> other) {
+    return asFoldSet().compose(other);
   }
 
   Getter<Whole, R> zipWith<Part2, R>(
@@ -67,6 +73,15 @@ final class Getter<Whole, Part> {
     });
   }
 
+  FoldSet<Whole, R> zipWithFoldSet<Part2, R>(
+    FoldSet<Whole, Part2> other,
+    NonEmptySet<R> Function(Part value1, NonEmptySet<Part2> value2) function,
+  ) {
+    return asFoldSet().zipWith(other, (value1, value2) {
+      return function(value1.any, value2);
+    });
+  }
+
   @override
   String toString() {
     return "Getter<$Whole, $Part>";
@@ -80,5 +95,9 @@ final class Getter<Whole, Part> {
 
   FoldList<Whole, Part> asFoldList() {
     return asPreview().asFoldList();
+  }
+
+  FoldSet<Whole, Part> asFoldSet() {
+    return asPreview().asFoldSet();
   }
 }
