@@ -2,10 +2,10 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/optics/readonly/fold.dart';
+import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/types/non_empty_iterable.dart';
+import 'package:obmin/types/non_empty_list.dart';
 
 final class Eqv<T> {
   const Eqv();
@@ -30,11 +30,11 @@ final class Eqv<T> {
     return asPreview().zipWith(other, function);
   }
 
-  Fold<T, R> zipWithFold<Part, R>(
-    Fold<T, Part> other,
-    NonEmptyIterable<R> Function(T value1, NonEmptyIterable<Part> value2) function,
+  FoldList<T, R> zipWithFoldList<Part, R>(
+    FoldList<T, Part> other,
+    NonEmptyList<R> Function(T value1, NonEmptyList<Part> value2) function,
   ) {
-    return asFold().zipWith(other, (value1, value2) {
+    return asFoldList().zipWith(other, (value1, value2) {
       return function(value1.head, value2);
     });
   }
@@ -47,8 +47,8 @@ final class Eqv<T> {
     return asPreview().compose(other);
   }
 
-  Fold<T, R> composeWithFold<R>(Fold<T, R> other) {
-    return asFold().compose(other);
+  FoldList<T, R> composeWithFoldList<R>(FoldList<T, R> other) {
+    return asFoldList().compose(other);
   }
 
   Getter<T, T> asGetter() {
@@ -59,8 +59,8 @@ final class Eqv<T> {
     return asGetter().asPreview();
   }
 
-  Fold<T, T> asFold() {
-    return asGetter().asFold();
+  FoldList<T, T> asFoldList() {
+    return asGetter().asFoldList();
   }
 
   @override

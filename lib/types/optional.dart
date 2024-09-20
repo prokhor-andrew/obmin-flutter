@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold.dart';
+import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
@@ -136,8 +136,8 @@ extension OptionalObminOpticPreviewExtension<Whole, T> on Preview<Whole, Optiona
   Preview<Whole, T> get value => compose(Preview<Optional<T>, T>((whole) => whole));
 }
 
-extension OptionalObminOpticFoldExtension<Whole, T> on Fold<Whole, Optional<T>> {
-  Fold<Whole, T> get value => composeWithPreview(Preview<Optional<T>, T>((whole) => whole));
+extension OptionalObminOpticFoldListExtension<Whole, T> on FoldList<Whole, Optional<T>> {
+  FoldList<Whole, T> get value => composeWithPreview(Preview<Optional<T>, T>((whole) => whole));
 }
 
 extension OptionalObminOpticMutatorExtension<Whole, T> on Mutator<Whole, Optional<T>> {

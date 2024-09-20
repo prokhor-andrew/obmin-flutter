@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold.dart';
+import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/types/non_empty_iterable.dart';
+import 'package:obmin/types/non_empty_list.dart';
 import 'package:obmin/types/optional.dart';
 
 final class Getter<Whole, Part> {
@@ -27,8 +27,8 @@ final class Getter<Whole, Part> {
     return asPreview().compose(other);
   }
 
-  Fold<Whole, Sub> composeWithFold<Sub>(Fold<Part, Sub> other) {
-    return asFold().compose(other);
+  FoldList<Whole, Sub> composeWithFoldList<Sub>(FoldList<Part, Sub> other) {
+    return asFoldList().compose(other);
   }
 
   Getter<Whole, R> zipWith<Part2, R>(
@@ -58,11 +58,11 @@ final class Getter<Whole, Part> {
     return asPreview().zipWith(other, function);
   }
 
-  Fold<Whole, R> zipWithFold<Part2, R>(
-    Fold<Whole, Part2> other,
-    NonEmptyIterable<R> Function(Part value1, NonEmptyIterable<Part2> value2) function,
+  FoldList<Whole, R> zipWithFoldList<Part2, R>(
+    FoldList<Whole, Part2> other,
+    NonEmptyList<R> Function(Part value1, NonEmptyList<Part2> value2) function,
   ) {
-    return asFold().zipWith(other, (value1, value2) {
+    return asFoldList().zipWith(other, (value1, value2) {
       return function(value1.head, value2);
     });
   }
@@ -78,7 +78,7 @@ final class Getter<Whole, Part> {
     });
   }
 
-  Fold<Whole, Part> asFold() {
-    return asPreview().asFold();
+  FoldList<Whole, Part> asFoldList() {
+    return asPreview().asFoldList();
   }
 }
