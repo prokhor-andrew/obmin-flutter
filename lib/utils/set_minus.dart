@@ -3,6 +3,13 @@
 // See the LICENSE file in the project root for license information.
 
 extension MinusOnSetExtension<T> on Set<T> {
+  Set<T> minus(T value) {
+    final copy = toSet();
+    copy.remove(value);
+
+    return copy;
+  }
+
   Set<T> minusWhere(bool Function(T value) predicate) {
     final list = toList();
 
