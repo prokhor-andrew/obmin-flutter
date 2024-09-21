@@ -57,7 +57,7 @@ extension SetOpticsPreviewExtension<Whole, T> on Preview<Whole, Set<T>> {
 }
 
 extension SetOpticsFoldListExtension<Whole, T> on FoldList<Whole, Set<T>> {
-  FoldSet<Whole, T> get folded => composeWithFoldSet(FoldSet<Set<T>, T>((whole) => whole));
+  FoldSet<Whole, T> get folded => asFoldSet().folded;
 
   FoldSet<Whole, T> find(bool Function(T element) function) {
     return asFoldSet().composeWithPreview(
