@@ -234,7 +234,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
     buffer.writeln('}');
 
     buffer.writeln(
-        "extension ${caseName}ObminOpticFoldExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldList<Whole, $caseName$generics> {");
+        "extension ${caseName}ObminOpticFoldListExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldList<Whole, $caseName$generics> {");
 
     for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
@@ -244,6 +244,22 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         final fieldType = field.type;
 
         buffer.writeln('  FoldList<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName));');
+      }
+    }
+
+    buffer.writeln('}');
+
+    buffer.writeln(
+        "extension ${caseName}ObminOpticFoldSetExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldSet<Whole, $caseName$generics> {");
+
+    for (final field in caseE.fields) {
+      if (!_isComputedProperty(field)) {
+        buffer.writeln("");
+
+        final fieldName = field.displayName;
+        final fieldType = field.type;
+
+        buffer.writeln('  FoldSet<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName));');
       }
     }
 
@@ -421,7 +437,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
   buffer.writeln("");
 
   buffer.writeln(
-      "extension ${className}ObminOpticFoldExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldList<Whole, $className$generics> {");
+      "extension ${className}ObminOpticFoldListExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldList<Whole, $className$generics> {");
 
   for (final caseE in cases) {
     final caseName = caseE.displayName;
@@ -430,6 +446,20 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
 
     buffer.writeln(
         "FoldList<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPreview(Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone));");
+  }
+
+  buffer.writeln('}');
+
+  buffer.writeln(
+      "extension ${className}ObminOpticFoldSetExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldSet<Whole, $className$generics> {");
+
+  for (final caseE in cases) {
+    final caseName = caseE.displayName;
+
+    buffer.writeln("");
+
+    buffer.writeln(
+        "FoldSet<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPreview(Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone));");
   }
 
   buffer.writeln('}');
@@ -804,7 +834,7 @@ void _generateForFold(StringBuffer buffer, ClassElement element) {
   }
 
   buffer.writeln(
-      "extension ${className}ObminOpticFoldExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldList<Whole, $className$generics> {");
+      "extension ${className}ObminOpticFoldListExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldList<Whole, $className$generics> {");
 
   for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
@@ -814,6 +844,22 @@ void _generateForFold(StringBuffer buffer, ClassElement element) {
       final fieldType = field.type;
 
       buffer.writeln('  FoldList<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$className$generics, $fieldType>((whole) => whole.$fieldName));');
+    }
+  }
+
+  buffer.writeln('}');
+
+  buffer.writeln(
+      "extension ${className}ObminOpticFoldSetExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldSet<Whole, $className$generics> {");
+
+  for (final field in element.fields) {
+    if (!_isComputedProperty(field)) {
+      buffer.writeln("");
+
+      final fieldName = field.displayName;
+      final fieldType = field.type;
+
+      buffer.writeln('  FoldSet<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$className$generics, $fieldType>((whole) => whole.$fieldName));');
     }
   }
 
