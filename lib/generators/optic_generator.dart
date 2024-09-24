@@ -487,7 +487,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
   buffer.writeln("");
 
   buffer.writeln(
-      "extension ${className}ObminOpticBiEqvExtension<${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on BiEqv<$className$generics> {");
+      "extension ${className}ObminOpticBiEqvExtension${generics.isEmpty ? "" : "<${_dropFirstChar(_dropLastChar(generics))}>"} on BiEqv<$className$generics> {");
 
   for (final caseE in cases) {
     final caseName = caseE.displayName;
@@ -503,7 +503,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
   buffer.writeln('}');
 
   buffer.writeln(
-      "extension ${className}ObminOpticBiEqvExtension<${_dropFirstChar(_dropLastChar(generics))}> on BiEqv<$className$generics> {");
+      "extension ${className}ObminOpticBiEqvExtension${generics.isEmpty ? "" : "<${_dropFirstChar(_dropLastChar(generics))}>"} on BiEqv<$className$generics> {");
 
   for (final caseE in cases) {
     final caseName = caseE.displayName;
@@ -995,7 +995,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
   buffer.writeln('}');
 
   buffer.writeln(
-      "extension ${className}ObminOpticBiEqvExtension<${_dropFirstChar(_dropLastChar(generics))}> on BiEqv<$className$generics> {");
+      "extension ${className}ObminOpticBiEqvExtension${generics.isEmpty ? "" : "<${_dropFirstChar(_dropLastChar(generics))}>"} on BiEqv<$className$generics> {");
 
   for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
