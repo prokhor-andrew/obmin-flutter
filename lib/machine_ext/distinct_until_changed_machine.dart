@@ -4,49 +4,26 @@
 
 import 'package:obmin/channel/channel_lib.dart';
 import 'package:obmin/machine/machine.dart';
-import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
-import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
-import 'package:obmin/machine_ext/feature_machine/outline.dart';
+import 'package:obmin/machine_ext/filter_machine.dart';
+import 'package:obmin/machine_ext/silo_machine.dart';
 import 'package:obmin/types/optional.dart';
 
 extension DistinctUntilChangedMachineExtension<Input, Output> on Machine<Input, Output> {
-
   Machine<Input, Output> distinctUntilChangedInput({
     bool shouldWaitOnEffects = false,
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<Output, Input>>? internalBufferStrategy,
   }) {
-    Outline<Optional<Input>, Output, Input, Input, Output> outline(Optional<Input> state) {
-      return Outline.create(
-        state: state,
-        transit: (state, trigger, _) {
-          switch (trigger) {
-            case InternalFeatureEvent(value: final value):
-              return OutlineTransition(
-                outline(state),
-                effects: [ExternalFeatureEvent(value)],
-              );
-            case ExternalFeatureEvent(value: final value):
-              return OutlineTransition(
-                outline(Optional.some(value)),
-                effects: state.map<List<FeatureEvent<Input, Output>>>((state) {
-                  return state == value ? [] : [InternalFeatureEvent(value)];
-                }).valueOr([InternalFeatureEvent(value)]),
-              );
-          }
-        },
-      );
-    }
-
-    return MachineFactory.shared.feature(
-      id: id,
-      onCreateFeature: () async {
-        return outline(const Optional.none()).asFeature({this});
+    return filterInputWithState<Optional<Input>>(
+      Optional.none(),
+      (state, input) {
+        return (
+          Optional.some(input),
+          state.map((oldInput) => oldInput != input).valueOr(true),
+        );
       },
-      onDestroyFeature: (_) async {},
-      shouldWaitOnEffects: shouldWaitOnEffects,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
@@ -59,37 +36,29 @@ extension DistinctUntilChangedMachineExtension<Input, Output> on Machine<Input, 
     ChannelBufferStrategy<Output>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<Output, Input>>? internalBufferStrategy,
   }) {
-    Outline<Optional<Output>, Output, Input, Input, Output> outline(Optional<Output> state) {
-      return Outline.create(
-        state: state,
-        transit: (state, trigger, _) {
-          switch (trigger) {
-            case InternalFeatureEvent(value: final value):
-              return OutlineTransition(
-                outline(Optional.some(value)),
-                effects: state.map<List<FeatureEvent<Input, Output>>>((state) {
-                  return state == value ? [] : [ExternalFeatureEvent(value)];
-                }).valueOr([ExternalFeatureEvent(value)]),
-              );
-
-            case ExternalFeatureEvent(value: final value):
-              return OutlineTransition(
-                outline(state),
-                effects: [InternalFeatureEvent(value)],
-              );
-          }
-        },
-      );
-    }
-
-    return MachineFactory.shared.feature(
-      id: id,
-      onCreateFeature: () async {
-        return outline(const Optional.none()).asFeature({this});
+    return filterOutputWithState<Optional<Output>>(
+      Optional.none(),
+      (state, output) {
+        return (
+          Optional.some(output),
+          state.map((oldInput) => oldInput != output).valueOr(true),
+        );
       },
-      onDestroyFeature: (_) async {},
-      shouldWaitOnEffects: shouldWaitOnEffects,
       inputBufferStrategy: inputBufferStrategy,
+      outputBufferStrategy: outputBufferStrategy,
+      internalBufferStrategy: internalBufferStrategy,
+    );
+  }
+}
+
+extension DistinctUntilChangedSiloExtension<T> on Silo<T> {
+  Silo<T> distinctUntilChanged({
+    required bool shouldWaitOnEffects,
+    ChannelBufferStrategy<T>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<T, Never>>? internalBufferStrategy,
+  }) {
+    return distinctUntilChangedOutput(
+      shouldWaitOnEffects: shouldWaitOnEffects,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
     );
