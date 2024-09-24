@@ -136,7 +136,7 @@ extension FilterMapMachineExtension<Input, Output> on Machine<Input, Output> {
   }
 }
 
-extension MapSiloExtension<T> on Silo<T> {
+extension FilterMapSiloExtension<T> on Silo<T> {
   Silo<R> filterMapWithState<R, State>(
     State initial,
     (State, Optional<R>) Function(State state, T value) function, {
@@ -167,5 +167,23 @@ extension MapSiloExtension<T> on Silo<T> {
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
     );
+  }
+}
+
+extension UnwrapInputMachineExtension<Input, Output> on Machine<Input, Output> {
+  Machine<Optional<Input>, Output> unwrapInput() {
+    return filterMapInput((value) => value);
+  }
+}
+
+extension UnwrapOutputMachineExtension<Input, Output> on Machine<Input, Optional<Output>> {
+  Machine<Input, Output> unwrapOutput() {
+    return filterMapOutput((value) => value);
+  }
+}
+
+extension UnwrapSiloExtension<Input, Output> on Silo<Optional<Output>> {
+  Silo<Output> unwrap() {
+    return unwrapOutput();
   }
 }

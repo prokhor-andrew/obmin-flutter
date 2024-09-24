@@ -143,7 +143,7 @@ extension FilterMachineExtension<Input, Output> on Machine<Input, Output> {
   }
 }
 
-extension MapSiloExtension<T> on Silo<T> {
+extension FilterSiloExtension<T> on Silo<T> {
   Silo<T> filterWithState<State>(
     State initial,
     (State, bool) Function(State state, T value) function, {
