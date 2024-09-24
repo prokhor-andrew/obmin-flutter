@@ -8,7 +8,7 @@ import 'package:obmin/machine/machine.dart';
 import 'package:obmin/types/update.dart';
 
 Core<State, State, Update<State>> CoreY<State>({
-  required State Function() state,
+  required State Function(CoreInitialObject initial) state,
   required Set<Machine<State, Update<State>>> Function(State state) machines,
 }) {
   return CoreX(

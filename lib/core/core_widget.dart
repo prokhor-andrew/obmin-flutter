@@ -34,14 +34,13 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
   @override
   void initState() {
     super.initState();
-    final coreScene = widget._initialCore.scene();
-    final coreMachines = widget._initialCore.machines(coreScene.state);
 
     _core = Core<DomainState, Input, Output>(
-      scene: () {
-        return coreScene;
+      scene: (initial) {
+        return widget._initialCore.scene(initial);
       },
       machines: (state) {
+
         final Machine<Input, Output> uiMachine = widget.uiMachine._machine(
           (input) {
             _controller.add(input);
@@ -54,6 +53,7 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
           },
         );
 
+        final coreMachines = widget._initialCore.machines(state);
         return coreMachines.union({
           uiMachine,
         });

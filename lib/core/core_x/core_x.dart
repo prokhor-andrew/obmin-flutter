@@ -7,12 +7,12 @@ import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine_ext/feature_machine/scene.dart';
 
 Core<State, State, Event> CoreX<State, Event>({
-  required State Function() state,
+  required State Function(CoreInitialObject initial) state,
   required State Function(State state, Event event) reducer,
   required Set<Machine<State, Event>> Function(State state) machines,
 }) {
   return Core(
-    scene: () {
+    scene: (initial) {
       Scene<State, Event, State> scene(State state) {
         return Scene.create(
           state: state,
@@ -26,7 +26,7 @@ Core<State, State, Event> CoreX<State, Event>({
         );
       }
 
-      return scene(state());
+      return scene(state(initial));
     },
     machines: machines,
   );

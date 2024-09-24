@@ -7,8 +7,26 @@ import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/scene.dart';
 
+final class CoreInitialObject {
+  CoreInitialObject._();
+
+  @override
+  String toString() {
+    return "CoreInitialObject";
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is CoreInitialObject;
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+}
+
 final class Core<State, Input, Output> {
-  final Scene<State, Output, Input> Function() scene;
+  final Scene<State, Output, Input> Function(CoreInitialObject initial) scene;
   final Set<Machine<Input, Output>> Function(State state) machines;
 
   Process<void>? _process;
@@ -29,7 +47,7 @@ final class Core<State, Input, Output> {
         .feature(
           id: "core",
           onCreateFeature: () async {
-            final aScene = scene();
+            final aScene = scene(CoreInitialObject._());
             final aMachines = machines(aScene.state);
             return aScene.asIntTriggerIntEffect<void, void>().asFeature(aMachines);
           },
