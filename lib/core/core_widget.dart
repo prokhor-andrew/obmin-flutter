@@ -2,13 +2,13 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/basic_machine.dart';
+import 'package:obmin/machine_ext/silo_machine.dart';
+import 'package:uuid/uuid.dart';
 
 final class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
   final Core<DomainState, Input, Output> _initialCore;
@@ -25,7 +25,7 @@ final class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
 }
 
 final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidget<DomainState, Input, Output>> {
-  final StreamController<Input> _controller = StreamController.broadcast();
+  final Map<String, void Function(Input)> _map = {};
 
   void Function(Output)? _callback;
 
@@ -40,10 +40,11 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
         return widget._initialCore.scene(initial);
       },
       machines: (state) {
-
         final Machine<Input, Output> uiMachine = widget.uiMachine._machine(
           (input) {
-            _controller.add(input);
+            _map.forEach((key, callback) {
+              callback(input);
+            });
           },
           (callback) {
             _callback = callback;
@@ -64,7 +65,7 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
 
   @override
   void dispose() {
-    _controller.close();
+    _map.clear();
     _core?.stop();
     _core = null;
     super.dispose();
@@ -76,7 +77,24 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
     if (callback != null) {
       return widget.uiMachine.started(
         context,
-        () => _controller.stream,
+        () {
+          return MachineFactory.shared.basic<String, Never, Input>(
+            id: Uuid().v4().toString(),
+            onCreate: (id) => id,
+            onChange: (id, callback) async {
+              if (callback != null) {
+                _map[id] = (value) {
+                  callback(value);
+                };
+              } else {
+                _map.remove(id);
+              }
+            },
+            onProcess: (_, __) async {
+              // do nothing
+            },
+          );
+        },
         callback,
       );
     } else {
@@ -92,7 +110,7 @@ final class WidgetMachine<State, Input, Output> {
   ) _machine;
 
   final Widget Function(BuildContext context) stopped;
-  final Widget Function(BuildContext context, Stream<Input> Function() inputs, void Function(Output output) callback) started;
+  final Widget Function(BuildContext context, Silo<Input> Function() inputs, void Function(Output output) callback) started;
 
   const WidgetMachine._({
     required this.started,
@@ -106,7 +124,7 @@ final class WidgetMachine<State, Input, Output> {
   static WidgetMachine<State, Input, Output> create<State, Input, Output>({
     required String id,
     required Widget Function(BuildContext context) stopped,
-    required Widget Function(BuildContext context, Stream<Input> Function() inputs, void Function(Output output) callback) started,
+    required Widget Function(BuildContext context, Silo<Input> Function() inputs, void Function(Output output) callback) started,
   }) {
     return WidgetMachine<State, Input, Output>._(
       started: started,
