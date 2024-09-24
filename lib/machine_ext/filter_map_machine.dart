@@ -171,19 +171,49 @@ extension FilterMapSiloExtension<T> on Silo<T> {
 }
 
 extension UnwrapInputMachineExtension<Input, Output> on Machine<Input, Output> {
-  Machine<Optional<Input>, Output> unwrapInput() {
-    return filterMapInput((value) => value);
+  Machine<Optional<Input>, Output> unwrapInput({
+    bool shouldWaitOnEffects = false,
+    ChannelBufferStrategy<Optional<Input>>? inputBufferStrategy,
+    ChannelBufferStrategy<Output>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<Output, Optional<Input>>>? internalBufferStrategy,
+  }) {
+    return filterMapInput(
+      (value) => value,
+      shouldWaitOnEffects: shouldWaitOnEffects,
+      inputBufferStrategy: inputBufferStrategy,
+      outputBufferStrategy: outputBufferStrategy,
+      internalBufferStrategy: internalBufferStrategy,
+    );
   }
 }
 
 extension UnwrapOutputMachineExtension<Input, Output> on Machine<Input, Optional<Output>> {
-  Machine<Input, Output> unwrapOutput() {
-    return filterMapOutput((value) => value);
+  Machine<Input, Output> unwrapOutput({
+    bool shouldWaitOnEffects = false,
+    ChannelBufferStrategy<Input>? inputBufferStrategy,
+    ChannelBufferStrategy<Output>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<Optional<Output>, Input>>? internalBufferStrategy,
+  }) {
+    return filterMapOutput(
+      (value) => value,
+      shouldWaitOnEffects: shouldWaitOnEffects,
+      inputBufferStrategy: inputBufferStrategy,
+      outputBufferStrategy: outputBufferStrategy,
+      internalBufferStrategy: internalBufferStrategy,
+    );
   }
 }
 
 extension UnwrapSiloExtension<Input, Output> on Silo<Optional<Output>> {
-  Silo<Output> unwrap() {
-    return unwrapOutput();
+  Silo<Output> unwrap({
+    bool shouldWaitOnEffects = false,
+    ChannelBufferStrategy<Output>? outputBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<Optional<Output>, Never>>? internalBufferStrategy,
+  }) {
+    return unwrapOutput(
+      shouldWaitOnEffects: shouldWaitOnEffects,
+      outputBufferStrategy: outputBufferStrategy,
+      internalBufferStrategy: internalBufferStrategy,
+    );
   }
 }
