@@ -60,9 +60,9 @@ extension MapSiloExtension<T> on Silo<T> {
   Silo<R> map<R>(
     R Function(T value) function, {
     bool shouldWaitOnEffects = false,
-    ChannelBufferStrategy<()>? inputBufferStrategy,
+    ChannelBufferStrategy<Never>? inputBufferStrategy,
     ChannelBufferStrategy<R>? outputBufferStrategy,
-    ChannelBufferStrategy<FeatureEvent<T, ()>>? internalBufferStrategy,
+    ChannelBufferStrategy<FeatureEvent<T, Never>>? internalBufferStrategy,
   }) {
     return mapOutput<R>(
       function,

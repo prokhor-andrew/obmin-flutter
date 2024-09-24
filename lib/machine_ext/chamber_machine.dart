@@ -23,7 +23,7 @@ extension ChamberMachineExtension on MachineFactory {
     ChannelBufferStrategy<Output>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<Output, Input>>? internalBufferStrategy,
   }) {
-    Feature<Helper, Output, (), Input, Output> config(Helper helper, Set<Silo<Output>> machines) {
+    Feature<Helper, Output, Never, Input, Output> config(Helper helper, Set<Silo<Output>> machines) {
       return Feature.create(
         state: helper,
         machines: machines,

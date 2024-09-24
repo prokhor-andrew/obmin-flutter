@@ -7,7 +7,21 @@ import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/basic_machine.dart';
 import 'package:obmin/channel/channel_lib.dart';
 
-typedef Silo<T> = Machine<(), T>;
+typedef Silo<T> = Machine<Never, T>;
+
+extension SiloListenExtension<T> on Silo<T> {
+  Process<Never> listen({
+    ChannelBufferStrategy<T>? bufferStrategy,
+    required Future<void> Function(T output) onConsume,
+  }) {
+    return run(
+      inputBufferStrategy: null,
+      outputBufferStrategy: bufferStrategy,
+      onChange: (_) async {},
+      onConsume: onConsume,
+    );
+  }
+}
 
 extension SiloMachineExtension on MachineFactory {
   Silo<T> silo<Object, T>({
@@ -16,7 +30,7 @@ extension SiloMachineExtension on MachineFactory {
     required void Function(Object object) onStop,
     ChannelBufferStrategy<T>? bufferStrategy,
   }) {
-    return MachineFactory.shared.basic<_Holder<Object>, (), T>(
+    return MachineFactory.shared.basic<_Holder<Object>, Never, T>(
       id: id,
       onCreate: (id) {
         return _Holder<Object>();
