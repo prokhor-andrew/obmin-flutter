@@ -266,7 +266,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
     buffer.writeln('}');
 
     buffer.writeln(
-        "extension ${caseName}ObminOpticMutatorExtension<${generics.isEmpty ? "" : "<123${_dropFirstChar(_dropLastChar(generics))}>"}> on Mutator<Whole, $caseName$generics> {");
+        "extension ${caseName}ObminOpticMutatorExtension${generics.isEmpty ? "" : "<${_dropFirstChar(_dropLastChar(generics))}>"} on Mutator<Whole, $caseName$generics> {");
 
     for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
