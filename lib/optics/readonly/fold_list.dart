@@ -2,11 +2,13 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:collection/collection.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/non_empty_list.dart';
+import 'package:obmin/types/product.dart';
 
 final class FoldList<Whole, Part> {
   final List<Part> Function(Whole whole) get;
@@ -18,12 +20,9 @@ final class FoldList<Whole, Part> {
       return get(whole).expand(other.get).toList();
     });
   }
+
   FoldList<Whole, Part> composeWithEqv(Eqv<Part> other) {
     return compose(other.asFoldList());
-  }
-
-  FoldSet<Whole, Sub> composeWithFoldSet<Sub>(FoldSet<Part, Sub> other) {
-    return asFoldSet().compose(other);
   }
 
   FoldList<Whole, Sub> composeWithGetter<Sub>(Getter<Part, Sub> other) {
@@ -93,12 +92,9 @@ final class FoldList<Whole, Part> {
     return Getter(get);
   }
 
-  // there is no asFoldList method in FoldSet
-  // as conversion from Set to List will always give random order
-  // thus making such function impure
-  FoldSet<Whole, Part> asFoldSet() {
+  FoldSet<Whole, Product<int, Part>> asFoldSet() {
     return FoldSet((whole) {
-      return get(whole).toSet();
+      return get(whole).mapIndexed(Product.new).toSet();
     });
   }
 }
