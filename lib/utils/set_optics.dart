@@ -7,7 +7,6 @@ import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/transformers/bi_eqv.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
 import 'package:obmin/optics/transformers/prism.dart';
@@ -40,7 +39,7 @@ extension SetOpticsPreviewExtension<Whole, T> on Preview<Whole, Set<T>> {
   Preview<Whole, T> find(bool Function(T element) function) {
     return compose(
       Preview<Set<T>, T>(
-            (whole) {
+        (whole) {
           for (final element in whole) {
             if (function(element)) {
               return Optional.some(element);
@@ -61,7 +60,7 @@ extension SetOpticsFoldSetExtension<Whole, T> on FoldSet<Whole, Set<T>> {
   FoldSet<Whole, T> find(bool Function(T element) function) {
     return composeWithPreview(
       Preview<Set<T>, T>(
-            (whole) {
+        (whole) {
           for (final element in whole) {
             if (function(element)) {
               return Optional.some(element);
@@ -78,11 +77,11 @@ extension SetOpticsFoldSetExtension<Whole, T> on FoldSet<Whole, Set<T>> {
 
 extension SetOpticsMutatorExtension<Whole, T> on Mutator<Whole, Set<T>> {
   Mutator<Whole, T> get traversed => compose(
-    Mutator.traversalSet<Set<T>, T>(
-      FoldSet<Set<T>, T>((whole) => whole),
-      Getter((part) => Getter((_) => part.asSet())),
-    ),
-  );
+        Mutator.traversalSet<Set<T>, T>(
+          FoldSet<Set<T>, T>((whole) => whole),
+          Getter((part) => Getter((_) => part.asSet())),
+        ),
+      );
 
   Mutator<Whole, T> find(bool Function(T element) function) {
     return compose(
@@ -94,7 +93,7 @@ extension SetOpticsMutatorExtension<Whole, T> on Mutator<Whole, Set<T>> {
         }
         return Optional.none();
       }), Getter(
-            (part) {
+        (part) {
           return Getter((whole) {
             final copy = whole.toList();
             final index = copy.indexWhere(function);
@@ -110,14 +109,6 @@ extension SetOpticsMutatorExtension<Whole, T> on Mutator<Whole, Set<T>> {
         },
       )),
     );
-  }
-}
-
-extension SetOpticsBiEqvExtension<T> on BiEqv<Set<T>> {
-  Mutator<Set<T>, T> get traversed => asMutator().traversed;
-
-  Mutator<Set<T>, T> find(bool Function(T element) function) {
-    return asMutator().find(function);
   }
 }
 

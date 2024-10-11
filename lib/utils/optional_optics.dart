@@ -7,7 +7,6 @@ import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/transformers/bi_eqv.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
 import 'package:obmin/optics/transformers/prism.dart';
@@ -36,13 +35,6 @@ extension OptionalOpticsMutatorExtension<Whole, T> on Mutator<Whole, Optional<T>
           Preview((whole) => whole),
           Getter(Optional.some),
         ),
-      );
-}
-
-extension OptionalOpticsBiEqvExtension<T> on BiEqv<Optional<T>> {
-  Prism<Optional<T>, T> get previewed => Prism(
-        Preview((whole) => whole),
-        Getter(Optional.some),
       );
 }
 

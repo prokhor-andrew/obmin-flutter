@@ -5,7 +5,6 @@
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/transformers/bi_eqv.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
 import 'package:obmin/optics/transformers/prism.dart';
@@ -88,10 +87,6 @@ final class Mutator<Whole, Part> {
     }));
   }
 
-  Mutator<Whole, Part> composeWithBiEqv(BiEqv<Part> other) {
-    return compose(other.asMutator());
-  }
-
   Mutator<Whole, Sub> composeWithIso<Sub>(Iso<Part, Sub> other) {
     return compose(other.asMutator());
   }
@@ -106,12 +101,6 @@ final class Mutator<Whole, Part> {
 
   Mutator<Whole, Sub> composeWithBiPreview<Sub>(BiPreview<Part, Sub> other) {
     return compose(other.asMutator());
-  }
-}
-
-extension BiEqvAsMutatorExtension<T> on BiEqv<T> {
-  Mutator<T, T> asMutator() {
-    return asIso().asMutator();
   }
 }
 
