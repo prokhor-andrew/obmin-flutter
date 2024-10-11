@@ -3,10 +3,8 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
-import 'package:obmin/types/non_empty_list.dart';
 import 'package:obmin/types/non_empty_set.dart';
 import 'package:obmin/types/optional.dart';
 
@@ -46,18 +44,6 @@ final class Preview<Whole, Part> {
     return zipWith(other.asPreview(), function);
   }
 
-  FoldList<Whole, R> zipWithFoldList<Part2, R>(
-    FoldList<Whole, Part2> other,
-    NonEmptyList<R> Function(Part value1, NonEmptyList<Part2> value) function,
-  ) {
-    return asFoldList().zipWith(
-      other,
-      (value1, value2) {
-        return function(value1.head, value2);
-      },
-    );
-  }
-
   FoldSet<Whole, R> zipWithFoldSet<Part2, R>(
     FoldSet<Whole, Part2> other,
     NonEmptySet<R> Function(Part value1, NonEmptySet<Part2> value) function,
@@ -84,10 +70,6 @@ final class Preview<Whole, Part> {
     return compose(other.asPreview());
   }
 
-  FoldList<Whole, Sub> composeWithFoldList<Sub>(FoldList<Part, Sub> other) {
-    return asFoldList().compose(other);
-  }
-
   FoldSet<Whole, Sub> composeWithFoldSet<Sub>(FoldSet<Part, Sub> other) {
     return asFoldSet().compose(other);
   }
@@ -99,12 +81,6 @@ final class Preview<Whole, Part> {
 
   Getter<Whole, Optional<Part>> asGetter() {
     return Getter(get);
-  }
-
-  FoldList<Whole, Part> asFoldList() {
-    return FoldList((whole) {
-      return get(whole).map((value) => [value]).valueOr([]);
-    });
   }
 
   FoldSet<Whole, Part> asFoldSet() {

@@ -2,16 +2,15 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/transformers/prism.dart';
 import 'package:obmin/optics/transformers/reflector.dart';
-import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/utils/bool_fold.dart';
 
@@ -31,20 +30,20 @@ final class Result<Res, Err> {
         _isSuccess = false;
 
   T fold<T>(
-      T Function(Res res) ifSuccess,
-      T Function(Err err) ifFailure,
-      ) {
+    T Function(Res res) ifSuccess,
+    T Function(Err err) ifFailure,
+  ) {
     return _isSuccess.fold<T>(
-          () => ifSuccess(_res!),
-          () => ifFailure(_err!),
+      () => ifSuccess(_res!),
+      () => ifFailure(_err!),
     );
   }
 
   @override
   String toString() {
     return fold<String>(
-          (res) => "Success<$Res, $Err> { res=$res }",
-          (err) => "Failure<$Res, $Err> { err=$err }",
+      (res) => "Success<$Res, $Err> { res=$res }",
+      (err) => "Failure<$Res, $Err> { err=$err }",
     );
   }
 
@@ -67,7 +66,7 @@ final class Result<Res, Err> {
 
   Result<T, Err> bindRes<T>(Result<T, Err> Function(Res res) function) {
     return fold<Result<T, Err>>(
-          (value) => function(value),
+      (value) => function(value),
       Result<T, Err>.failure,
     );
   }
@@ -83,7 +82,7 @@ final class Result<Res, Err> {
   Result<Res, T> bindErr<T>(Result<Res, T> Function(Err err) function) {
     return fold<Result<Res, T>>(
       Result<Res, T>.success,
-          (value) => function(value),
+      (value) => function(value),
     );
   }
 
@@ -98,12 +97,12 @@ final class Result<Res, Err> {
   Optional<Res> get successOrNone => fold<Optional<Res>>(
         (res) => Optional<Res>.some(res),
         (err) => Optional<Res>.none(),
-  );
+      );
 
   Optional<Err> get failureOrNone => fold<Optional<Err>>(
         (res) => Optional<Err>.none(),
         (err) => Optional<Err>.some(err),
-  );
+      );
 
   bool get isSuccess => successOrNone.mapTo(true).valueOr(false);
 
@@ -111,15 +110,15 @@ final class Result<Res, Err> {
 
   void executeIfSuccess(void Function(Res value) function) {
     fold<void Function()>(
-          (value) => () => function(value),
-          (_) => () {},
+      (value) => () => function(value),
+      (_) => () {},
     )();
   }
 
   void executeIfFailure(void Function(Err value) function) {
     fold<void Function()>(
-          (_) => () {},
-          (value) => () => function(value),
+      (_) => () {},
+      (value) => () => function(value),
     )();
   }
 
@@ -146,12 +145,6 @@ extension ResultObminOpticPreviewExtension<Whole, Res, Err> on Preview<Whole, Re
   Preview<Whole, Err> get failure => compose(Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone));
 }
 
-extension ResultObminOpticFoldListExtension<Whole, Res, Err> on FoldList<Whole, Result<Res, Err>> {
-  FoldList<Whole, Res> get success => composeWithPreview(Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone));
-
-  FoldList<Whole, Err> get failure => composeWithPreview(Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone));
-}
-
 extension ResultObminOpticFoldSetExtension<Whole, Res, Err> on FoldSet<Whole, Result<Res, Err>> {
   FoldSet<Whole, Res> get success => composeWithPreview(Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone));
 
@@ -160,80 +153,80 @@ extension ResultObminOpticFoldSetExtension<Whole, Res, Err> on FoldSet<Whole, Re
 
 extension ResultObminOpticMutatorExtension<Whole, Res, Err> on Mutator<Whole, Result<Res, Err>> {
   Mutator<Whole, Res> get success => composeWithPrism(
-    Prism<Result<Res, Err>, Res>(
-      Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
-      Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
-    ),
-  );
+        Prism<Result<Res, Err>, Res>(
+          Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
+          Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
+        ),
+      );
 
   Mutator<Whole, Err> get failure => composeWithPrism(
-    Prism<Result<Res, Err>, Err>(
-      Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
-      Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
-    ),
-  );
+        Prism<Result<Res, Err>, Err>(
+          Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
+          Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
+        ),
+      );
 }
 
 extension ResultObminOpticIsoExtension<Whole, Res, Err> on Iso<Whole, Result<Res, Err>> {
   Prism<Whole, Res> get success => composeWithPrism(
-    Prism<Result<Res, Err>, Res>(
-      Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
-      Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
-    ),
-  );
+        Prism<Result<Res, Err>, Res>(
+          Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
+          Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
+        ),
+      );
 
   Prism<Whole, Err> get failure => composeWithPrism(
-    Prism<Result<Res, Err>, Err>(
-      Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
-      Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
-    ),
-  );
+        Prism<Result<Res, Err>, Err>(
+          Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
+          Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
+        ),
+      );
 }
 
 extension ResultObminOpticPrismExtension<Whole, Res, Err> on Prism<Whole, Result<Res, Err>> {
   Prism<Whole, Res> get success => compose(
-    Prism<Result<Res, Err>, Res>(
-      Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
-      Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
-    ),
-  );
+        Prism<Result<Res, Err>, Res>(
+          Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
+          Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
+        ),
+      );
 
   Prism<Whole, Err> get failure => compose(
-    Prism<Result<Res, Err>, Err>(
-      Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
-      Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
-    ),
-  );
+        Prism<Result<Res, Err>, Err>(
+          Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
+          Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
+        ),
+      );
 }
 
 extension ResultObminOpticReflectorExtension<Whole, Res, Err> on Reflector<Whole, Result<Res, Err>> {
   BiPreview<Whole, Res> get success => composeWithPrism(
-    Prism<Result<Res, Err>, Res>(
-      Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
-      Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
-    ),
-  );
+        Prism<Result<Res, Err>, Res>(
+          Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
+          Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
+        ),
+      );
 
   BiPreview<Whole, Err> get failure => composeWithPrism(
-    Prism<Result<Res, Err>, Err>(
-      Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
-      Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
-    ),
-  );
+        Prism<Result<Res, Err>, Err>(
+          Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
+          Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
+        ),
+      );
 }
 
 extension ResultObminOpticBiPreviewExtension<Whole, Res, Err> on BiPreview<Whole, Result<Res, Err>> {
   BiPreview<Whole, Res> get success => composeWithPrism(
-    Prism<Result<Res, Err>, Res>(
-      Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
-      Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
-    ),
-  );
+        Prism<Result<Res, Err>, Res>(
+          Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
+          Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
+        ),
+      );
 
   BiPreview<Whole, Err> get failure => composeWithPrism(
-    Prism<Result<Res, Err>, Err>(
-      Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
-      Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
-    ),
-  );
+        Prism<Result<Res, Err>, Err>(
+          Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
+          Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
+        ),
+      );
 }

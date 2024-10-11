@@ -5,4 +5,4 @@
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/types/product.dart';
 
-typedef FoldList<Whole, Part> = FoldSet<Whole, Product<int, Part>>;
+typedef FoldMap<Whole, Key, Part> = FoldSet<Whole, Product<Key, Part>>;

@@ -4,7 +4,6 @@
 
 import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
@@ -95,12 +94,6 @@ extension ProductObminOpticPreviewExtension<Whole, T1, T2> on Preview<Whole, Pro
   Preview<Whole, T1> get value1 => composeWithGetter(Getter<Product<T1, T2>, T1>((whole) => whole.value1));
 
   Preview<Whole, T2> get value2 => composeWithGetter(Getter<Product<T1, T2>, T2>((whole) => whole.value2));
-}
-
-extension ProductObminOpticFoldListExtension<Whole, T1, T2> on FoldList<Whole, Product<T1, T2>> {
-  FoldList<Whole, T1> get value1 => composeWithGetter(Getter<Product<T1, T2>, T1>((whole) => whole.value1));
-
-  FoldList<Whole, T2> get value2 => composeWithGetter(Getter<Product<T1, T2>, T2>((whole) => whole.value2));
 }
 
 extension ProductObminOpticFoldSetExtension<Whole, T1, T2> on FoldSet<Whole, Product<T1, T2>> {

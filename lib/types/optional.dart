@@ -2,16 +2,15 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/transformers/prism.dart';
 import 'package:obmin/optics/transformers/reflector.dart';
-import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/utils/bool_fold.dart';
 
@@ -136,11 +135,6 @@ extension OptionalObminOpticGetterExtension<Whole, T> on Getter<Whole, Optional<
 extension OptionalObminOpticPreviewExtension<Whole, T> on Preview<Whole, Optional<T>> {
   Preview<Whole, T> get value => compose(Preview<Optional<T>, T>((whole) => whole));
 }
-
-extension OptionalObminOpticFoldListExtension<Whole, T> on FoldList<Whole, Optional<T>> {
-  FoldList<Whole, T> get value => composeWithPreview(Preview<Optional<T>, T>((whole) => whole));
-}
-
 
 extension OptionalObminOpticFoldSetExtension<Whole, T> on FoldSet<Whole, Optional<T>> {
   FoldSet<Whole, T> get value => composeWithPreview(Preview<Optional<T>, T>((whole) => whole));

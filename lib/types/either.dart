@@ -2,16 +2,15 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
+import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/transformers/prism.dart';
 import 'package:obmin/optics/transformers/reflector.dart';
-import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/types/product.dart';
 import 'package:obmin/utils/bool_fold.dart';
@@ -162,12 +161,6 @@ extension EitherObminOpticPreviewExtension<Whole, L, R> on Preview<Whole, Either
   Preview<Whole, L> get left => compose(Preview<Either<L, R>, L>((whole) => whole.leftOrNone));
 
   Preview<Whole, R> get right => compose(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
-}
-
-extension EitherObminOpticFoldListExtension<Whole, L, R> on FoldList<Whole, Either<L, R>> {
-  FoldList<Whole, L> get left => composeWithPreview(Preview<Either<L, R>, L>((whole) => whole.leftOrNone));
-
-  FoldList<Whole, R> get right => composeWithPreview(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
 }
 
 extension EitherObminOpticFoldSetExtension<Whole, L, R> on FoldSet<Whole, Either<L, R>> {
