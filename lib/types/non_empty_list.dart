@@ -334,7 +334,7 @@ final class NonEmptyList<T> {
   }
 
   bool containsWhereIndexed(bool Function(int index, T value) predicate) {
-    return findWhereIndexed((index, value) => predicate(index + 1, value)).isSome;
+    return findWhereIndexed((index, value) => predicate(index, value)).isSome;
   }
 
   bool containsWhere(bool Function(T value) predicate) {
