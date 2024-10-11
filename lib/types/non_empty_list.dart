@@ -33,22 +33,30 @@ final class NonEmptyList<T> {
     return [head].plusMultiple(tail);
   }
 
-  NonEmptyList<R> map<R>(R Function(T value) function) {
-    final mappedHead = function(head);
-    final mappedTail = tail.map(function).toList();
+  NonEmptyList<R> mapIndexed<R>(R Function(int index, T value) function) {
+    final mappedHead = function(0, head);
+    final mappedTail = tail.mapIndexed((index, value) {
+      return function(index + 1, value);
+    }).toList();
     return NonEmptyList(
       head: mappedHead,
       tail: mappedTail,
     );
   }
 
-  NonEmptyList<R> bind<R>(NonEmptyList<R> Function(T value) function) {
-    final mappedHeadNonEmptyList = function(head);
+  NonEmptyList<R> map<R>(R Function(T value) function) {
+    return mapIndexed((_, value) => function(value));
+  }
+
+  NonEmptyList<R> bindIndexed<R>(NonEmptyList<R> Function(int index, T value) function) {
+    final mappedHeadNonEmptyList = function(0, head);
 
     final List<R> resultTail = mappedHeadNonEmptyList.tail.toList();
 
-    for (final item in tail.toList()) {
-      resultTail.addAll(function(item).asList());
+    final copy = tail.toList();
+    for (int i = 0; i < copy.length; i++) {
+      final item = copy[i];
+      resultTail.addAll(function(i + 1, item).asList());
     }
 
     return NonEmptyList(
@@ -57,12 +65,24 @@ final class NonEmptyList<T> {
     );
   }
 
-  R fold<R>(R initialValue, R Function(R acc, T value) function) {
-    R result = function(initialValue, head);
-    for (final item in tail.toList()) {
-      result = function(result, item);
+  NonEmptyList<R> bind<R>(NonEmptyList<R> Function(T value) function) {
+    return bindIndexed((_, value) => function(value));
+  }
+
+  R foldIndexed<R>(R initialValue, R Function(R acc, int index, T value) function) {
+    R result = function(initialValue, 0, head);
+
+    final copy = tail.toList();
+    for (int i = 0; i < copy.length; i++) {
+      final item = copy[i];
+      result = function(result, i + 1, item);
     }
+
     return result;
+  }
+
+  R fold<R>(R initialValue, R Function(R acc, T value) function) {
+    return foldIndexed(initialValue, (acc, _, value) => function(acc, value));
   }
 
   NonEmptyList<R> ap<R>(NonEmptyList<R Function(T)> listOfFunctions) {
@@ -74,9 +94,9 @@ final class NonEmptyList<T> {
     return NonEmptyList(head: appliedHead, tail: appliedTail);
   }
 
-  Optional<NonEmptyList<T>> filter(bool Function(T value) predicate) {
-    final filteredTail = tail.where(predicate).toList();
-    if (predicate(head)) {
+  Optional<NonEmptyList<T>> filterIndexed(bool Function(int index, T value) predicate) {
+    final filteredTail = tail.whereIndexed((index, value) => predicate(index + 1, value)).toList();
+    if (predicate(0, head)) {
       return Optional.some(NonEmptyList(head: head, tail: filteredTail));
     } else if (filteredTail.isNotEmpty) {
       return Optional.some(NonEmptyList(head: filteredTail.first, tail: filteredTail.skip(1).toList()));
@@ -84,18 +104,26 @@ final class NonEmptyList<T> {
     return Optional.none();
   }
 
-  void forEach(void Function(T value) action) {
-    action(head);
-    tail.toList().forEach(action);
+  Optional<NonEmptyList<T>> filter(bool Function(T value) predicate) {
+    return filterIndexed((_, value) => predicate(value));
   }
 
-  NonEmptyList<R> zipWith<R, U>(NonEmptyList<U> other, R Function(T value1, U value2) combine) {
+  void forEachIndexed(void Function(int index, T value) action) {
+    action(0, head);
+    tail.toList().forEachIndexed((index, value) => action(index + 1, value));
+  }
+
+  void forEach(void Function(T value) action) {
+    forEachIndexed((_, value) => action(value));
+  }
+
+  NonEmptyList<R> zipWith<R, U>(NonEmptyList<U> other, R Function(int index, T value1, U value2) combine) {
     final tailCopy = tail.toList();
     final otherTailCopy = other.tail.toList();
 
     final minLength = tailCopy.length < otherTailCopy.length ? tailCopy.length : otherTailCopy.length;
-    final zippedTail = List<R>.generate(minLength, (i) => combine(tailCopy[i], otherTailCopy[i]));
-    return NonEmptyList(head: combine(head, other.head), tail: zippedTail);
+    final zippedTail = List<R>.generate(minLength, (i) => combine(i + 1, tailCopy[i], otherTailCopy[i]));
+    return NonEmptyList(head: combine(0, head, other.head), tail: zippedTail);
   }
 
   NonEmptyList<T> get reversed {
@@ -281,13 +309,15 @@ final class NonEmptyList<T> {
 
   int get length => tail.length + 1;
 
-  Optional<T> findWhere(bool Function(T value) predicate) {
-    if (predicate(head)) {
+  Optional<T> findWhereIndexed(bool Function(int index, T value) predicate) {
+    if (predicate(0, head)) {
       return Optional.some(head);
     }
 
-    for (final element in tail.toList()) {
-      if (predicate(element)) {
+    final copy = tail.toList();
+    for (int i = 0; i < copy.length; i++) {
+      final element = copy[i];
+      if (predicate(i + 1, element)) {
         return Optional.some(element);
       }
     }
@@ -295,12 +325,20 @@ final class NonEmptyList<T> {
     return Optional.none();
   }
 
+  Optional<T> findWhere(bool Function(T value) predicate) {
+    return findWhereIndexed((_, value) => predicate(value));
+  }
+
   bool contains(T value) {
     return containsWhere((iValue) => iValue == value);
   }
 
+  bool containsWhereIndexed(bool Function(int index, T value) predicate) {
+    return findWhereIndexed((index, value) => predicate(index + 1, value)).isSome;
+  }
+
   bool containsWhere(bool Function(T value) predicate) {
-    return findWhere(predicate).isSome;
+    return containsWhereIndexed((_, value) => predicate(value));
   }
 
   NonEmptySet<T> asNonEmptySet() {
