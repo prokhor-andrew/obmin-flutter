@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:collection/collection.dart';
+import 'package:obmin/types/either.dart';
 import 'package:obmin/types/non_empty_set.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/types/product.dart';
@@ -118,13 +119,30 @@ final class NonEmptyList<T> {
     forEachIndexed((_, value) => action(value));
   }
 
-  NonEmptyList<R> zipWith<R, U>(NonEmptyList<U> other, R Function(int index, T value1, U value2) combine) {
-    final tailCopy = tail.toList();
-    final otherTailCopy = other.tail.toList();
+  NonEmptyList<R> zipWith<R, U>(
+    NonEmptyList<U> other,
+    R Function(int index, Either<Product<T, U>, Either<T, U>>) combine,
+  ) {
+    List<T> list1 = [head, ...tail];
+    List<U> list2 = [other.head, ...other.tail];
 
-    final minLength = tailCopy.length < otherTailCopy.length ? tailCopy.length : otherTailCopy.length;
-    final zippedTail = List<R>.generate(minLength, (i) => combine(i + 1, tailCopy[i], otherTailCopy[i]));
-    return NonEmptyList(head: combine(0, head, other.head), tail: zippedTail);
+    List<R> result = [];
+    int length = list1.length > list2.length ? list1.length : list2.length;
+
+    for (int i = 0; i < length; i++) {
+      if (i < list1.length && i < list2.length) {
+        result.add(combine(i, Either.left(Product(list1[i], list2[i]))));
+      } else if (i < list1.length) {
+        result.add(combine(i, Either.right(Either.left(list1[i]))));
+      } else {
+        result.add(combine(i, Either.right(Either.right(list2[i]))));
+      }
+    }
+
+    return NonEmptyList<R>(
+      head: result.first,
+      tail: result.skip(1).toList(),
+    );
   }
 
   NonEmptyList<T> get reversed {
