@@ -2,6 +2,8 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/optics/readonly/fold_list.dart';
+import 'package:obmin/optics/readonly/fold_map.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
@@ -9,8 +11,12 @@ import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
 import 'package:obmin/optics/transformers/prism.dart';
 import 'package:obmin/optics/transformers/reflector.dart';
+import 'package:obmin/types/non_empty_list.dart';
+import 'package:obmin/types/non_empty_map.dart';
 import 'package:obmin/types/non_empty_set.dart';
+import 'package:obmin/types/product.dart';
 import 'package:obmin/types/update.dart';
+import 'package:obmin/utils/as_set.dart';
 
 final class Mutator<Whole, Part> {
   final Getter<Update<Part>, Update<Whole>> applier;
@@ -67,6 +73,36 @@ final class Mutator<Whole, Part> {
       return Getter((whole) {
         return preview.get(whole).map(modify.get).map((part) {
           return reconstruct.get(part).get(whole);
+        }).valueOr(whole);
+      });
+    }));
+  }
+
+  static Mutator<Whole, Product<int, Part>> traversalList<Whole, Part>(
+    FoldList<Whole, Part> fold,
+    Getter<NonEmptyList<Part>, Update<Whole>> reconstruct,
+  ) {
+    return Mutator(Getter((modify) {
+      return Getter((whole) {
+        final zoomedOrNone = NonEmptySet.fromSet(fold.get(whole));
+        return zoomedOrNone.map((zoomed) {
+          final modified = zoomed.map(modify.get).fromSetOfProductToList();
+          return reconstruct.get(modified).get(whole);
+        }).valueOr(whole);
+      });
+    }));
+  }
+
+  static Mutator<Whole, Product<Key, Part>> traversalMap<Whole, Key, Part>(
+    FoldMap<Whole, Key, Part> fold,
+    Getter<NonEmptyMap<Key, Part>, Update<Whole>> reconstruct,
+  ) {
+    return Mutator(Getter((modify) {
+      return Getter((whole) {
+        final zoomedOrNone = NonEmptySet.fromSet(fold.get(whole));
+        return zoomedOrNone.map((zoomed) {
+          final modified = zoomed.map(modify.get).fromSetOfProductToMap();
+          return reconstruct.get(modified).get(whole);
         }).valueOr(whole);
       });
     }));
