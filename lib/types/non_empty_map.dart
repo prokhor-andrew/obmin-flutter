@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:collection/collection.dart';
+import 'package:obmin/types/either.dart';
 import 'package:obmin/types/non_empty_set.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/types/product.dart';
@@ -34,6 +35,38 @@ final class NonEmptyMap<K, T> {
     final map = Map<K, T>.of(rest);
     map[any.key] = any.value;
     return map;
+  }
+
+  NonEmptyMap<K, R> zipWith<R, U>(
+    NonEmptyMap<K, U> other,
+    R Function(K key, Either<Product<T, U>, Either<T, U>>) combine,
+  ) {
+    final combinedKeys = {...rest.keys, ...other.rest.keys, any.key, other.any.key};
+
+    final Map<K, R> result = {};
+
+    for (K key in combinedKeys) {
+      final bool hasT = rest.containsKey(key) || key == any.key;
+      final bool hasU = other.rest.containsKey(key) || key == other.any.key;
+
+      if (hasT && hasU) {
+        final tValue = key == any.key ? any.value : rest[key]!;
+        final uValue = key == other.any.key ? other.any.value : other.rest[key]!;
+        result[key] = combine(key, Either.left(Product(tValue, uValue)));
+      } else if (hasT) {
+        final tValue = key == any.key ? any.value : rest[key]!;
+        result[key] = combine(key, Either.right(Either.left(tValue)));
+      } else {
+        final uValue = key == other.any.key ? other.any.value : other.rest[key]!;
+        result[key] = combine(key, Either.right(Either.right(uValue)));
+      }
+    }
+
+    final firstEntry = result.entries.first;
+    return NonEmptyMap<K, R>(
+      any: MapEntry(firstEntry.key, firstEntry.value),
+      rest: Map.fromEntries(result.entries.skip(1)),
+    );
   }
 
   NonEmptyMap<K, R> mapKeyed<R>(R Function(K key, T value) function) {
