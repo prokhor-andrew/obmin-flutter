@@ -5,6 +5,7 @@
 import 'package:collection/collection.dart';
 import 'package:obmin/types/non_empty_set.dart';
 import 'package:obmin/types/optional.dart';
+import 'package:obmin/types/product.dart';
 import 'package:obmin/utils/list_minus.dart';
 import 'package:obmin/utils/list_plus.dart';
 
@@ -341,10 +342,10 @@ final class NonEmptyList<T> {
     return containsWhereIndexed((_, value) => predicate(value));
   }
 
-  NonEmptySet<T> asNonEmptySet() {
+  NonEmptySet<Product<int, T>> asNonEmptySet() {
     return NonEmptySet(
-      any: head,
-      rest: tail.toSet(),
+      any: Product(0, head),
+      rest: tail.mapIndexed(Product.new).toSet(),
     );
   }
 
