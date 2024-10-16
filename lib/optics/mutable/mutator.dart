@@ -7,10 +7,6 @@ import 'package:obmin/optics/readonly/fold_map.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/transformers/bi_preview.dart';
-import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/transformers/prism.dart';
-import 'package:obmin/optics/transformers/reflector.dart';
 import 'package:obmin/types/non_empty_list.dart';
 import 'package:obmin/types/non_empty_map.dart';
 import 'package:obmin/types/non_empty_set.dart';
@@ -46,10 +42,71 @@ final class Mutator<Whole, Part> {
     return "Mutator<$Whole, $Part>";
   }
 
-  static Mutator<Whole, Whole> reducer<Whole>() {
+  static Mutator<Whole, Whole> identity<Whole>() {
     return Mutator(Getter((modify) {
       return Getter(modify.get);
     }));
+  }
+
+  static Mutator<Whole, Part> iso<Whole, Part>(
+    Getter<Whole, Part> forward,
+    Getter<Part, Whole> backward,
+  ) {
+    return Mutator(
+      Getter(
+        (update) {
+          return Getter(
+            (whole) {
+              final part = forward.get(whole);
+              final updated = update.get(part);
+              final result = backward.get(updated);
+              return result;
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  static Mutator<Whole, Part> prism<Whole, Part>(
+    Preview<Whole, Part> forward,
+    Getter<Part, Whole> backward,
+  ) {
+    return Mutator(
+      Getter(
+        (update) {
+          return Getter(
+            (whole) {
+              final partOrNone = forward.get(whole);
+              final updatedPartOrNone = partOrNone.map(update.get);
+              final result = updatedPartOrNone.map(backward.get).valueOr(whole);
+
+              return result;
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  static Mutator<Whole, Part> biPreview<Whole, Part>(
+    Preview<Whole, Part> forward,
+    Preview<Part, Whole> backward,
+  ) {
+    return Mutator(
+      Getter(
+        (update) {
+          return Getter(
+            (whole) {
+              final partOrNone = forward.get(whole);
+              final updatedPartOrNone = partOrNone.map(update.get);
+              final wholeOrNone = updatedPartOrNone.bind(backward.get);
+              return wholeOrNone.valueOr(whole);
+            },
+          );
+        },
+      ),
+    );
   }
 
   static Mutator<Whole, Part> lens<Whole, Part>(
@@ -121,54 +178,5 @@ final class Mutator<Whole, Part> {
         }).valueOr(whole);
       });
     }));
-  }
-
-  Mutator<Whole, Sub> composeWithIso<Sub>(Iso<Part, Sub> other) {
-    return compose(other.asMutator());
-  }
-
-  Mutator<Whole, Sub> composeWithPrism<Sub>(Prism<Part, Sub> other) {
-    return compose(other.asMutator());
-  }
-
-  Mutator<Whole, Sub> composeWithReflector<Sub>(Reflector<Part, Sub> other) {
-    return compose(other.asMutator());
-  }
-
-  Mutator<Whole, Sub> composeWithBiPreview<Sub>(BiPreview<Part, Sub> other) {
-    return compose(other.asMutator());
-  }
-}
-
-extension IsoAsMutatorExtension<T1, T2> on Iso<T1, T2> {
-  Mutator<T1, T2> asMutator() {
-    return asBiPreview().asMutator();
-  }
-}
-
-extension PrismAsMutatorExtension<Whole, Part> on Prism<Whole, Part> {
-  Mutator<Whole, Part> asMutator() {
-    return asBiPreview().asMutator();
-  }
-}
-
-extension ReflectorAsMutatorExtension<Whole, Part> on Reflector<Whole, Part> {
-  Mutator<Whole, Part> asMutator() {
-    return asBiPreview().asMutator();
-  }
-}
-
-extension BiPreviewAsMutatorExtension<T1, T2> on BiPreview<T1, T2> {
-  Mutator<T1, T2> asMutator() {
-    return Mutator(Getter(
-      (update) {
-        return Getter((whole) {
-          final partOrNone = forward.get(whole);
-          final updatedOrNone = partOrNone.map(update.get);
-          final wholeOrNone = updatedOrNone.bind(backward.get);
-          return wholeOrNone.valueOr(whole);
-        });
-      },
-    ));
   }
 }
