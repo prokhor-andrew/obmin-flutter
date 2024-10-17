@@ -125,8 +125,8 @@ final class Channel<T> {
       return partialResult.contains(element) ? partialResult : partialResult.add(element);
     });
 
-    final set1 = Set<ChannelBufferData<T>>.from(currentArray);
-    final set2 = Set<ChannelBufferData<T>>.from(withoutDuplicates);
+    final set1 = currentArray.toISet();
+    final set2 = withoutDuplicates.toISet();
 
     final difference = set1.union(set2).difference(set1.intersection(set2));
     _state = withoutDuplicates.isEmpty ? _IdleChannelState() : _AwaitingForConsumer(withoutDuplicates);
