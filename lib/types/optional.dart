@@ -7,10 +7,6 @@ import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/transformers/bi_preview.dart';
-import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/transformers/prism.dart';
-import 'package:obmin/optics/transformers/reflector.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/utils/bool_fold.dart';
 
@@ -112,7 +108,7 @@ final class Optional<T> {
 
   static Eqv<Optional<T>> eqv<T>() => Eqv<Optional<T>>();
 
-  static Mutator<Optional<T>, Optional<T>> reducer<T>() => Mutator.reducer<Optional<T>>();
+  static Mutator<Optional<T>, Optional<T>> identity<T>() => Mutator.identity<Optional<T>>();
 }
 
 extension EitherToOptionalExtension<T> on Either<T, ()> {
@@ -141,44 +137,8 @@ extension OptionalObminOpticFoldSetExtension<Whole, T> on FoldSet<Whole, Optiona
 }
 
 extension OptionalObminOpticMutatorExtension<Whole, T> on Mutator<Whole, Optional<T>> {
-  Mutator<Whole, T> get value => composeWithPrism(
-        Prism<Optional<T>, T>(
-          Preview<Optional<T>, T>((whole) => whole),
-          Getter<T, Optional<T>>(Optional<T>.some),
-        ),
-      );
-}
-
-extension OptionalObminOpticIsoExtension<Whole, T> on Iso<Whole, Optional<T>> {
-  Prism<Whole, T> get value => composeWithPrism(
-        Prism<Optional<T>, T>(
-          Preview<Optional<T>, T>((whole) => whole),
-          Getter<T, Optional<T>>(Optional<T>.some),
-        ),
-      );
-}
-
-extension OptionalObminOpticPrismExtension<Whole, T> on Prism<Whole, Optional<T>> {
-  Prism<Whole, T> get value => compose(
-        Prism<Optional<T>, T>(
-          Preview<Optional<T>, T>((whole) => whole),
-          Getter<T, Optional<T>>(Optional<T>.some),
-        ),
-      );
-}
-
-extension OptionalObminOpticReflectorExtension<Whole, T> on Reflector<Whole, Optional<T>> {
-  BiPreview<Whole, T> get value => composeWithPrism(
-        Prism<Optional<T>, T>(
-          Preview<Optional<T>, T>((whole) => whole),
-          Getter<T, Optional<T>>(Optional<T>.some),
-        ),
-      );
-}
-
-extension OptionalObminOpticBiPreviewExtension<Whole, T> on BiPreview<Whole, Optional<T>> {
-  BiPreview<Whole, T> get value => composeWithPrism(
-        Prism<Optional<T>, T>(
+  Mutator<Whole, T> get value => compose(
+        Mutator.prism<Optional<T>, T>(
           Preview<Optional<T>, T>((whole) => whole),
           Getter<T, Optional<T>>(Optional<T>.some),
         ),

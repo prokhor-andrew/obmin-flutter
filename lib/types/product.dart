@@ -7,10 +7,6 @@ import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/transformers/bi_preview.dart';
-import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/transformers/prism.dart';
-import 'package:obmin/optics/transformers/reflector.dart';
 
 final class Product<T1, T2> {
   final T1 value1;
@@ -45,7 +41,7 @@ final class Product<T1, T2> {
 
   static Eqv<Product<T1, T2>> eqv<T1, T2>() => Eqv<Product<T1, T2>>();
 
-  static Mutator<Product<T1, T2>, Product<T1, T2>> reducer<T1, T2>() => Mutator.reducer<Product<T1, T2>>();
+  static Mutator<Product<T1, T2>, Product<T1, T2>> identity<T1, T2>() => Mutator.identity<Product<T1, T2>>();
 }
 
 extension ProductObminOpticToolMethodsExtension<T1, T2> on Product<T1, T2> {
@@ -111,70 +107,6 @@ extension ProductObminOpticMutatorExtension<Whole, T1, T2> on Mutator<Whole, Pro
       );
 
   Mutator<Whole, T2> get value2 => compose(
-        Mutator.lens<Product<T1, T2>, T2>(
-          Getter<Product<T1, T2>, T2>((whole) => whole.value2),
-          Getter((part) => Getter((whole) => whole.mapValue2To(part))),
-        ),
-      );
-}
-
-extension ProductObminOpticIsoExtension<Whole, T1, T2> on Iso<Whole, Product<T1, T2>> {
-  Mutator<Whole, T1> get value1 => asMutator().compose(
-        Mutator.lens<Product<T1, T2>, T1>(
-          Getter<Product<T1, T2>, T1>((whole) => whole.value1),
-          Getter((part) => Getter((whole) => whole.mapValue1To(part))),
-        ),
-      );
-
-  Mutator<Whole, T2> get value2 => asMutator().compose(
-        Mutator.lens<Product<T1, T2>, T2>(
-          Getter<Product<T1, T2>, T2>((whole) => whole.value2),
-          Getter((part) => Getter((whole) => whole.mapValue2To(part))),
-        ),
-      );
-}
-
-extension ProductObminOpticPrismExtension<Whole, T1, T2> on Prism<Whole, Product<T1, T2>> {
-  Mutator<Whole, T1> get value1 => asMutator().compose(
-        Mutator.lens<Product<T1, T2>, T1>(
-          Getter<Product<T1, T2>, T1>((whole) => whole.value1),
-          Getter((part) => Getter((whole) => whole.mapValue1To(part))),
-        ),
-      );
-
-  Mutator<Whole, T2> get value2 => asMutator().compose(
-        Mutator.lens<Product<T1, T2>, T2>(
-          Getter<Product<T1, T2>, T2>((whole) => whole.value2),
-          Getter((part) => Getter((whole) => whole.mapValue2To(part))),
-        ),
-      );
-}
-
-extension ProductObminOpticReflectorExtension<Whole, T1, T2> on Reflector<Whole, Product<T1, T2>> {
-  Mutator<Whole, T1> get value1 => asMutator().compose(
-        Mutator.lens<Product<T1, T2>, T1>(
-          Getter<Product<T1, T2>, T1>((whole) => whole.value1),
-          Getter((part) => Getter((whole) => whole.mapValue1To(part))),
-        ),
-      );
-
-  Mutator<Whole, T2> get value2 => asMutator().compose(
-        Mutator.lens<Product<T1, T2>, T2>(
-          Getter<Product<T1, T2>, T2>((whole) => whole.value2),
-          Getter((part) => Getter((whole) => whole.mapValue2To(part))),
-        ),
-      );
-}
-
-extension ProductObminOpticBiPreviewExtension<Whole, T1, T2> on BiPreview<Whole, Product<T1, T2>> {
-  Mutator<Whole, T1> get value1 => asMutator().compose(
-        Mutator.lens<Product<T1, T2>, T1>(
-          Getter<Product<T1, T2>, T1>((whole) => whole.value1),
-          Getter((part) => Getter((whole) => whole.mapValue1To(part))),
-        ),
-      );
-
-  Mutator<Whole, T2> get value2 => asMutator().compose(
         Mutator.lens<Product<T1, T2>, T2>(
           Getter<Product<T1, T2>, T2>((whole) => whole.value2),
           Getter((part) => Getter((whole) => whole.mapValue2To(part))),

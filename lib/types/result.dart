@@ -7,10 +7,6 @@ import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/transformers/bi_preview.dart';
-import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/transformers/prism.dart';
-import 'package:obmin/optics/transformers/reflector.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/utils/bool_fold.dart';
 
@@ -124,7 +120,7 @@ final class Result<Res, Err> {
 
   static Eqv<Result<L, R>> eqv<L, R>() => Eqv<Result<L, R>>();
 
-  static Mutator<Result<L, R>, Result<L, R>> reducer<L, R>() => Mutator.reducer<Result<L, R>>();
+  static Mutator<Result<L, R>, Result<L, R>> identity<L, R>() => Mutator.identity<Result<L, R>>();
 }
 
 extension ResultObminOpticEqvExtension<Res, Err> on Eqv<Result<Res, Err>> {
@@ -152,79 +148,15 @@ extension ResultObminOpticFoldSetExtension<Whole, Res, Err> on FoldSet<Whole, Re
 }
 
 extension ResultObminOpticMutatorExtension<Whole, Res, Err> on Mutator<Whole, Result<Res, Err>> {
-  Mutator<Whole, Res> get success => composeWithPrism(
-        Prism<Result<Res, Err>, Res>(
+  Mutator<Whole, Res> get success => compose(
+        Mutator.prism<Result<Res, Err>, Res>(
           Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
           Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
         ),
       );
 
-  Mutator<Whole, Err> get failure => composeWithPrism(
-        Prism<Result<Res, Err>, Err>(
-          Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
-          Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
-        ),
-      );
-}
-
-extension ResultObminOpticIsoExtension<Whole, Res, Err> on Iso<Whole, Result<Res, Err>> {
-  Prism<Whole, Res> get success => composeWithPrism(
-        Prism<Result<Res, Err>, Res>(
-          Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
-          Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
-        ),
-      );
-
-  Prism<Whole, Err> get failure => composeWithPrism(
-        Prism<Result<Res, Err>, Err>(
-          Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
-          Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
-        ),
-      );
-}
-
-extension ResultObminOpticPrismExtension<Whole, Res, Err> on Prism<Whole, Result<Res, Err>> {
-  Prism<Whole, Res> get success => compose(
-        Prism<Result<Res, Err>, Res>(
-          Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
-          Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
-        ),
-      );
-
-  Prism<Whole, Err> get failure => compose(
-        Prism<Result<Res, Err>, Err>(
-          Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
-          Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
-        ),
-      );
-}
-
-extension ResultObminOpticReflectorExtension<Whole, Res, Err> on Reflector<Whole, Result<Res, Err>> {
-  BiPreview<Whole, Res> get success => composeWithPrism(
-        Prism<Result<Res, Err>, Res>(
-          Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
-          Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
-        ),
-      );
-
-  BiPreview<Whole, Err> get failure => composeWithPrism(
-        Prism<Result<Res, Err>, Err>(
-          Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
-          Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
-        ),
-      );
-}
-
-extension ResultObminOpticBiPreviewExtension<Whole, Res, Err> on BiPreview<Whole, Result<Res, Err>> {
-  BiPreview<Whole, Res> get success => composeWithPrism(
-        Prism<Result<Res, Err>, Res>(
-          Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone),
-          Getter<Res, Result<Res, Err>>(Result<Res, Err>.success),
-        ),
-      );
-
-  BiPreview<Whole, Err> get failure => composeWithPrism(
-        Prism<Result<Res, Err>, Err>(
+  Mutator<Whole, Err> get failure => compose(
+        Mutator.prism<Result<Res, Err>, Err>(
           Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone),
           Getter<Err, Result<Res, Err>>(Result<Res, Err>.failure),
         ),
