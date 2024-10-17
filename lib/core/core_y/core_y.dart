@@ -6,7 +6,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/core/core.dart';
 import 'package:obmin/core/core_x/core_x.dart';
 import 'package:obmin/machine/machine.dart';
-import 'package:obmin/types/update.dart';
+import 'package:obmin/optics/readonly/update.dart';
 
 Core<State, State, Update<State>> CoreY<State>({
   required State Function(CoreInitialObject initial) state,

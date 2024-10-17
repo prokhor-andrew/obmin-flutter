@@ -6,7 +6,7 @@ import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/types/non_empty_set.dart';
-import 'package:obmin/types/update.dart';
+import 'package:obmin/optics/readonly/update.dart';
 
 final class Mutator<Whole, Part> {
   final Getter<Update<Part>, Update<Whole>> applier;

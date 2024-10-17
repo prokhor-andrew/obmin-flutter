@@ -10,7 +10,7 @@ import 'package:obmin/machine_ext/distinct_until_changed_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
 import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
 import 'package:obmin/machine_ext/silo_machine.dart';
-import 'package:obmin/types/update.dart';
+import 'package:obmin/optics/readonly/update.dart';
 
 extension ChamberMachineExtension on MachineFactory {
   Machine<Input, Output> chamber<Input, Output, Helper>({
