@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
 
@@ -51,7 +52,7 @@ final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   @override
   int get hashCode => state.hashCode;
 
-  Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> asFeature(Set<Machine<IntEffect, IntTrigger>> machines) {
+  Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> asFeature(ISet<Machine<IntEffect, IntTrigger>> machines) {
     return Feature.create(
       state: state,
       machines: machines,
@@ -68,11 +69,11 @@ final class Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
 
 final class OutlineTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   final Outline<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> outline;
-  final List<FeatureEvent<IntEffect, ExtEffect>> effects;
+  final IList<FeatureEvent<IntEffect, ExtEffect>> effects;
 
   const OutlineTransition(
     this.outline, {
-    this.effects = const [],
+    this.effects = const IList.empty(),
   });
 
   @override

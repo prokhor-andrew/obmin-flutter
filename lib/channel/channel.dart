@@ -19,14 +19,14 @@ final class Channel<T> {
 
     switch (_state) {
       case _IdleChannelState<T>():
-        _handleBuffer(event: ChannelBufferAddedEvent(), currentArray: [ChannelBufferData._(id: id, data: val, completer: completer)]);
+        _handleBuffer(event: ChannelBufferAddedEvent(), currentArray: [ChannelBufferData._(id: id, data: val, completer: completer)].lock);
         break;
       case _AwaitingForConsumer<T>(buffer: final array):
-        _handleBuffer(event: ChannelBufferAddedEvent(), currentArray: array.plus(ChannelBufferData._(id: id, data: val, completer: completer)));
+        _handleBuffer(event: ChannelBufferAddedEvent(), currentArray: array.add(ChannelBufferData._(id: id, data: val, completer: completer)));
         break;
       case _AwaitingForProducer<T>(cur: final cur, rest: final rest):
         _state = _IdleChannelState();
-        for (final element in [cur].plusMultiple(rest)) {
+        for (final element in [cur].lock.addAll(rest)) {
           element.comp.complete(Optional<T>.some(val));
         }
         completer.complete(true);
@@ -41,16 +41,19 @@ final class Channel<T> {
           case _IdleChannelState<T>() || _AwaitingForProducer<T>():
             break; // do nothing, as there is no completer to be completed
           case _AwaitingForConsumer<T>(buffer: final array):
-            final currentArray = array.where((data) {
+            final currentArray = array.removeWhere((data) {
               if (data.id != id) {
                 return true;
               } else {
                 data._completer.complete(false);
                 return false;
               }
-            }).toList();
+            });
 
-            _handleBuffer(event: ChannelBufferRemovedEvent(isConsumed: false), currentArray: currentArray);
+            _handleBuffer(
+              event: ChannelBufferRemovedEvent(isConsumed: false),
+              currentArray: currentArray,
+            );
         }
       },
     );
@@ -62,15 +65,16 @@ final class Channel<T> {
 
     switch (_state) {
       case _IdleChannelState<T>():
-        _state = _AwaitingForProducer(cur: _ChannelConsumer(id, completer), rest: []);
+        _state = _AwaitingForProducer(cur: _ChannelConsumer(id, completer), rest: <_ChannelConsumer<T>>[].lock);
         break;
       case _AwaitingForProducer<T>(cur: final cur, rest: final rest):
-        _state = _AwaitingForProducer(cur: cur, rest: rest.plus(_ChannelConsumer(id, completer)));
+        _state = _AwaitingForProducer(cur: cur, rest: rest.add(_ChannelConsumer(id, completer)));
         break;
       case _AwaitingForConsumer<T>(buffer: final array):
         array[0]._completer.complete(true);
         completer.complete(Optional<T>.some(array[0].data));
-        _handleBuffer(event: ChannelBufferRemovedEvent(isConsumed: true), currentArray: array.minusFirst());
+
+        _handleBuffer(event: ChannelBufferRemovedEvent(isConsumed: true), currentArray: array.removeAt(0));
         break;
     }
 
@@ -87,19 +91,22 @@ final class Channel<T> {
                 _state = _IdleChannelState();
                 cur.comp.complete(Optional<T>.none());
               } else {
-                _state = _AwaitingForProducer(cur: rest[0], rest: rest.minusFirst());
+                _state = _AwaitingForProducer(cur: rest[0], rest: rest.removeAt(0));
                 cur.comp.complete(Optional<T>.none());
               }
             } else {
-              final newList = rest.where((item) {
+              final newList = rest.removeWhere((item) {
                 if (item.id != id) {
                   return true;
                 } else {
                   item.comp.complete(Optional<T>.none());
                   return false;
                 }
-              }).toList();
-              _state = _AwaitingForProducer(cur: cur, rest: newList);
+              });
+              _state = _AwaitingForProducer(
+                cur: cur,
+                rest: newList,
+              );
             }
             break;
         }
@@ -109,13 +116,14 @@ final class Channel<T> {
 
   void _handleBuffer({
     required ChannelBufferEvent event,
-    required List<ChannelBufferData<T>> currentArray,
+    required IList<ChannelBufferData<T>> currentArray,
   }) {
-    final bufferedArray = bufferStrategy.bufferReducer(currentArray.toList(), event).toList();
+    final bufferedArray = bufferStrategy.bufferReducer(currentArray, event);
 
-    final List<ChannelBufferData<T>> withoutDuplicates = bufferedArray.fold<List<ChannelBufferData<T>>>([], (partialResult, element) {
-      return partialResult.contains(element) ? partialResult : partialResult.plus(element);
-    }).toList();
+    final IList<ChannelBufferData<T>> withoutDuplicates =
+        bufferedArray.fold<IList<ChannelBufferData<T>>>(<ChannelBufferData<T>>[].lock, (partialResult, element) {
+      return partialResult.contains(element) ? partialResult : partialResult.add(element);
+    });
 
     final set1 = Set<ChannelBufferData<T>>.from(currentArray);
     final set2 = Set<ChannelBufferData<T>>.from(withoutDuplicates);
@@ -135,7 +143,7 @@ final class _IdleChannelState<T> extends _ChannelState<T> {}
 
 final class _AwaitingForProducer<T> extends _ChannelState<T> {
   final _ChannelConsumer<T> cur;
-  final List<_ChannelConsumer<T>> rest;
+  final IList<_ChannelConsumer<T>> rest;
 
   _AwaitingForProducer({
     required this.cur,
@@ -144,7 +152,7 @@ final class _AwaitingForProducer<T> extends _ChannelState<T> {
 }
 
 final class _AwaitingForConsumer<T> extends _ChannelState<T> {
-  final List<ChannelBufferData<T>> buffer;
+  final IList<ChannelBufferData<T>> buffer;
 
   _AwaitingForConsumer(this.buffer);
 }

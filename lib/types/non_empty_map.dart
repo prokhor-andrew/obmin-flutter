@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:collection/collection.dart';
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/non_empty_set.dart';
 import 'package:obmin/types/optional.dart';
@@ -10,14 +11,15 @@ import 'package:obmin/types/product.dart';
 
 final class NonEmptyMap<K, T> {
   final MapEntry<K, T> any;
-  final Map<K, T> rest;
+  final IMap<K, T> rest;
 
   const NonEmptyMap({
     required this.any,
     required this.rest,
   });
 
-  static Optional<NonEmptyMap<K, T>> fromMap<K, T>(Map<K, T> map) {
+  static Optional<NonEmptyMap<K, T>> fromIMap<K, T>(IMap<K, T> map) {
+
     final iterator = map.entries.iterator;
     if (iterator.moveNext()) {
       final any = iterator.current;
@@ -31,19 +33,18 @@ final class NonEmptyMap<K, T> {
     return Optional.none();
   }
 
-  Map<K, T> asMap() {
-    final map = Map<K, T>.of(rest);
-    map[any.key] = any.value;
-    return map;
+  IMap<K, T> toIMap() {
+    return rest.add(any.key, any.value);
   }
 
   NonEmptyMap<K, R> zipWith<R, U>(
     NonEmptyMap<K, U> other,
     R Function(K key, Either<Product<T, U>, Either<T, U>>) combine,
   ) {
-    final combinedKeys = {...rest.keys, ...other.rest.keys, any.key, other.any.key};
 
-    final Map<K, R> result = {};
+    final combinedKeys = {...rest.keys, ...other.rest.keys, any.key, other.any.key}.lock;
+
+    IMap<K, R> result = const IMap.empty();
 
     for (K key in combinedKeys) {
       final bool hasT = rest.containsKey(key) || key == any.key;
@@ -87,17 +88,17 @@ final class NonEmptyMap<K, T> {
   NonEmptyMap<K, R> bindKeyed<R>(NonEmptyMap<K, R> Function(K key, T value) function) {
     final NonEmptyMap<K, R> first = function(any.key, any.value);
 
-    final Map<K, R> resultMap = Map<K, R>.of(first.asMap());
+    IMap<K, R> resultMap = first.asMap();
 
     for (final entry in rest.entries) {
       final NonEmptyMap<K, R> mapped = function(entry.key, entry.value);
-      resultMap.addAll(mapped.asMap());
+      resultMap = resultMap.addAll(mapped.asMap());
     }
 
     final iterator = resultMap.entries.iterator;
     iterator.moveNext();
     final MapEntry<K, R> newAny = iterator.current;
-    resultMap.remove(newAny.key);
+    resultMap = resultMap.remove(newAny.key);
 
     return NonEmptyMap(any: newAny, rest: resultMap);
   }
@@ -358,5 +359,14 @@ final class NonEmptyMap<K, T> {
   int get hashCode {
     final mapEquality = const DeepCollectionEquality();
     return any.hashCode ^ mapEquality.hash(rest);
+  }
+}
+
+extension OptionalOfNonEmptyMapToIMapExtension<Key, Value> on Optional<NonEmptyMap<Key, Value>> {
+  IMap<Key, Value> toIMap() {
+    return fold(
+      (value) => value.toIMap(),
+      () => const IMap.empty(),
+    );
   }
 }

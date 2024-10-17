@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core.dart';
 import 'package:obmin/machine/machine.dart';
@@ -25,7 +26,7 @@ final class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
 }
 
 final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidget<DomainState, Input, Output>> {
-  final Map<String, void Function(Input)> _map = {};
+  IMap<String, void Function(Input)> _map = <String, void Function(Input)>{}.lock;
 
   void Function(Output)? _callback;
 
@@ -65,7 +66,7 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
 
   @override
   void dispose() {
-    _map.clear();
+    _map = <String, void Function(Input)>{}.lock;
     _core?.stop();
     _core = null;
     super.dispose();
@@ -83,11 +84,11 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
             onCreate: (id) => id,
             onChange: (id, callback) async {
               if (callback != null) {
-                _map[id] = (value) {
+                _map = _map.add(id, (value) {
                   callback(value);
-                };
+                });
               } else {
-                _map.remove(id);
+                _map = _map.remove(id);
               }
             },
             onProcess: (_, __) async {

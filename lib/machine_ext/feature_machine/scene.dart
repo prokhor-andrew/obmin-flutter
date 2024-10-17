@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
 import 'package:obmin/machine_ext/feature_machine/outline.dart';
 
@@ -53,11 +54,11 @@ final class Scene<State, Trigger, Effect> {
 
 final class SceneTransition<State, Trigger, Effect> {
   final Scene<State, Trigger, Effect> scene;
-  final List<Effect> effects;
+  final IList<Effect> effects;
 
   const SceneTransition(
     this.scene, {
-    this.effects = const [],
+    this.effects = const IList.empty(),
   });
 
   @override
@@ -91,7 +92,7 @@ extension SceneToOutlineConverterExtension<State, Trigger, Effect> on Scene<Stat
                 (effect) {
                   return ExternalFeatureEvent<IntEffect, Effect>(effect);
                 },
-              ).toList(),
+              ).toIList(),
             );
         }
       },
@@ -113,7 +114,7 @@ extension SceneToOutlineConverterExtension<State, Trigger, Effect> on Scene<Stat
                 (effect) {
                   return InternalFeatureEvent<Effect, ExtEffect>(effect);
                 },
-              ).toList(),
+              ).toIList(),
             );
         }
       },
@@ -133,7 +134,7 @@ extension SceneToOutlineConverterExtension<State, Trigger, Effect> on Scene<Stat
                 (effect) {
                   return ExternalFeatureEvent<IntEffect, Effect>(effect);
                 },
-              ).toList(),
+              ).toIList(),
             );
           case ExternalFeatureEvent():
             return OutlineTransition(asIntTriggerExtEffect());
@@ -155,7 +156,7 @@ extension SceneToOutlineConverterExtension<State, Trigger, Effect> on Scene<Stat
                 (effect) {
                   return InternalFeatureEvent<Effect, ExtEffect>(effect);
                 },
-              ).toList(),
+              ).toIList(),
             );
           case ExternalFeatureEvent():
             return OutlineTransition(asIntTriggerIntEffect());
@@ -182,7 +183,7 @@ extension SceneToOutlineConverterExtension<State, Trigger, Effect> on Scene<Stat
                     ExternalFeatureEvent<Effect, Effect>(effect),
                   ];
                 },
-              ).toList(),
+              ).toIList(),
             );
         }
       },
@@ -205,7 +206,7 @@ extension SceneToOutlineConverterExtension<State, Trigger, Effect> on Scene<Stat
                     ExternalFeatureEvent<Effect, Effect>(effect),
                   ];
                 },
-              ).toList(),
+              ).toIList(),
             );
           case ExternalFeatureEvent():
             return OutlineTransition(asIntTriggerIntEffectExtEffect());
@@ -227,7 +228,7 @@ extension SceneToOutlineConverterExtension<State, Trigger, Effect> on Scene<Stat
                 (effect) {
                   return InternalFeatureEvent<Effect, ExtEffect>(effect);
                 },
-              ).toList(),
+              ).toIList(),
             );
         }
       },
@@ -247,7 +248,7 @@ extension SceneToOutlineConverterExtension<State, Trigger, Effect> on Scene<Stat
                 (effect) {
                   return ExternalFeatureEvent<IntEffect, Effect>(effect);
                 },
-              ).toList(),
+              ).toIList(),
             );
         }
       },
@@ -270,7 +271,7 @@ extension SceneToOutlineConverterExtension<State, Trigger, Effect> on Scene<Stat
                     ExternalFeatureEvent<Effect, Effect>(effect),
                   ];
                 },
-              ).toList(),
+              ).toIList(),
             );
         }
       },

@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/channel/channel_lib.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine/machine_factory.dart';
@@ -35,7 +36,7 @@ extension MapMachineExtension<Input, Output> on Machine<Input, Output> {
                     outline(state),
                     effects: [
                       ExternalFeatureEvent<Input, Output>(value),
-                    ],
+                    ].lock,
                   );
                 case ExternalFeatureEvent(value: final value):
                   final (newState, event) = function(state, value);
@@ -44,14 +45,14 @@ extension MapMachineExtension<Input, Output> on Machine<Input, Output> {
                     outline(newState),
                     effects: [
                       InternalFeatureEvent<Input, Output>(event),
-                    ],
+                    ].lock,
                   );
               }
             },
           );
         }
 
-        return outline(initial).asFeature({this});
+        return outline(initial).asFeature({this}.lock);
       },
       onDestroyFeature: (_) async {},
       shouldWaitOnEffects: shouldWaitOnEffects,
@@ -100,21 +101,21 @@ extension MapMachineExtension<Input, Output> on Machine<Input, Output> {
                     outline(newState),
                     effects: [
                       ExternalFeatureEvent<Input, R>(event),
-                    ],
+                    ].lock,
                   );
                 case ExternalFeatureEvent(value: final value):
                   return OutlineTransition(
                     outline(state),
                     effects: [
                       InternalFeatureEvent<Input, R>(value),
-                    ],
+                    ].lock,
                   );
               }
             },
           );
         }
 
-        return outline(initial).asFeature({this});
+        return outline(initial).asFeature({this}.lock);
       },
       onDestroyFeature: (_) async {},
       shouldWaitOnEffects: shouldWaitOnEffects,

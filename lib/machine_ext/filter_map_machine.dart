@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/channel/channel_lib.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine/machine_factory.dart';
@@ -34,23 +35,23 @@ extension FilterMapMachineExtension<Input, Output> on Machine<Input, Output> {
                 case InternalFeatureEvent(value: final value):
                   return OutlineTransition(
                     outline(state),
-                    effects: [
+                    effects: IList([
                       ExternalFeatureEvent<Input, Output>(value),
-                    ],
+                    ]),
                   );
                 case ExternalFeatureEvent(value: final value):
                   final (newState, event) = function(state, value);
 
                   return OutlineTransition(
                     outline(newState),
-                    effects: event.map((value) => [InternalFeatureEvent<Input, Output>(value)]).valueOr([]),
+                    effects: event.map((value) => [InternalFeatureEvent<Input, Output>(value)].lock).valueOr(const IList.empty()),
                   );
               }
             },
           );
         }
 
-        return outline(initial).asFeature({this});
+        return outline(initial).asFeature({this}.lock);
       },
       onDestroyFeature: (_) async {},
       shouldWaitOnEffects: shouldWaitOnEffects,
@@ -97,21 +98,21 @@ extension FilterMapMachineExtension<Input, Output> on Machine<Input, Output> {
                   final (newState, event) = function(state, value);
                   return OutlineTransition(
                     outline(newState),
-                    effects: event.map((value) => [ExternalFeatureEvent<Input, R>(value)]).valueOr([]),
+                    effects: event.map((value) => [ExternalFeatureEvent<Input, R>(value)].lock).valueOr(const IList.empty()),
                   );
                 case ExternalFeatureEvent(value: final value):
                   return OutlineTransition(
                     outline(state),
                     effects: [
                       InternalFeatureEvent<Input, R>(value),
-                    ],
+                    ].lock,
                   );
               }
             },
           );
         }
 
-        return outline(initial).asFeature({this});
+        return outline(initial).asFeature({this}.lock);
       },
       onDestroyFeature: (_) async {},
       shouldWaitOnEffects: shouldWaitOnEffects,
