@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
@@ -85,7 +86,7 @@ final class Preview<Whole, Part> {
 
   FoldSet<Whole, Part> asFoldSet() {
     return FoldSet((whole) {
-      return get(whole).map((value) => {value}).valueOr({});
+      return get(whole).map((value) => {value}.lock).valueOr(const ISet.empty());
     });
   }
 }

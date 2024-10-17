@@ -141,7 +141,7 @@ final class Mutator<Whole, Part> {
   ) {
     return Mutator(Getter((modify) {
       return Getter((whole) {
-        final zoomedOrNone = NonEmptySet.fromSet(fold.get(whole));
+        final zoomedOrNone = NonEmptySet.fromISet(fold.get(whole));
         return zoomedOrNone.map((zoomed) {
           final modified = zoomed.map(modify.get).fromSetOfProductToList();
           return reconstruct.get(modified).get(whole);
@@ -156,7 +156,7 @@ final class Mutator<Whole, Part> {
   ) {
     return Mutator(Getter((modify) {
       return Getter((whole) {
-        final zoomedOrNone = NonEmptySet.fromSet(fold.get(whole));
+        final zoomedOrNone = NonEmptySet.fromISet(fold.get(whole));
         return zoomedOrNone.map((zoomed) {
           final modified = zoomed.map(modify.get).fromSetOfProductToMap();
           return reconstruct.get(modified).get(whole);
@@ -171,7 +171,7 @@ final class Mutator<Whole, Part> {
   ) {
     return Mutator(Getter((modify) {
       return Getter((whole) {
-        final zoomedOrNone = NonEmptySet.fromSet(fold.get(whole));
+        final zoomedOrNone = NonEmptySet.fromISet(fold.get(whole));
         return zoomedOrNone.map((zoomed) {
           final modified = zoomed.map(modify.get);
           return reconstruct.get(modified).get(whole);
