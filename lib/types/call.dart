@@ -7,10 +7,6 @@ import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/transformers/bi_preview.dart';
-import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/transformers/prism.dart';
-import 'package:obmin/optics/transformers/reflector.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/utils/bool_fold.dart';
 
@@ -124,7 +120,7 @@ final class Call<Req, Res> {
 
   static Eqv<Call<L, R>> eqv<L, R>() => Eqv<Call<L, R>>();
 
-  static Mutator<Call<L, R>, Call<L, R>> reducer<L, R>() => Mutator.reducer<Call<L, R>>();
+  static Mutator<Call<L, R>, Call<L, R>> identity<L, R>() => Mutator.identity<Call<L, R>>();
 }
 
 extension CallObminOpticEqvExtension<Req, Res> on Eqv<Call<Req, Res>> {
@@ -151,81 +147,16 @@ extension CallObminOpticFoldSetExtension<Whole, Req, Res> on FoldSet<Whole, Call
   FoldSet<Whole, Res> get returned => composeWithPreview(Preview<Call<Req, Res>, Res>((whole) => whole.returnedOrNone));
 }
 
-
 extension CallObminOpticMutatorExtension<Whole, Req, Res> on Mutator<Whole, Call<Req, Res>> {
-  Mutator<Whole, Req> get launched => composeWithPrism(
-        Prism<Call<Req, Res>, Req>(
+  Mutator<Whole, Req> get launched => compose(
+        Mutator.prism<Call<Req, Res>, Req>(
           Preview<Call<Req, Res>, Req>((whole) => whole.launchedOrNone),
           Getter<Req, Call<Req, Res>>(Call<Req, Res>.launched),
         ),
       );
 
-  Mutator<Whole, Res> get returned => composeWithPrism(
-        Prism<Call<Req, Res>, Res>(
-          Preview<Call<Req, Res>, Res>((whole) => whole.returnedOrNone),
-          Getter<Res, Call<Req, Res>>(Call<Req, Res>.returned),
-        ),
-      );
-}
-
-extension CallObminOpticIsoExtension<Whole, Req, Res> on Iso<Whole, Call<Req, Res>> {
-  Prism<Whole, Req> get launched => composeWithPrism(
-        Prism<Call<Req, Res>, Req>(
-          Preview<Call<Req, Res>, Req>((whole) => whole.launchedOrNone),
-          Getter<Req, Call<Req, Res>>(Call<Req, Res>.launched),
-        ),
-      );
-
-  Prism<Whole, Res> get returned => composeWithPrism(
-        Prism<Call<Req, Res>, Res>(
-          Preview<Call<Req, Res>, Res>((whole) => whole.returnedOrNone),
-          Getter<Res, Call<Req, Res>>(Call<Req, Res>.returned),
-        ),
-      );
-}
-
-extension CallObminOpticPrismExtension<Whole, Req, Res> on Prism<Whole, Call<Req, Res>> {
-  Prism<Whole, Req> get launched => compose(
-        Prism<Call<Req, Res>, Req>(
-          Preview<Call<Req, Res>, Req>((whole) => whole.launchedOrNone),
-          Getter<Req, Call<Req, Res>>(Call<Req, Res>.launched),
-        ),
-      );
-
-  Prism<Whole, Res> get returned => compose(
-        Prism<Call<Req, Res>, Res>(
-          Preview<Call<Req, Res>, Res>((whole) => whole.returnedOrNone),
-          Getter<Res, Call<Req, Res>>(Call<Req, Res>.returned),
-        ),
-      );
-}
-
-extension CallObminOpticReflectorExtension<Whole, Req, Res> on Reflector<Whole, Call<Req, Res>> {
-  BiPreview<Whole, Req> get launched => composeWithPrism(
-        Prism<Call<Req, Res>, Req>(
-          Preview<Call<Req, Res>, Req>((whole) => whole.launchedOrNone),
-          Getter<Req, Call<Req, Res>>(Call<Req, Res>.launched),
-        ),
-      );
-
-  BiPreview<Whole, Res> get returned => composeWithPrism(
-        Prism<Call<Req, Res>, Res>(
-          Preview<Call<Req, Res>, Res>((whole) => whole.returnedOrNone),
-          Getter<Res, Call<Req, Res>>(Call<Req, Res>.returned),
-        ),
-      );
-}
-
-extension CallObminOpticBiPreviewExtension<Whole, Req, Res> on BiPreview<Whole, Call<Req, Res>> {
-  BiPreview<Whole, Req> get launched => composeWithPrism(
-        Prism<Call<Req, Res>, Req>(
-          Preview<Call<Req, Res>, Req>((whole) => whole.launchedOrNone),
-          Getter<Req, Call<Req, Res>>(Call<Req, Res>.launched),
-        ),
-      );
-
-  BiPreview<Whole, Res> get returned => composeWithPrism(
-        Prism<Call<Req, Res>, Res>(
+  Mutator<Whole, Res> get returned => compose(
+        Mutator.prism<Call<Req, Res>, Res>(
           Preview<Call<Req, Res>, Res>((whole) => whole.returnedOrNone),
           Getter<Res, Call<Req, Res>>(Call<Req, Res>.returned),
         ),

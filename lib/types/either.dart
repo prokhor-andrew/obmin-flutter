@@ -7,10 +7,6 @@ import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/optics/transformers/bi_preview.dart';
-import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/transformers/prism.dart';
-import 'package:obmin/optics/transformers/reflector.dart';
 import 'package:obmin/types/optional.dart';
 import 'package:obmin/types/product.dart';
 import 'package:obmin/utils/bool_fold.dart';
@@ -135,7 +131,7 @@ final class Either<L, R> {
 
   static Eqv<Either<L, R>> eqv<L, R>() => Eqv<Either<L, R>>();
 
-  static Mutator<Either<L, R>, Either<L, R>> reducer<L, R>() => Mutator.reducer<Either<L, R>>();
+  static Mutator<Either<L, R>, Either<L, R>> identity<L, R>() => Mutator.identity<Either<L, R>>();
 }
 
 extension EitherValueWhenBothExtension<T> on Either<T, T> {
@@ -170,79 +166,15 @@ extension EitherObminOpticFoldSetExtension<Whole, L, R> on FoldSet<Whole, Either
 }
 
 extension EitherObminOpticMutatorExtension<Whole, L, R> on Mutator<Whole, Either<L, R>> {
-  Mutator<Whole, L> get left => composeWithPrism(
-        Prism<Either<L, R>, L>(
+  Mutator<Whole, L> get left => compose(
+        Mutator.prism<Either<L, R>, L>(
           Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
           Getter<L, Either<L, R>>(Either<L, R>.left),
         ),
       );
 
-  Mutator<Whole, R> get right => composeWithPrism(
-        Prism<Either<L, R>, R>(
-          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
-          Getter<R, Either<L, R>>(Either<L, R>.right),
-        ),
-      );
-}
-
-extension EitherObminOpticIsoExtension<Whole, L, R> on Iso<Whole, Either<L, R>> {
-  Prism<Whole, L> get left => composeWithPrism(
-        Prism<Either<L, R>, L>(
-          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
-          Getter<L, Either<L, R>>(Either<L, R>.left),
-        ),
-      );
-
-  Prism<Whole, R> get right => composeWithPrism(
-        Prism<Either<L, R>, R>(
-          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
-          Getter<R, Either<L, R>>(Either<L, R>.right),
-        ),
-      );
-}
-
-extension EitherObminOpticPrismExtension<Whole, L, R> on Prism<Whole, Either<L, R>> {
-  Prism<Whole, L> get left => compose(
-        Prism<Either<L, R>, L>(
-          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
-          Getter<L, Either<L, R>>(Either<L, R>.left),
-        ),
-      );
-
-  Prism<Whole, R> get right => compose(
-        Prism<Either<L, R>, R>(
-          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
-          Getter<R, Either<L, R>>(Either<L, R>.right),
-        ),
-      );
-}
-
-extension EitherObminOpticReflectorExtension<Whole, L, R> on Reflector<Whole, Either<L, R>> {
-  BiPreview<Whole, L> get left => composeWithPrism(
-        Prism<Either<L, R>, L>(
-          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
-          Getter<L, Either<L, R>>(Either<L, R>.left),
-        ),
-      );
-
-  BiPreview<Whole, R> get right => composeWithPrism(
-        Prism<Either<L, R>, R>(
-          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
-          Getter<R, Either<L, R>>(Either<L, R>.right),
-        ),
-      );
-}
-
-extension EitherObminOpticBiPreviewExtension<Whole, L, R> on BiPreview<Whole, Either<L, R>> {
-  BiPreview<Whole, L> get left => composeWithPrism(
-        Prism<Either<L, R>, L>(
-          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
-          Getter<L, Either<L, R>>(Either<L, R>.left),
-        ),
-      );
-
-  BiPreview<Whole, R> get right => composeWithPrism(
-        Prism<Either<L, R>, R>(
+  Mutator<Whole, R> get right => compose(
+        Mutator.prism<Either<L, R>, R>(
           Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
           Getter<R, Either<L, R>>(Either<L, R>.right),
         ),
