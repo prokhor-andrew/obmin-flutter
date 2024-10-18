@@ -30,6 +30,7 @@ final class Writer<T> {
     return value == other.value && logs == other.logs;
   }
 
+  @useResult
   @override
   int get hashCode => value.hashCode ^ logs.hashCode;
 
