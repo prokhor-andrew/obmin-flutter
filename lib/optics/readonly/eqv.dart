@@ -2,7 +2,6 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:flutter/cupertino.dart';
 import 'package:meta/meta.dart';
 import 'package:obmin/fp/non_empty_set.dart';
 import 'package:obmin/optics/mutable/mutator.dart';
