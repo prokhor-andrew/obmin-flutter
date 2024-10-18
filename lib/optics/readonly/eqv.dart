@@ -12,6 +12,8 @@ import 'package:obmin/optics/readonly/preview.dart';
 
 @immutable
 final class Eqv<T> {
+
+  @literal
   const Eqv();
 
   @useResult
