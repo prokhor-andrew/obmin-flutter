@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:obmin/channel/channel_lib.dart';
-import 'package:obmin/types/optional.dart';
+import 'package:obmin/fp/optional.dart';
 
 final class Machine<Input, Output> {
   final ChannelBufferStrategy<Input>? inputBufferStrategy;

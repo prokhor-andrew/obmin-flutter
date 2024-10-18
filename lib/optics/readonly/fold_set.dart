@@ -6,7 +6,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/types/non_empty_set.dart';
+import 'package:obmin/fp/non_empty_set.dart';
 
 final class FoldSet<Whole, Part> {
   final ISet<Part> Function(Whole whole) get;

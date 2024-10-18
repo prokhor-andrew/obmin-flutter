@@ -6,8 +6,8 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
-import 'package:obmin/types/non_empty_set.dart';
-import 'package:obmin/types/optional.dart';
+import 'package:obmin/fp/non_empty_set.dart';
+import 'package:obmin/fp/optional.dart';
 
 final class Preview<Whole, Part> {
   final Optional<Part> Function(Whole whole) get;

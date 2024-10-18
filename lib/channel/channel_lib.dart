@@ -6,7 +6,7 @@ library channel;
 
 import 'dart:async';
 
-import 'package:obmin/types/optional.dart';
+import 'package:obmin/fp/optional.dart';
 import 'package:uuid/uuid.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 

@@ -4,10 +4,10 @@
 
 import 'package:collection/collection.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/types/non_empty_set.dart';
-import 'package:obmin/types/optional.dart';
-import 'package:obmin/types/product.dart';
-import 'package:obmin/types/zip_element.dart';
+import 'package:obmin/fp/non_empty_set.dart';
+import 'package:obmin/fp/optional.dart';
+import 'package:obmin/fp/product.dart';
+import 'package:obmin/fp/zipped.dart';
 
 final class NonEmptyList<T> {
   final T head;
@@ -97,7 +97,7 @@ final class NonEmptyList<T> {
 
   NonEmptyList<R> zipWith<R, U>(
     NonEmptyList<U> other,
-    R Function(int index, ZipElement<T, U> element) combine,
+    R Function(int index, Zipped<T, U> element) combine,
   ) {
     final IList<T> list1 = toIList();
     final IList<U> list2 = other.toIList();
@@ -108,11 +108,11 @@ final class NonEmptyList<T> {
 
     for (int i = 0; i < length; i++) {
       if (i < list1.length && i < list2.length) {
-        result = result.add(combine(i, ZipElement.both(list1[i], list2[i])));
+        result = result.add(combine(i, Zipped.both(list1[i], list2[i])));
       } else if (i < list1.length) {
-        result = result.add(combine(i, ZipElement.left(list1[i])));
+        result = result.add(combine(i, Zipped.left(list1[i])));
       } else {
-        result = result.add(combine(i, ZipElement.right(list2[i])));
+        result = result.add(combine(i, Zipped.right(list2[i])));
       }
     }
 

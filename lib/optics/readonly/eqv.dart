@@ -5,7 +5,7 @@
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/types/non_empty_set.dart';
+import 'package:obmin/fp/non_empty_set.dart';
 
 final class Eqv<T> {
   const Eqv();

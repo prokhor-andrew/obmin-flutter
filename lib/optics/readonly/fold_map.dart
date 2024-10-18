@@ -3,6 +3,6 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/fold_set.dart';
-import 'package:obmin/types/product.dart';
+import 'package:obmin/fp/product.dart';
 
 typedef FoldMap<Whole, Key, Part> = FoldSet<Whole, Product<Key, Part>>;

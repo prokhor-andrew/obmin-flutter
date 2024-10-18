@@ -8,7 +8,7 @@ import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/basic_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
-import 'package:obmin/types/optional.dart';
+import 'package:obmin/fp/optional.dart';
 
 extension FeatureMachineExtension on MachineFactory {
   Machine<ExtTrigger, ExtEffect> feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({

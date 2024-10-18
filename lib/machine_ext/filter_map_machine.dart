@@ -10,7 +10,7 @@ import 'package:obmin/machine_ext/feature_machine/feature.dart';
 import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/outline.dart';
 import 'package:obmin/machine_ext/silo_machine.dart';
-import 'package:obmin/types/optional.dart';
+import 'package:obmin/fp/optional.dart';
 
 extension FilterMapMachineExtension<Input, Output> on Machine<Input, Output> {
   Machine<R, Output> filterMapInputWithState<R, State>(

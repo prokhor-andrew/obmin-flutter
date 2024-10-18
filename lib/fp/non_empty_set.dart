@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/types/optional.dart';
+import 'package:meta/meta.dart';
+import 'package:obmin/fp/optional.dart';
 
+@immutable
 final class NonEmptySet<T> {
   final T any;
   final ISet<T> rest;
@@ -14,9 +16,10 @@ final class NonEmptySet<T> {
     this.rest = const ISet.empty(),
   });
 
+  @useResult
   static Optional<NonEmptySet<T>> fromISet<T>(ISet<T> set) {
     if (set.isEmpty) {
-      return Optional.none();
+      return const Optional.none();
     }
     final list = set.toIList();
     return Optional.some(
@@ -27,10 +30,12 @@ final class NonEmptySet<T> {
     );
   }
 
+  @useResult
   ISet<T> toISet() {
     return rest.add(any);
   }
 
+  @useResult
   NonEmptySet<R> map<R>(R Function(T value) function) {
     final mappedAny = function(any);
     final mappedRest = rest.map(function).toISet();
@@ -41,6 +46,17 @@ final class NonEmptySet<T> {
     );
   }
 
+  @useResult
+  NonEmptySet<R> mapToLazy<R>(R Function() function) {
+    return map((_) => function());
+  }
+
+  @useResult
+  NonEmptySet<R> mapTo<R>(R value) {
+    return mapToLazy(() => value);
+  }
+
+  @useResult
   NonEmptySet<R> bind<R>(NonEmptySet<R> Function(T value) function) {
     final mappedAnyNonEmptySet = function(any);
 
@@ -56,6 +72,7 @@ final class NonEmptySet<T> {
     );
   }
 
+  @useResult
   R fold<R>(R initialValue, R Function(R acc, T value) function) {
     R result = function(initialValue, any);
     for (final item in rest) {
@@ -64,12 +81,19 @@ final class NonEmptySet<T> {
     return result;
   }
 
+  void forEach(void Function(T value) action) {
+    action(any);
+    rest.forEach(action);
+  }
+
+  @useResult
   Optional<NonEmptySet<T>> removeWhere(bool Function(T value) predicate) {
     final filteredRest = rest.removeWhere(predicate);
-
     if (!predicate(any)) {
       return Optional.some(NonEmptySet(any: any, rest: filteredRest));
-    } else if (filteredRest.isNotEmpty) {
+    }
+
+    if (filteredRest.isNotEmpty) {
       final list = filteredRest.toIList();
 
       return Optional.some(
@@ -79,28 +103,29 @@ final class NonEmptySet<T> {
         ),
       );
     }
-    return Optional.none();
+
+    return const Optional.none();
   }
 
+  @useResult
   Optional<NonEmptySet<T>> remove(T value) {
-    return removeWhere((iValue) => iValue == value);
+    return NonEmptySet.fromISet(toISet().remove(value));
   }
 
-  void forEach(void Function(T value) action) {
-    action(any);
-    rest.forEach(action);
-  }
-
+  @useResult
   NonEmptySet<T> add(T value) {
     return NonEmptySet(any: any, rest: rest.add(value));
   }
 
+  @useResult
   NonEmptySet<T> addAll(NonEmptySet<T> other) {
     return NonEmptySet(any: any, rest: rest.addAll(other.toISet()));
   }
 
+  @useResult
   int get length => rest.length + 1;
 
+  @useResult
   Optional<T> findWhere(bool Function(T value) predicate) {
     if (predicate(any)) {
       return Optional.some(any);
@@ -112,22 +137,38 @@ final class NonEmptySet<T> {
       }
     }
 
-    return Optional.none();
+    return const Optional.none();
   }
 
+  @useResult
+  NonEmptySet<T> replace(T withElement, T forElement) {
+    return NonEmptySet.fromISet(toISet().remove(forElement).add(withElement)).force();
+  }
+
+  @useResult
+  NonEmptySet<T> replaceWhere(T withElement, bool Function(T element) predicate) {
+    return findWhere(predicate).map((forElement) {
+      return replace(withElement, forElement);
+    }).valueOr(this);
+  }
+
+  @useResult
   bool contains(T value) {
-    return containsWhere((iValue) => iValue == value);
+    return toISet().contains(value);
   }
 
+  @useResult
   bool containsWhere(bool Function(T value) predicate) {
     return findWhere(predicate).isSome;
   }
 
+  @useResult
   @override
   String toString() {
     return "NonEmptySet<$T> { any=$any, rest=$rest }";
   }
 
+  @useResult
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -136,6 +177,7 @@ final class NonEmptySet<T> {
     return toISet() == other.toISet();
   }
 
+  @useResult
   @override
   int get hashCode {
     return toISet().hashCode;
@@ -143,6 +185,7 @@ final class NonEmptySet<T> {
 }
 
 extension OptionalOfNonEmptySetToISetExtension<Element> on Optional<NonEmptySet<Element>> {
+  @useResult
   ISet<Element> toISet() {
     return fold(
       (value) => value.toISet(),

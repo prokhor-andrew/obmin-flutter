@@ -5,8 +5,8 @@
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/types/non_empty_set.dart';
-import 'package:obmin/types/optional.dart';
+import 'package:obmin/fp/non_empty_set.dart';
+import 'package:obmin/fp/optional.dart';
 
 final class Getter<Whole, Part> {
   final Part Function(Whole whole) get;
