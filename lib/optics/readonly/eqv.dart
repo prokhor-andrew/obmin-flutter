@@ -2,10 +2,11 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/fp/non_empty_set.dart';
+import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/fp/non_empty_set.dart';
 
 final class Eqv<T> {
   const Eqv();
@@ -14,6 +15,10 @@ final class Eqv<T> {
 
   Eqv<T> compose(Eqv<T> other) {
     return const Eqv();
+  }
+
+  Mutator<Whole, Whole> asMutator<Whole>() {
+    return Mutator.identity<Whole>();
   }
 
   Getter<T, R> zipWithGetter<Part, R>(
