@@ -6,6 +6,8 @@ import 'package:meta/meta.dart';
 
 @immutable
 final class Reader<Env, T> {
+
+  @useResult
   final T Function(Env env) run;
 
   const Reader(this.run);

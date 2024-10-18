@@ -7,6 +7,8 @@ import 'package:obmin/fp/product.dart';
 
 @immutable
 final class Value<State, T> {
+
+  @useResult
   final Product<State, T> Function(State state) run;
 
   const Value(this.run);
