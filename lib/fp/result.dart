@@ -168,19 +168,37 @@ final class Result<Res, Err> {
   }
 
   @useResult
-  Result<Res, Err2> apSuccess<Err2>(Result<Res, Err2 Function(Err)> resultWithFunction) {
+  Result<Res2, Err> apSuccess<Res2>(Result<Res2 Function(Res), Err> resultWithFunction) {
     return fold(
-      Result.success,
       (value) => resultWithFunction.fold(
-        Result.success,
-        (function) => Result.failure(function(value)),
+        (function) => Result.success(function(value)),
+        Result.failure,
       ),
+      Result.failure,
     );
   }
 
   @useResult
-  Result<Res2, Err> apFailure<Res2>(Result<Res2 Function(Res), Err> resultWithFunction) {
+  Result<Res, Err2> apFailure<Err2>(Result<Res, Err2 Function(Err)> resultWithFunction) {
     return swapped.apSuccess(resultWithFunction.swapped).swapped;
+  }
+
+  @useResult
+  Result<R, Err> zipWithSuccess<R, Res2>(
+    Result<Res2, Err> other,
+    R Function(Res value1, Res2 value2) function,
+  ) {
+    final curried = (Res val1) => (Res2 val2) => function(val1, val2);
+
+    return other.apSuccess(mapSuccess(curried));
+  }
+
+  @useResult
+  Result<Res, R> zipWithFailure<R, Err2>(
+    Result<Res, Err2> other,
+    R Function(Err value1, Err2 value2) function,
+  ) {
+    return swapped.zipWithSuccess(other.swapped, function).swapped;
   }
 
   void runIfFailure(void Function(Err value) function) {
