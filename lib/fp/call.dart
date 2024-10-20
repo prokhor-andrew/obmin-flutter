@@ -165,19 +165,39 @@ final class Call<Req, Res> {
   }
 
   @useResult
-  Call<Req, Res2> apLaunched<Res2>(Call<Req, Res2 Function(Res)> callWithFunction) {
+  Call<Req2, Res> apLaunched<Req2>(Call<Req2 Function(Req), Res> callWithFunction) {
     return fold(
-      Call.launched,
       (value) => callWithFunction.fold(
-        Call.launched,
-        (function) => Call.returned(function(value)),
+        (function) => Call.launched(function(value)),
+        Call.returned,
       ),
+      Call.returned,
     );
   }
 
   @useResult
-  Call<Req2, Res> apReturned<Req2>(Call<Req2 Function(Req), Res> callWithFunction) {
+  Call<Req, Res2> apReturned<Res2>(Call<Req, Res2 Function(Res)> callWithFunction) {
     return swapped.apLaunched(callWithFunction.swapped).swapped;
+  }
+
+  @useResult
+  Call<R, Res> zipWithLaunched<R, Req2>(
+    Call<Req2, Res> call,
+    R Function(Req req1, Req2 req2) function,
+  ) {
+    final curried = (Req req1) => (Req2 req2) => function(req1, req2);
+
+    return call.apLaunched(mapLaunched(curried));
+  }
+
+  @useResult
+  Call<Req, R> zipWithReturned<R, Res2>(
+    Call<Req, Res2> call,
+    R Function(Res res1, Res2 res2) function,
+  ) {
+    final curried = (Res res1) => (Res2 res2) => function(res1, res2);
+
+    return call.apReturned(mapReturned(curried));
   }
 
   void runIfLaunched(void Function(Req value) function) {
@@ -194,7 +214,7 @@ final class Call<Req, Res> {
     )();
   }
 
-  static void _doNothing(dynamic a, dynamic b) {}
+  static void _doNothing(a, b) {}
 
   void runWith<Req2, Res2>(
     Call<Req2, Res2> other, {
