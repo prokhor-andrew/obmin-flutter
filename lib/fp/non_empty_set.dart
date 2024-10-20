@@ -215,6 +215,16 @@ extension ISetExtension<T> on ISet<T> {
   }
 
   @useResult
+  ISet<R> mapSetToLazy<R>(R Function() function) {
+    return mapSet((_) => function());
+  }
+
+  @useResult
+  ISet<R> mapSetTo<R>(R value) {
+    return mapSetToLazy(() => value);
+  }
+
+  @useResult
   ISet<R> ap<R>(ISet<R Function(T)> other) {
     return expand((value) => other.map((f) => f(value))).toISet();
   }
