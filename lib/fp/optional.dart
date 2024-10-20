@@ -145,6 +145,15 @@ final class Optional<T> {
   }
 
   @useResult
+  Optional<R> zipWith<T2, R>(
+    Optional<T2> other,
+    R Function(T value1, T2 value2) function,
+  ) {
+    final curried = (T val1) => (T2 val2) => function(val1, val2);
+    return other.ap(map(curried));
+  }
+
+  @useResult
   Optional<R> mapToLazy<R>(R Function() function) {
     return map((_) => function());
   }
