@@ -168,19 +168,37 @@ final class Either<L, R> {
   }
 
   @useResult
-  Either<L, R2> apLeft<R2>(Either<L, R2 Function(R)> eitherWithFunction) {
+  Either<L2, R> apLeft<L2>(Either<L2 Function(L), R> eitherWithFunction) {
     return fold(
-      Either.left,
       (value) => eitherWithFunction.fold(
-        Either.left,
-        (function) => Either.right(function(value)),
+        (function) => Either.left(function(value)),
+        Either.right,
       ),
+      Either.right,
     );
   }
 
   @useResult
-  Either<L2, R> apRight<L2>(Either<L2 Function(L), R> eitherWithFunction) {
+  Either<L, R2> apRight<R2>(Either<L, R2 Function(R)> eitherWithFunction) {
     return swapped.apLeft(eitherWithFunction.swapped).swapped;
+  }
+
+  @useResult
+  Either<T, R> zipWithLeft<T, L2>(
+    Either<L2, R> either,
+    T Function(L val1, L2 val2) function,
+  ) {
+    final curried = (L val1) => (L2 val2) => function(val1, val2);
+
+    return either.apLeft(mapLeft(curried));
+  }
+
+  @useResult
+  Either<L, T> zipWithRight<T, R2>(
+    Either<L, R2> either,
+    T Function(R val1, R2 val2) function,
+  ) {
+    return swapped.zipWithLeft(either.swapped, function).swapped;
   }
 
   void runIfLeft(void Function(L value) function) {

@@ -195,9 +195,7 @@ final class Call<Req, Res> {
     Call<Req, Res2> call,
     R Function(Res res1, Res2 res2) function,
   ) {
-    final curried = (Res res1) => (Res2 res2) => function(res1, res2);
-
-    return call.apReturned(mapReturned(curried));
+    return swapped.zipWithLaunched(call.swapped, function).swapped;
   }
 
   void runIfLaunched(void Function(Req value) function) {
