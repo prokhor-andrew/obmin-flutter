@@ -73,6 +73,20 @@ final class NonEmptySet<T> {
   }
 
   @useResult
+  NonEmptySet<R> ap<R>(NonEmptySet<R Function(T)> other) {
+    return NonEmptySet.fromISet(toISet().ap(other.toISet())).force();
+  }
+
+  @useResult
+  NonEmptySet<R> zipWith<R, T2>(
+    NonEmptySet<T2> other,
+    R Function(T value1, T2 value2) function,
+  ) {
+    final curried = (T value1) => (T2 value2) => function(value1, value2);
+    return other.ap(map(curried));
+  }
+
+  @useResult
   R fold<R>(R initialValue, R Function(R acc, T value) function) {
     R result = function(initialValue, any);
     for (final item in rest) {
@@ -191,5 +205,31 @@ extension OptionalOfNonEmptySetToISetExtension<Element> on Optional<NonEmptySet<
       (value) => value.toISet(),
       () => const ISet.empty(),
     );
+  }
+}
+
+extension ISetExtension<T> on ISet<T> {
+  @useResult
+  ISet<R> mapSet<R>(R Function(T value) function) {
+    return map(function).toISet();
+  }
+
+  @useResult
+  ISet<R> ap<R>(ISet<R Function(T)> other) {
+    return expand((value) => other.map((f) => f(value))).toISet();
+  }
+
+  @useResult
+  ISet<R> bind<R>(ISet<R> Function(T value) function) {
+    return expand(function).toISet();
+  }
+
+  @useResult
+  ISet<R> zipWith<T2, R>(
+    ISet<T2> other,
+    R Function(T value1, T2 value2) function,
+  ) {
+    final curried = (T val1) => (T2 val2) => function(val1, val2);
+    return other.ap(mapSet(curried));
   }
 }
