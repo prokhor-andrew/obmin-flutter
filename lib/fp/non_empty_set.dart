@@ -17,6 +17,26 @@ final class NonEmptySet<T> {
   });
 
   @useResult
+  NonEmptySet<T> union(NonEmptySet<T> other) {
+    return NonEmptySet(any: any, rest: rest.add(other.any).addAll(other.rest));
+  }
+
+  @useResult
+  Optional<NonEmptySet<T>> intersection(NonEmptySet<T> other) {
+    return NonEmptySet.fromISet(toISet().intersection(other.toISet()));
+  }
+
+  @useResult
+  bool intersectsWith(NonEmptySet<T> other) {
+    return intersection(other).isSome;
+  }
+
+  @useResult
+  Optional<NonEmptySet<T>> difference(NonEmptySet<T> other) {
+    return NonEmptySet.fromISet(toISet().difference(other.toISet()));
+  }
+
+  @useResult
   static Optional<NonEmptySet<T>> fromISet<T>(ISet<T> set) {
     if (set.isEmpty) {
       return const Optional.none();
