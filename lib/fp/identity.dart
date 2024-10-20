@@ -48,8 +48,13 @@ final class Identity<T> {
   }
 
   @useResult
+  Identity<R> mapToLazy<R>(R Function() function) {
+    return Identity(function());
+  }
+
+  @useResult
   Identity<R> mapTo<R>(R value) {
-    return map((_) => value);
+    return mapToLazy(() => value);
   }
 
   @useResult
@@ -59,6 +64,15 @@ final class Identity<T> {
 
   @useResult
   Identity<R> ap<R>(Identity<R Function(T)> identityWithFunc) => Identity(identityWithFunc.value(value));
+
+  @useResult
+  Identity<R> zipWithOther<R, T2>(
+    Identity<T2> other,
+    R Function(T value1, T2 value2) function,
+  ) {
+    final curried = (T value1) => (T2 value2) => function(value1, value2);
+    return other.ap(map(curried));
+  }
 
   void run(void Function(T value) function) {
     function(value);
