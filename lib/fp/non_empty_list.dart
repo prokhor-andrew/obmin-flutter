@@ -4,7 +4,9 @@
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:meta/meta.dart';
+import 'package:obmin/fp/non_empty_set.dart';
 import 'package:obmin/fp/optional.dart';
+import 'package:obmin/fp/product.dart';
 
 @immutable
 final class NonEmptyList<T> {
@@ -302,5 +304,21 @@ extension IListExtension<T> on IList<T> {
   ) {
     final curried = (T val1) => (T2 val2) => function(val1, val2);
     return other.ap(mapList(curried));
+  }
+}
+
+extension NonEmptySetOfProductsToNonEmptyListExtension<T> on NonEmptySet<Product<int, T>> {
+  @useResult
+  NonEmptyList<T> fromSetOfProductToList() {
+    return NonEmptyList.fromIList<T>(fold(const IList.empty(), (acc, product) {
+      final index = product.left;
+      final element = product.right;
+
+      if (index < acc.length) {
+        return acc.insert(index, element);
+      } else {
+        return acc.add(element);
+      }
+    })).force();
   }
 }

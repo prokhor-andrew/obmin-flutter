@@ -4,7 +4,9 @@
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:meta/meta.dart';
+import 'package:obmin/fp/non_empty_set.dart';
 import 'package:obmin/fp/optional.dart';
+import 'package:obmin/fp/product.dart';
 
 @immutable
 final class NonEmptyMap<Key, Value> {
@@ -120,5 +122,17 @@ extension OptionalOfNonEmptyMapToISetExtension<Key, Value> on Optional<NonEmptyM
       (value) => value.toIMap(),
       () => const IMap.empty(),
     );
+  }
+}
+
+extension NonEmptySetOfProductsToNonEmptyMapExtension<Key, Value> on NonEmptySet<Product<Key, Value>> {
+  @useResult
+  NonEmptyMap<Key, Value> fromSetOfProductToMap() {
+    return NonEmptyMap.fromIMap<Key, Value>(fold(const IMap.empty(), (acc, product) {
+      final key = product.left;
+      final element = product.right;
+
+      return acc.add(key, element);
+    })).force();
   }
 }
