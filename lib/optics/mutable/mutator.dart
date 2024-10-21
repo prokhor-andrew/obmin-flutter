@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:meta/meta.dart';
+import 'package:obmin/fp/either.dart';
 import 'package:obmin/fp/non_empty_list.dart';
 import 'package:obmin/fp/non_empty_map.dart';
 import 'package:obmin/fp/non_empty_set.dart';
@@ -15,15 +16,15 @@ import 'package:obmin/optics/readonly/preview.dart';
 import 'package:obmin/optics/readonly/update.dart';
 
 @immutable
-final class Mutator<Whole, Part> {
+final class PMutator<S, S1, F, F1> {
   @useResult
-  final Getter<Update<Part>, Update<Whole>> applier;
+  final Getter<Getter<F, F1>, Getter<S, S1>> applier;
 
-  const Mutator(this.applier);
+  const PMutator(this.applier);
 
   @useResult
-  Mutator<Whole, Sub> compose<Sub>(Mutator<Part, Sub> other) {
-    return Mutator(Getter((update) {
+  PMutator<S, S1, SF, SF1> compose<SF, SF1>(PMutator<F, F1, SF, SF1> other) {
+    return PMutator(Getter((update) {
       return Getter((whole) {
         return applier.get(Getter((part) {
           return other.applier.get(update).get(part);
@@ -33,19 +34,19 @@ final class Mutator<Whole, Part> {
   }
 
   @useResult
-  Update<Whole> apply(Part Function(Part part) update) {
+  Getter<S, S1> apply(F1 Function(F part) update) {
     return applier.get(Getter(update));
   }
 
   @useResult
-  Update<Whole> set(Part part) {
-    return applier.get(Update((_) => part));
+  Getter<S, S1> set(F1 part) {
+    return applier.get(Getter((_) => part));
   }
 
   @useResult
   @override
   String toString() {
-    return "Mutator<$Whole, $Part>";
+    return "PMutator<$S, $S1, $F, $F1>";
   }
 
   @useResult
@@ -56,11 +57,11 @@ final class Mutator<Whole, Part> {
   }
 
   @useResult
-  static Mutator<Whole, Part> iso<Whole, Part>(
-    Getter<Whole, Part> forward,
-    Getter<Part, Whole> backward,
+  static PMutator<S, S1, F, F1> pIso<S, S1, F, F1>(
+    Getter<S, F> forward,
+    Getter<F1, S1> backward,
   ) {
-    return Mutator(
+    return PMutator(
       Getter(
         (update) {
           return Getter(
@@ -77,18 +78,26 @@ final class Mutator<Whole, Part> {
   }
 
   @useResult
-  static Mutator<Whole, Part> prism<Whole, Part>(
-    Preview<Whole, Part> forward,
+  static Mutator<Whole, Part> iso<Whole, Part>(
+    Getter<Whole, Part> forward,
     Getter<Part, Whole> backward,
   ) {
-    return Mutator(
+    return pIso(forward, backward);
+  }
+
+  @useResult
+  static PMutator<S, S1, F, F1> pPrism<S, S1, F, F1>(
+    Getter<S, Either<F, S1>> forward,
+    Getter<F1, S1> backward,
+  ) {
+    return PMutator(
       Getter(
         (update) {
           return Getter(
             (whole) {
               final partOrNone = forward.get(whole);
-              final updatedPartOrNone = partOrNone.map(update.get);
-              final result = updatedPartOrNone.map(backward.get).valueOr(whole);
+              final updatedPartOrNone = partOrNone.mapLeft(update.get);
+              final result = updatedPartOrNone.mapLeft(backward.get).value;
 
               return result;
             },
@@ -99,32 +108,19 @@ final class Mutator<Whole, Part> {
   }
 
   @useResult
-  static Mutator<Whole, Part> biPreview<Whole, Part>(
+  static Mutator<Whole, Part> prism<Whole, Part>(
     Preview<Whole, Part> forward,
-    Preview<Part, Whole> backward,
+    Getter<Part, Whole> backward,
   ) {
-    return Mutator(
-      Getter(
-        (update) {
-          return Getter(
-            (whole) {
-              final partOrNone = forward.get(whole);
-              final updatedPartOrNone = partOrNone.map(update.get);
-              final wholeOrNone = updatedPartOrNone.bind(backward.get);
-              return wholeOrNone.valueOr(whole);
-            },
-          );
-        },
-      ),
-    );
+    return pPrism(Getter((whole) => forward.get(whole).fold(Either.left, () => Either.right(whole))), backward);
   }
 
   @useResult
-  static Mutator<Whole, Part> lens<Whole, Part>(
-    Getter<Whole, Part> get,
-    Getter<Part, Update<Whole>> reconstruct,
+  static PMutator<S, S1, F, F1> pLens<S, S1, F, F1>(
+    Getter<S, F> get,
+    Getter<F1, Getter<S, S1>> reconstruct,
   ) {
-    return Mutator(Getter((modify) {
+    return PMutator(Getter((modify) {
       return Getter((whole) {
         final zoomed = get.get(whole);
         final modified = modify.get(zoomed);
@@ -134,17 +130,33 @@ final class Mutator<Whole, Part> {
   }
 
   @useResult
+  static Mutator<Whole, Part> lens<Whole, Part>(
+    Getter<Whole, Part> get,
+    Getter<Part, Update<Whole>> reconstruct,
+  ) {
+    return pLens(get, reconstruct);
+  }
+
+  @useResult
+  static PMutator<S, S1, F, F1> pAffine<S, S1, F, F1>(
+    Getter<S, Either<F, S1>> preview,
+    Getter<F1, Getter<S, S1>> reconstruct,
+  ) {
+    return PMutator(Getter((modify) {
+      return Getter((whole) {
+        return preview.get(whole).mapLeft(modify.get).mapLeft((part) {
+          return reconstruct.get(part).get(whole);
+        }).value;
+      });
+    }));
+  }
+
+  @useResult
   static Mutator<Whole, Part> affine<Whole, Part>(
     Preview<Whole, Part> preview,
     Getter<Part, Update<Whole>> reconstruct,
   ) {
-    return Mutator(Getter((modify) {
-      return Getter((whole) {
-        return preview.get(whole).map(modify.get).map((part) {
-          return reconstruct.get(part).get(whole);
-        }).valueOr(whole);
-      });
-    }));
+    return pAffine(Getter((whole) => preview.get(whole).fold(Either.left, () => Either.right(whole))), reconstruct);
   }
 
   @useResult
@@ -195,3 +207,5 @@ final class Mutator<Whole, Part> {
     }));
   }
 }
+
+typedef Mutator<S, F> = PMutator<S, S, F, F>;
