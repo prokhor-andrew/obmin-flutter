@@ -24,8 +24,8 @@ final class Eqv<T> {
   }
 
   @useResult
-  Mutator<Whole, Whole> asMutator<Whole>() {
-    return Mutator.identity<Whole>();
+  Mutator<T, T> asMutator() {
+    return Mutator.identity<T>();
   }
 
   @useResult
