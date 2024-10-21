@@ -7,7 +7,7 @@ import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
 import 'package:obmin/machine_ext/filter_machine.dart';
 import 'package:obmin/machine_ext/silo_machine.dart';
-import 'package:obmin/types/optional.dart';
+import 'package:obmin/fp/optional.dart';
 
 extension DistinctUntilChangedMachineExtension<Input, Output> on Machine<Input, Output> {
   Machine<Input, Output> distinctUntilChangedInput({

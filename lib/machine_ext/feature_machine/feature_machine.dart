@@ -2,12 +2,13 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/channel/channel_lib.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/basic_machine.dart';
 import 'package:obmin/machine_ext/feature_machine/feature.dart';
-import 'package:obmin/types/optional.dart';
+import 'package:obmin/fp/optional.dart';
 
 extension FeatureMachineExtension on MachineFactory {
   Machine<ExtTrigger, ExtEffect> feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({
@@ -52,8 +53,8 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
 
   ChannelTask<bool> Function(ExtEffect)? _callback;
 
-  Set<Process<IntEffect>> _processes = {};
-  final Map<String, ChannelTask<bool> Function(IntEffect)> _senders = {};
+  ISet<Process<IntEffect>> _processes = const ISet.empty();
+  IMap<String, ChannelTask<bool> Function(IntEffect)> _senders = const IMap.empty();
 
   final Channel<FeatureEvent<IntTrigger, ExtTrigger>> _channel;
   ChannelTask<Optional<FeatureEvent<IntTrigger, ExtTrigger>>>? _task;
@@ -90,16 +91,16 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
         return machine.run(
           onChange: (sender) async {
             if (sender != null) {
-              _senders[machine.id] = sender;
+              _senders = _senders.add(machine.id, sender);
             } else {
-              _senders.remove(machine.id);
+              _senders = _senders.remove(machine.id);
             }
           },
           onConsume: (event) async {
             await _channel.send(InternalFeatureEvent(event)).future;
           },
         );
-      }).toSet();
+      }).toISet();
 
       Future(() async {
         while (true) {
@@ -125,10 +126,9 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
       for (final process in _processes) {
         process.cancel();
       }
-      _processes = {};
+      _processes = const ISet.empty();
 
       await _onDestroy(_state);
-
     }
   }
 
@@ -145,21 +145,21 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
 
     final resultingMachines = transition.feature.machines;
 
-    final machinesToAdd = resultingMachines.where((machine) {
+    final machinesToAdd = resultingMachines.removeWhere((machine) {
       return _processes.where((process) {
             return process.id == machine.id;
           }).firstOrNull ==
           null;
     });
 
-    final processesToRemove = _processes.where((process) {
+    final processesToRemove = _processes.removeWhere((process) {
       return resultingMachines.where((machine) {
             return machine.id == process.id;
           }).firstOrNull ==
           null;
     });
 
-    final processesToKeep = _processes.where((process) {
+    final processesToKeep = _processes.removeWhere((process) {
       return machinesToAdd.where(
                 (machine) {
                   return machine.id == process.id;
@@ -172,7 +172,7 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
                 },
               ).firstOrNull ==
               null;
-    }).toSet();
+    });
 
     for (final process in processesToRemove) {
       process.cancel();
@@ -182,16 +182,16 @@ final class _FeatureHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> 
       return machine.run(
         onChange: (sender) async {
           if (sender != null) {
-            _senders[machine.id] = sender;
+            _senders = _senders.add(machine.id, sender);
           } else {
-            _senders.remove(machine.id);
+            _senders = _senders.remove(machine.id);
           }
         },
         onConsume: (output) async {
           await _channel.send(InternalFeatureEvent(output)).future;
         },
       );
-    }).toSet();
+    }).toISet();
 
     _processes = processesToAdd.union(processesToKeep);
     _state = transition.feature.state;

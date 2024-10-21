@@ -3,11 +3,12 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:collection/collection.dart';
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/machine/machine.dart';
 
 final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   final State state;
-  final Set<Machine<IntEffect, IntTrigger>> machines;
+  final ISet<Machine<IntEffect, IntTrigger>> machines;
 
   final FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
     FeatureEvent<IntTrigger, ExtTrigger> event,
@@ -24,16 +25,11 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> &&
-        other.state == state &&
-        const SetEquality().equals(other.machines, machines);
+    return other is Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> && other.state == state && other.machines == machines;
   }
 
   @override
-  int get hashCode => Object.hash(
-        state,
-        const SetEquality().hash(machines),
-      );
+  int get hashCode => state.hashCode ^ machines.hashCode;
 
   @override
   String toString() {
@@ -42,10 +38,10 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
 
   static Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> create<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({
     required State state,
-    required Set<Machine<IntEffect, IntTrigger>> machines,
+    required ISet<Machine<IntEffect, IntTrigger>> machines,
     required FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
       State state,
-      Set<Machine<IntEffect, IntTrigger>> machines,
+      ISet<Machine<IntEffect, IntTrigger>> machines,
       FeatureEvent<IntTrigger, ExtTrigger> trigger,
       String machineId,
     ) transit,
@@ -67,24 +63,22 @@ final class Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
 
 final class FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   final Feature<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> feature;
-  final List<FeatureEvent<IntEffect, ExtEffect>> effects;
+  final IList<FeatureEvent<IntEffect, ExtEffect>> effects;
 
   const FeatureTransition(
     this.feature, {
-    this.effects = const [],
+    this.effects = const IList.empty(),
   });
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> &&
-        other.feature == feature &&
-        const ListEquality().equals(other.effects, effects);
+    return other is FeatureTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> && other.feature == feature && other.effects == effects;
   }
 
   @override
-  int get hashCode => feature.hashCode ^ const ListEquality().hash(effects);
+  int get hashCode => feature.hashCode ^ effects.hashCode;
 
   @override
   String toString() {

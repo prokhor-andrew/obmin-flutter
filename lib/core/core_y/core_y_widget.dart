@@ -5,7 +5,7 @@
 import 'package:obmin/core/core.dart';
 import 'package:obmin/core/core_widget.dart';
 import 'package:obmin/core/core_x/core_x_widget.dart';
-import 'package:obmin/types/update.dart';
+import 'package:obmin/optics/readonly/update.dart';
 
 CoreWidget<State, State, Update<State>> CoreYWidget<State>({
   required Core<State, State, Update<State>> core,

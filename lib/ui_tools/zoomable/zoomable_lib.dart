@@ -5,12 +5,14 @@
 library zoomable;
 
 import 'package:flutter/material.dart';
-import 'package:obmin/optics/mutable/mutator.dart';
-import 'package:obmin/types/optional.dart';
-import 'package:obmin/types/update.dart';
+import 'package:obmin/fp/optional.dart';
 
 part 'extensions/calculator_widget.dart';
+
 part 'extensions/render_widget.dart';
+
 part 'zoomable.dart';
+
 part 'zoomable_consumer_widget.dart';
+
 part 'zoomable_widget.dart';

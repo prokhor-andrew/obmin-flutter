@@ -6,7 +6,7 @@ part of 'channel_lib.dart';
 
 final class ChannelBufferStrategy<T> {
   final String id;
-  final List<ChannelBufferData<T>> Function(List<ChannelBufferData<T>> data, ChannelBufferEvent event) bufferReducer;
+  final IList<ChannelBufferData<T>> Function(IList<ChannelBufferData<T>> data, ChannelBufferEvent event) bufferReducer;
 
   const ChannelBufferStrategy({
     required this.id,
