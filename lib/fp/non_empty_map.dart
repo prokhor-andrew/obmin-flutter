@@ -115,6 +115,19 @@ final class NonEmptyMap<Key, Value> {
   }
 }
 
+extension IMapExtension<Key, Value> on IMap<Key, Value> {
+  @useResult
+  ISet<Product<Key, Value>> toISetOfProducts() {
+    ISet<Product<Key, Value>> set = const ISet.empty();
+
+    forEach((key, value) {
+      set = set.add(Product(key, value));
+    });
+
+    return set;
+  }
+}
+
 extension OptionalOfNonEmptyMapToISetExtension<Key, Value> on Optional<NonEmptyMap<Key, Value>> {
   @useResult
   IMap<Key, Value> toIMap() {

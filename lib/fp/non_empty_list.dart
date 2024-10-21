@@ -326,6 +326,17 @@ extension IListExtension<T> on IList<T> {
     final curried = (T val1) => (T2 val2) => function(val1, val2);
     return other.ap(mapList(curried));
   }
+
+  @useResult
+  ISet<Product<int, T>> toISetOfProducts() {
+    ISet<Product<int, T>> set = const ISet.empty();
+    for (int i = 0; i < length; i++) {
+      final element = this[i];
+      set = set.add(Product(i, element));
+    }
+
+    return set;
+  }
 }
 
 extension NonEmptySetOfProductsToNonEmptyListExtension<T> on NonEmptySet<Product<int, T>> {
