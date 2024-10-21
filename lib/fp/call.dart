@@ -206,10 +206,7 @@ final class Call<Req, Res> {
   }
 
   void runIfReturned(void Function(Res value) function) {
-    fold<void Function()>(
-      (_) => () {},
-      (value) => () => function(value),
-    )();
+    swapped.runIfLaunched(function);
   }
 
   static void _doNothing(a, b) {}

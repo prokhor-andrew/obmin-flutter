@@ -201,11 +201,16 @@ final class Result<Res, Err> {
     return swapped.zipWithSuccess(other.swapped, function).swapped;
   }
 
-  void runIfFailure(void Function(Err value) function) {
+
+  void runIfSuccess(void Function(Res value) function) {
     fold<void Function()>(
-      (_) => () {},
-      (value) => () => function(value),
+          (value) => () => function(value),
+          (_) => () {},
     )();
+  }
+
+  void runIfFailure(void Function(Err value) function) {
+    swapped.runIfSuccess(function);
   }
 
   static void _doNothing(dynamic a, dynamic b) {}
