@@ -5,7 +5,7 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 extension ISetFlattenedExtension<T> on ISet<ISet<T>> {
-  ISet<T> get flattened {
+  ISet<T> get iSetFlattened {
     ISet<T> result = const ISet.empty();
 
     for (int i = 0; i < length; i++) {

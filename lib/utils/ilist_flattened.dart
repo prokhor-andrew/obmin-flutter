@@ -5,7 +5,7 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 extension IListFlattenedExtension<T> on IList<IList<T>> {
-  IList<T> get flattened {
+  IList<T> get iListFlattened {
     IList<T> result = const IList.empty();
 
     for (int i = 0; i < length; i++) {
