@@ -245,6 +245,18 @@ final class NonEmptyList<T> {
     final curried = (T val1) => (T2 val2) => function(val1, val2);
     return other.ap(mapList(curried));
   }
+
+  void forEach(void Function(T value) function) {
+    function(head);
+    tail.forEach(function);
+  }
+
+  void forEachIndexed(void Function(int index, T value) function) {
+    function(0, head);
+    for (int i = 0; i < tail.length; i++) {
+      function(i + 1, tail[i]);
+    }
+  }
 }
 
 extension OptionalOfNonEmptyListToIListExtension<Element> on Optional<NonEmptyList<Element>> {
