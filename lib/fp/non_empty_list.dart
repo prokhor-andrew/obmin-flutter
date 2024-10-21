@@ -172,6 +172,7 @@ final class NonEmptyList<T> {
     return tail.contains(element);
   }
 
+  @useResult
   Optional<NonEmptyList<T>> removeWhere(bool Function(T value) predicate) {
     final result = toIList().removeWhere(predicate);
     return NonEmptyList.fromIList(result);
@@ -220,8 +221,18 @@ final class NonEmptyList<T> {
   }
 
   @useResult
+  NonEmptyList<R> mapListIndexed<R>(R Function(int index, T value) function) {
+    return NonEmptyList(head: function(0, head), tail: tail.mapListIndexed((index, value) => function(index + 1, value)));
+  }
+
+  @useResult
   NonEmptyList<R> mapListToLazy<R>(R Function() function) {
     return mapList((_) => function());
+  }
+
+  @useResult
+  NonEmptyList<R> mapListIndexedToLazy<R>(R Function(int index) function) {
+    return mapListIndexed((index, _) => function(index));
   }
 
   @useResult
@@ -274,7 +285,17 @@ extension OptionalOfNonEmptyListToIListExtension<Element> on Optional<NonEmptyLi
 extension IListExtension<T> on IList<T> {
   @useResult
   IList<R> mapList<R>(R Function(T value) function) {
-    return map(function).toIList();
+    return mapListIndexed((_, value) => function(value));
+  }
+
+  @useResult
+  IList<R> mapListIndexed<R>(R Function(int index, T value) function) {
+    IList<R> result = const IList.empty();
+    for (int i = 0; i < length; i++) {
+      final element = this[i];
+      result = result.add(function(i, element));
+    }
+    return result;
   }
 
   @useResult
