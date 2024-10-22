@@ -8,11 +8,11 @@ extension ISetFlattenedExtension<T> on ISet<ISet<T>> {
   ISet<T> get iSetFlattened {
     ISet<T> result = const ISet.empty();
 
-    for (int i = 0; i < length; i++) {
-      for (int j = 0; j < this[i].length; j++) {
-        result = result.add(this[i][j]);
-      }
-    }
+    forEach((set) {
+      set.forEach((val) {
+        result = result.add(val);
+      });
+    });
 
     return result;
   }

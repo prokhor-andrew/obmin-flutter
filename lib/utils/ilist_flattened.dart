@@ -9,8 +9,11 @@ extension IListFlattenedExtension<T> on IList<IList<T>> {
     IList<T> result = const IList.empty();
 
     for (int i = 0; i < length; i++) {
-      for (int j = 0; j < this[i].length; j++) {
-        result = result.add(this[i][j]);
+      final iItem = this[i];
+      for (int j = 0; j < iItem.length; j++) {
+        final item = iItem[j];
+
+        result = result.add(item);
       }
     }
 
