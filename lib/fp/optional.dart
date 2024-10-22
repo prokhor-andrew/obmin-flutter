@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:meta/meta.dart';
+import 'package:obmin/fp/either.dart';
 import 'package:obmin/utils/bool_fold.dart';
 
 @immutable
@@ -143,6 +144,9 @@ final class Optional<T> {
       ifNone: () => const Optional.none(),
     );
   }
+
+  @useResult
+  Either<T, ()> asEither() => fold(Either.left, () => Either.right(()));
 
   @useResult
   Optional<R> zipWith<T2, R>(

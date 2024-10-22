@@ -259,3 +259,8 @@ extension EitherValueWhenBothExtension<T> on Either<T, T> {
         (val) => val,
       );
 }
+
+extension EitherToOptionalExtension<T> on Either<T, ()> {
+  @useResult
+  Optional<T> asOptional() => fold(Optional.some, (_) => const Optional.none());
+}
