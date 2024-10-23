@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:obmin/channel/channel_lib.dart';
-import 'package:obmin/fp/optional.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine_ext/silo_machine.dart';
+import 'package:obmin/types/optional.dart';
 
 extension SiloBuilderWidgetExtension<T> on Silo<T> {
   Widget build(
@@ -38,7 +38,7 @@ final class SiloBuilderWidget<T> extends StatefulWidget {
 }
 
 final class _SiloBuilderWidgetState<T> extends State<SiloBuilderWidget<T>> {
-  Optional<T> _state = const Optional.none();
+  Optional<T> _state = Optional.none();
 
   Process<Never>? _process;
 

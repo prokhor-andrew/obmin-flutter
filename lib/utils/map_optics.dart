@@ -2,113 +2,194 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/fp/non_empty_map.dart';
-import 'package:obmin/fp/optional.dart';
-import 'package:obmin/fp/product.dart';
 import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold_map.dart';
+import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
+import 'package:obmin/optics/transformers/bi_eqv.dart';
+import 'package:obmin/optics/transformers/bi_preview.dart';
+import 'package:obmin/optics/transformers/iso.dart';
+import 'package:obmin/optics/transformers/prism.dart';
+import 'package:obmin/optics/transformers/reflector.dart';
+import 'package:obmin/types/optional.dart';
 
-extension MapOpticsEqvExtension<Key, T> on Eqv<IMap<Key, T>> {
-  FoldMap<IMap<Key, T>, Key, T> get folded => asGetter().folded;
-
-  Preview<IMap<Key, T>, T> find(bool Function(T element) function) {
-    return asGetter().find(function);
+extension MapOpticsEqvExtension<Key, T> on Eqv<Map<Key, T>> {
+  Preview<Map<Key, T>, T> at(Key key) {
+    return asGetter().at(key);
   }
 
-  Getter<IMap<Key, T>, int> get length => asGetter().length;
+  FoldSet<Map<Key, T>, MapEntry<Key, T>> get folded => asGetter().folded;
 }
 
-extension MapOpticsGetterExtension<Whole, Key, T> on Getter<Whole, IMap<Key, T>> {
-  FoldMap<Whole, Key, T> get folded => asPreview().folded;
-
-  Preview<Whole, T> find(bool Function(T element) function) {
-    return asPreview().find(function);
+extension MapOpticsGetterExtension<Whole, Key, T> on Getter<Whole, Map<Key, T>> {
+  Preview<Whole, T> at(Key key) {
+    return asPreview().at(key);
   }
 
-  Getter<Whole, int> get length => compose(Getter((map) => map.length));
+  FoldSet<Whole, MapEntry<Key, T>> get folded => asPreview().folded;
 }
 
-extension MapOpticsPreviewExtension<Whole, Key, T> on Preview<Whole, IMap<Key, T>> {
-  FoldMap<Whole, Key, T> get folded => asFoldSet().folded;
-
-  Preview<Whole, T> find(bool Function(T element) function) {
+extension MapOpticsPreviewExtension<Whole, Key, T> on Preview<Whole, Map<Key, T>> {
+  Preview<Whole, T> at(Key key) {
     return compose(
-      Preview(
+      Preview<Map<Key, T>, T>(
         (whole) {
-          for (final element in whole.values) {
-            if (function(element)) {
-              return Optional.some(element);
-            }
+          final element = whole[key];
+          if (element == null) {
+            return Optional<T>.none();
+          } else {
+            return Optional<T>.some(element);
           }
-          return const Optional.none();
         },
       ),
     );
   }
 
-  Preview<Whole, int> get length => composeWithGetter(Getter((map) => map.length));
+  FoldSet<Whole, MapEntry<Key, T>> get folded => asFoldList().folded;
 }
 
-extension MapOpticsFoldSetExtension<Whole, Key, T> on FoldSet<Whole, IMap<Key, T>> {
-  FoldMap<Whole, Key, T> get folded => compose(FoldSet((map) {
-        return map.toISetOfProducts();
-      }));
-
-  FoldSet<Whole, T> find(bool Function(T element) function) {
+extension MapOpticsFoldListExtension<Whole, Key, T> on FoldList<Whole, Map<Key, T>> {
+  FoldList<Whole, T> at(Key key) {
     return composeWithPreview(
-      Preview<IMap<Key, T>, T>(
+      Preview<Map<Key, T>, T>(
         (whole) {
-          for (final element in whole.values) {
-            if (function(element)) {
-              return Optional.some(element);
-            }
+          final element = whole[key];
+          if (element == null) {
+            return Optional<T>.none();
+          } else {
+            return Optional<T>.some(element);
           }
-          return const Optional.none();
         },
       ),
     );
   }
 
-  FoldSet<Whole, int> get length => composeWithGetter(Getter((map) => map.length));
+  FoldSet<Whole, MapEntry<Key, T>> get folded => asFoldSet().folded;
 }
 
-extension MapOpticsMutatorExtension<Whole, Key, T> on Mutator<Whole, IMap<Key, T>> {
-  Mutator<Whole, Product<Key, T>> get traversed => compose(
-        Mutator.traversalSet<IMap<Key, T>, Product<Key, T>>(
-          FoldMap<IMap<Key, T>, Key, T>((whole) => whole.toISetOfProducts()),
-          Getter((part) => Getter((_) => part.fromSetOfProductToMap().toIMap())),
-        ),
-      );
-
-  Mutator<Whole, Product<Key, T>> find(bool Function(T element) function) {
-    return compose(
-      Mutator.affine(
-        Preview<IMap<Key, T>, Product<Key, T>>(
-          (whole) {
-            for (final entry in whole.entries) {
-              if (function(entry.value)) {
-                return Optional.some(Product(entry.key, entry.value));
-              }
-            }
-
-            return const Optional.none();
-          },
-        ),
-        Getter(
-          (part) {
-            return Getter(
-              (whole) {
-                return whole.add(part.left, part.right);
-              },
-            );
-          },
-        ),
+extension MapOpticsFoldSetExtension<Whole, Key, T> on FoldSet<Whole, Map<Key, T>> {
+  FoldSet<Whole, T> at(Key key) {
+    return composeWithPreview(
+      Preview<Map<Key, T>, T>(
+        (whole) {
+          final element = whole[key];
+          if (element == null) {
+            return Optional<T>.none();
+          } else {
+            return Optional<T>.some(element);
+          }
+        },
       ),
     );
+  }
+
+  FoldSet<Whole, MapEntry<Key, T>> get folded {
+    return compose(FoldSet((whole) {
+      if (whole.isEmpty) {
+        return {};
+      } else {
+        return whole.entries.toSet();
+      }
+    }));
+  }
+}
+
+extension MapOpticsMutatorExtension<Whole, Key, T> on Mutator<Whole, Map<Key, T>> {
+  Mutator<Whole, T> at(Key key) {
+    return compose(
+      Mutator.affine<Map<Key, T>, T>(
+        Preview<Map<Key, T>, T>((whole) {
+          final element = whole[key];
+          if (element == null) {
+            return Optional<T>.none();
+          } else {
+            return Optional<T>.some(element);
+          }
+        }),
+        Getter((part) {
+          return Getter((whole) {
+            if (whole.isEmpty) {
+              return whole;
+            }
+
+            whole[key] = part;
+            return whole;
+          });
+        }),
+      ),
+    );
+  }
+
+  Mutator<Whole, MapEntry<Key, T>> get traversed {
+    return compose(
+      Mutator.traversalSet(
+        FoldSet((whole) {
+          if (whole.isEmpty) {
+            return {};
+          } else {
+            return whole.entries.toSet();
+          }
+        }),
+        Getter((part) {
+          return Getter((_) {
+            final Map<Key, T> copy = {};
+            copy.addEntries(part.asSet());
+            return copy;
+          });
+        }),
+      ),
+    );
+  }
+}
+
+extension MapOpticsBiEqvExtension<Key, T> on BiEqv<Map<Key, T>> {
+  Mutator<Map<Key, T>, T> at(Key key) {
+    return asMutator().at(key);
+  }
+
+  Mutator<Map<Key, T>, MapEntry<Key, T>> get traversed {
+    return asMutator().traversed;
+  }
+}
+
+extension MapOpticsIsoExtension<Whole, Key, T> on Iso<Whole, Map<Key, T>> {
+  Mutator<Whole, T> at(Key key) {
+    return asMutator().at(key);
+  }
+
+  Mutator<Whole, MapEntry<Key, T>> get traversed {
+    return asMutator().traversed;
+  }
+}
+
+extension MapOpticsPrismExtension<Whole, Key, T> on Prism<Whole, Map<Key, T>> {
+  Mutator<Whole, T> at(Key key) {
+    return asMutator().at(key);
+  }
+
+  Mutator<Whole, MapEntry<Key, T>> get traversed {
+    return asMutator().traversed;
+  }
+}
+
+extension MapOpticsReflectorExtension<Whole, Key, T> on Reflector<Whole, Map<Key, T>> {
+  Mutator<Whole, T> at(Key key) {
+    return asMutator().at(key);
+  }
+
+  Mutator<Whole, MapEntry<Key, T>> get traversed {
+    return asMutator().traversed;
+  }
+}
+
+extension MapOpticsBiPreviewExtension<Whole, Key, T> on BiPreview<Whole, Map<Key, T>> {
+  Mutator<Whole, T> at(Key key) {
+    return asMutator().at(key);
+  }
+
+  Mutator<Whole, MapEntry<Key, T>> get traversed {
+    return asMutator().traversed;
   }
 }

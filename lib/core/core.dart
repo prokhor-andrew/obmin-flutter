@@ -2,7 +2,6 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/machine/machine.dart';
 import 'package:obmin/machine/machine_factory.dart';
 import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
@@ -28,7 +27,7 @@ final class CoreInitialObject {
 
 final class Core<State, Input, Output> {
   final Scene<State, Output, Input> Function(CoreInitialObject initial) scene;
-  final ISet<Machine<Input, Output>> Function(State state) machines;
+  final Set<Machine<Input, Output>> Function(State state) machines;
 
   Process<void>? _process;
 

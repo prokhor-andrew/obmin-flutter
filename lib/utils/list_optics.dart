@@ -2,114 +2,382 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/fp/non_empty_list.dart';
-import 'package:obmin/fp/optional.dart';
-import 'package:obmin/fp/product.dart';
 import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
+import 'package:obmin/optics/transformers/bi_eqv.dart';
+import 'package:obmin/optics/transformers/bi_preview.dart';
+import 'package:obmin/optics/transformers/iso.dart';
+import 'package:obmin/optics/transformers/prism.dart';
+import 'package:obmin/optics/transformers/reflector.dart';
+import 'package:obmin/types/optional.dart';
 
-extension ListOpticsEqvExtension<T> on Eqv<IList<T>> {
-  FoldList<IList<T>, T> get folded => asGetter().folded;
+extension ListOpticsEqvExtension<T> on Eqv<List<T>> {
+  FoldList<List<T>, T> get folded => asGetter().folded;
 
-  Preview<IList<T>, T> find(bool Function(T element) function) {
+  Preview<List<T>, T> find(bool Function(T element) function) {
     return asGetter().find(function);
   }
 
-  Getter<IList<T>, int> get length => asGetter().length;
+  Getter<List<T>, int> get length => asGetter().length;
+
+  Preview<List<T>, T> get last => asGetter().last;
+
+  Preview<List<T>, T> get first => asGetter().first;
+
+  Preview<List<T>, T> at(int index) {
+    return asGetter().at(index);
+  }
 }
 
-extension ListOpticsGetterExtension<Whole, T> on Getter<Whole, IList<T>> {
+extension ListOpticsGetterExtension<Whole, T> on Getter<Whole, List<T>> {
   FoldList<Whole, T> get folded => asPreview().folded;
 
   Preview<Whole, T> find(bool Function(T element) function) {
     return asPreview().find(function);
   }
 
-  Getter<Whole, int> get length => compose(Getter((list) => list.length));
+  Getter<Whole, int> get length => compose(Getter<List<T>, int>((whole) => whole.length));
+
+  Preview<Whole, T> get last => asPreview().last;
+
+  Preview<Whole, T> get first => asPreview().first;
+
+  Preview<Whole, T> at(int index) {
+    return asPreview().at(index);
+  }
 }
 
-extension ListOpticsPreviewExtension<Whole, T> on Preview<Whole, IList<T>> {
-  FoldList<Whole, T> get folded => asFoldSet().folded;
+extension ListOpticsPreviewExtension<Whole, T> on Preview<Whole, List<T>> {
+  FoldList<Whole, T> get folded => asFoldList().folded;
 
   Preview<Whole, T> find(bool Function(T element) function) {
     return compose(
-      Preview(
+      Preview<List<T>, T>(
         (whole) {
           for (final element in whole) {
             if (function(element)) {
               return Optional.some(element);
             }
           }
-          return const Optional.none();
+          return Optional.none();
         },
       ),
     );
   }
 
-  Preview<Whole, int> get length => composeWithGetter(Getter((list) => list.length));
-}
+  Preview<Whole, int> get length => composeWithGetter(Getter<List<T>, int>((whole) => whole.length));
 
-extension ListOpticsFoldSetExtension<Whole, T> on FoldSet<Whole, IList<T>> {
-  FoldList<Whole, T> get folded => compose(FoldSet((list) {
-        return list.toISetOfProducts();
-      }));
-
-  FoldSet<Whole, T> find(bool Function(T element) function) {
-    return composeWithPreview(
-      Preview<IList<T>, T>(
-        (whole) {
-          for (final element in whole) {
-            if (function(element)) {
-              return Optional.some(element);
+  Preview<Whole, T> get last => compose(
+        Preview<List<T>, T>(
+          (whole) {
+            if (whole.isEmpty) {
+              return Optional<T>.none();
+            } else {
+              return Optional<T>.some(whole.last);
             }
-          }
-          return const Optional.none();
-        },
-      ),
-    );
-  }
-
-  FoldSet<Whole, int> get length => composeWithGetter(Getter((list) => list.length));
-}
-
-extension ListOpticsMutatorExtension<Whole, T> on Mutator<Whole, IList<T>> {
-  Mutator<Whole, Product<int, T>> get traversed => compose(
-        Mutator.traversalSet<IList<T>, Product<int, T>>(
-          FoldList<IList<T>, T>((whole) => whole.toISetOfProducts()),
-          Getter((part) => Getter((_) => part.fromSetOfProductToList().toIList())),
+          },
         ),
       );
 
-  Mutator<Whole, Product<int, T>> find(bool Function(T element) function) {
-    return compose(
-      Mutator.affine(
-        Preview<IList<T>, Product<int, T>>(
+  Preview<Whole, T> get first => compose(
+        Preview<List<T>, T>(
           (whole) {
-            for (int i = 0; i < whole.length; i++) {
-              final element = whole[i];
-              if (function(element)) {
-                return Optional.some(Product(i, element));
-              }
+            if (whole.isEmpty) {
+              return Optional<T>.none();
+            } else {
+              return Optional<T>.some(whole[0]);
             }
+          },
+        ),
+      );
 
-            return const Optional.none();
-          },
-        ),
-        Getter(
-          (part) {
-            return Getter(
-              (whole) {
-                return whole.removeAt(part.left).insert(part.left, part.right);
-              },
-            );
-          },
-        ),
+  Preview<Whole, T> at(int index) {
+    return compose(
+      Preview<List<T>, T>(
+        (whole) {
+          if (index < 0 || index >= whole.length) {
+            return Optional<T>.none();
+          } else {
+            final element = whole[index];
+            return Optional<T>.some(element);
+          }
+        },
       ),
     );
+  }
+}
+
+extension ListOpticsFoldListExtension<Whole, T> on FoldList<Whole, List<T>> {
+  FoldList<Whole, T> get folded => compose(FoldList<List<T>, T>((whole) => whole));
+
+  FoldList<Whole, T> find(bool Function(T element) function) {
+    return composeWithPreview(
+      Preview<List<T>, T>(
+        (whole) {
+          for (final element in whole) {
+            if (function(element)) {
+              return Optional.some(element);
+            }
+          }
+          return Optional.none();
+        },
+      ),
+    );
+  }
+
+  FoldList<Whole, int> get length => composeWithGetter(Getter<List<T>, int>((whole) => whole.length));
+
+  FoldList<Whole, T> get last => composeWithPreview(
+        Preview<List<T>, T>(
+          (whole) {
+            if (whole.isEmpty) {
+              return Optional<T>.none();
+            } else {
+              return Optional<T>.some(whole.last);
+            }
+          },
+        ),
+      );
+
+  FoldList<Whole, T> get first => composeWithPreview(
+        Preview<List<T>, T>(
+          (whole) {
+            if (whole.isEmpty) {
+              return Optional<T>.none();
+            } else {
+              return Optional<T>.some(whole[0]);
+            }
+          },
+        ),
+      );
+
+  FoldList<Whole, T> at(int index) {
+    return composeWithPreview(
+      Preview<List<T>, T>(
+        (whole) {
+          if (index < 0 || index >= whole.length) {
+            return Optional<T>.none();
+          } else {
+            final element = whole[index];
+            return Optional<T>.some(element);
+          }
+        },
+      ),
+    );
+  }
+}
+
+extension ListOpticsFoldSetExtension<Whole, T> on FoldSet<Whole, List<T>> {
+  FoldSet<Whole, T> get folded => compose(FoldSet<List<T>, T>((whole) => whole.toSet()));
+
+  FoldSet<Whole, T> find(bool Function(T element) function) {
+    return composeWithPreview(
+      Preview<List<T>, T>(
+        (whole) {
+          for (final element in whole) {
+            if (function(element)) {
+              return Optional.some(element);
+            }
+          }
+          return Optional.none();
+        },
+      ),
+    );
+  }
+
+  FoldSet<Whole, int> get length => composeWithGetter(Getter<List<T>, int>((whole) => whole.length));
+
+  FoldSet<Whole, T> get last => composeWithPreview(
+        Preview<List<T>, T>(
+          (whole) {
+            if (whole.isEmpty) {
+              return Optional<T>.none();
+            } else {
+              return Optional<T>.some(whole.last);
+            }
+          },
+        ),
+      );
+
+  FoldSet<Whole, T> get first => composeWithPreview(
+        Preview<List<T>, T>(
+          (whole) {
+            if (whole.isEmpty) {
+              return Optional<T>.none();
+            } else {
+              return Optional<T>.some(whole[0]);
+            }
+          },
+        ),
+      );
+
+  FoldSet<Whole, T> at(int index) {
+    return composeWithPreview(
+      Preview<List<T>, T>(
+        (whole) {
+          if (index < 0 || index >= whole.length) {
+            return Optional<T>.none();
+          } else {
+            final element = whole[index];
+            return Optional<T>.some(element);
+          }
+        },
+      ),
+    );
+  }
+}
+
+extension ListOpticsMutatorExtension<Whole, T> on Mutator<Whole, List<T>> {
+  Mutator<Whole, T> get traversed => compose(
+        Mutator.traversalList<List<T>, T>(
+          FoldList<List<T>, T>((whole) => whole),
+          Getter((part) => Getter((_) => part.asList())),
+        ),
+      );
+
+  Mutator<Whole, T> find(bool Function(T element) function) {
+    return compose(
+      Mutator.affine(Preview<List<T>, T>((whole) {
+        for (final element in whole) {
+          if (function(element)) {
+            return Optional.some(element);
+          }
+        }
+        return Optional.none();
+      }), Getter(
+        (part) {
+          return Getter((whole) {
+            final copy = whole.toList();
+            final index = copy.indexWhere(function);
+            if (index == -1) {
+              return whole;
+            }
+
+            copy.removeAt(index);
+            copy.insert(index, part);
+            return copy;
+          });
+        },
+      )),
+    );
+  }
+
+  Mutator<Whole, T> get last => compose(
+        Mutator.affine<List<T>, T>(Preview<List<T>, T>((whole) {
+          if (whole.isEmpty) {
+            return Optional<T>.none();
+          } else {
+            return Optional<T>.some(whole.last);
+          }
+        }), Getter(
+          (part) {
+            return Getter((whole) {
+              if (whole.isEmpty) {
+                return whole;
+              }
+              final copy = whole.toList();
+
+              final indexOfLastElement = whole.length - 1;
+              copy.removeAt(indexOfLastElement);
+              copy.insert(indexOfLastElement, part);
+
+              return copy;
+            });
+          },
+        )),
+      );
+
+  Mutator<Whole, T> get first => compose(
+        Mutator.affine<List<T>, T>(Preview<List<T>, T>((whole) {
+          if (whole.isEmpty) {
+            return Optional<T>.none();
+          } else {
+            return Optional<T>.some(whole.last);
+          }
+        }), Getter(
+          (part) {
+            return Getter((whole) {
+              if (whole.isEmpty) {
+                return whole;
+              }
+              final copy = whole.toList();
+
+              copy.removeAt(0);
+              copy.insert(0, part);
+
+              return copy;
+            });
+          },
+        )),
+      );
+
+  Mutator<Whole, T> at(int index) {
+    return compose(
+      Mutator.affine<List<T>, T>(
+        Preview<List<T>, T>((whole) {
+          if (index < 0 || index >= whole.length) {
+            return Optional<T>.none();
+          } else {
+            return Optional<T>.some(whole.last);
+          }
+        }),
+        Getter((part) {
+          return Getter((whole) {
+            if (index < 0 || index >= whole.length) {
+              return whole;
+            }
+
+            final copy = whole.toList();
+            copy.removeAt(index);
+            copy.insert(index, part);
+            return copy;
+          });
+        }),
+      ),
+    );
+  }
+}
+
+extension ListOpticsBiEqvExtension<T> on BiEqv<List<T>> {
+  Mutator<List<T>, T> get traversed => asMutator().traversed;
+
+  Mutator<List<T>, T> find(bool Function(T element) function) {
+    return asMutator().find(function);
+  }
+}
+
+extension ListOpticsIsoExtension<Whole, T> on Iso<Whole, List<T>> {
+  Mutator<Whole, T> get traversed => asMutator().traversed;
+
+  Mutator<Whole, T> find(bool Function(T element) function) {
+    return asMutator().find(function);
+  }
+}
+
+extension ListOpticsPrismExtension<Whole, T> on Prism<Whole, List<T>> {
+  Mutator<Whole, T> get traversed => asMutator().traversed;
+
+  Mutator<Whole, T> find(bool Function(T element) function) {
+    return asMutator().find(function);
+  }
+}
+
+extension ListOpticsReflectorExtension<Whole, T> on Reflector<Whole, List<T>> {
+  Mutator<Whole, T> get traversed => asMutator().traversed;
+
+  Mutator<Whole, T> find(bool Function(T element) function) {
+    return asMutator().find(function);
+  }
+}
+
+extension ListOpticsBiPreviewExtension<Whole, T> on BiPreview<Whole, List<T>> {
+  Mutator<Whole, T> get traversed => asMutator().traversed;
+
+  Mutator<Whole, T> find(bool Function(T element) function) {
+    return asMutator().find(function);
   }
 }
