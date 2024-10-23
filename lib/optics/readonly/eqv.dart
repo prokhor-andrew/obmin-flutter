@@ -2,8 +2,8 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:meta/meta.dart';
-import 'package:obmin/fp/non_empty_set.dart';
 import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
@@ -47,10 +47,10 @@ final class Eqv<T> {
   @useResult
   FoldSet<T, R> zipWithFoldSet<Part, R>(
     FoldSet<T, Part> other,
-    NonEmptySet<R> Function(T value1, NonEmptySet<Part> value2) function,
+    ISet<R> Function(T value1, ISet<Part> value2) function,
   ) {
     return asFoldSet().zipWith(other, (value1, value2) {
-      return function(value1.any, value2);
+      return function(value1.first, value2);
     });
   }
 

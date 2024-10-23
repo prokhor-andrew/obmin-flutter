@@ -3,16 +3,14 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:meta/meta.dart';
+import 'package:obmin/fp/optional.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/fp/non_empty_set.dart';
 
 @immutable
 final class FoldSet<Whole, Part> {
-
   @useResult
   final ISet<Part> Function(Whole whole) get;
 
@@ -43,48 +41,46 @@ final class FoldSet<Whole, Part> {
   @useResult
   FoldSet<Whole, R> zipWith<Part2, R>(
     FoldSet<Whole, Part2> other,
-    NonEmptySet<R> Function(NonEmptySet<Part> value1, NonEmptySet<Part2> value2) function,
+    ISet<R> Function(ISet<Part> value1, ISet<Part2> value2) function,
   ) {
     return FoldSet((whole) {
-      return NonEmptySet.fromISet(get(whole)).bind((value1) {
-        return NonEmptySet.fromISet(other.get(whole)).map((value2) {
-          return (value1, value2);
-        });
-      }).map((tuple) {
-        final value1 = tuple.$1;
-        final value2 = tuple.$2;
-        return function(value1, value2).toISet();
-      }).valueOr(const ISet.empty());
+      final set1 = get(whole);
+      final set2 = other.get(whole);
+      if (set1.isEmpty || set2.isEmpty) {
+        const ISet.empty();
+      }
+
+      return function(set1, set2);
     });
   }
 
   @useResult
   FoldSet<Whole, R> zipWithEqv<R>(
     Eqv<Whole> other,
-    NonEmptySet<R> Function(NonEmptySet<Part> value1, Whole value2) function,
+    ISet<R> Function(ISet<Part> value1, Whole value2) function,
   ) {
     return zipWith(other.asFoldSet(), (value1, value2) {
-      return function(value1, value2.any);
+      return function(value1, value2.first);
     });
   }
 
   @useResult
   FoldSet<Whole, R> zipWithGetter<Part2, R>(
     Getter<Whole, Part2> other,
-    NonEmptySet<R> Function(NonEmptySet<Part> value1, Part2 value2) function,
+    ISet<R> Function(ISet<Part> value1, Part2 value2) function,
   ) {
     return zipWith(other.asFoldSet(), (value1, value2) {
-      return function(value1, value2.any);
+      return function(value1, value2.first);
     });
   }
 
   @useResult
   FoldSet<Whole, R> zipWithPreview<Part2, R>(
     Preview<Whole, Part2> other,
-    NonEmptySet<R> Function(NonEmptySet<Part> value1, Part2 value2) function,
+    ISet<R> Function(ISet<Part> value1, Part2 value2) function,
   ) {
     return zipWith(other.asFoldSet(), (value1, value2) {
-      return function(value1, value2.any);
+      return function(value1, value2.first);
     });
   }
 
@@ -95,9 +91,13 @@ final class FoldSet<Whole, Part> {
   }
 
   @useResult
-  Preview<Whole, NonEmptySet<Part>> asPreview() {
+  Preview<Whole, ISet<Part>> asPreview() {
     return Preview((whole) {
-      return NonEmptySet.fromISet(get(whole));
+      final set = get(whole);
+      if (set.isEmpty) {
+        return const Optional.none();
+      }
+      return Optional.some(set);
     });
   }
 

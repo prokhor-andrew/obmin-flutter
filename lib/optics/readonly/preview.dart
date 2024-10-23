@@ -4,7 +4,6 @@
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:meta/meta.dart';
-import 'package:obmin/fp/non_empty_set.dart';
 import 'package:obmin/fp/optional.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
@@ -54,12 +53,12 @@ final class Preview<Whole, Part> {
   @useResult
   FoldSet<Whole, R> zipWithFoldSet<Part2, R>(
     FoldSet<Whole, Part2> other,
-    NonEmptySet<R> Function(Part value1, NonEmptySet<Part2> value) function,
+    ISet<R> Function(Part value1, ISet<Part2> value) function,
   ) {
     return asFoldSet().zipWith(
       other,
       (value1, value2) {
-        return function(value1.any, value2);
+        return function(value1.first, value2);
       },
     );
   }

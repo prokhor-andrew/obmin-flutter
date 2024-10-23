@@ -3,113 +3,81 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/fp/non_empty_list.dart';
-import 'package:obmin/fp/optional.dart';
 import 'package:obmin/fp/product.dart';
 import 'package:obmin/optics/mutable/mutator.dart';
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/readonly/preview.dart';
 
 extension ListOpticsEqvExtension<T> on Eqv<IList<T>> {
-  FoldList<IList<T>, T> get folded => asGetter().folded;
-
-  Preview<IList<T>, T> find(bool Function(T element) function) {
-    return asGetter().find(function);
-  }
-
-  Getter<IList<T>, int> get length => asGetter().length;
+  Getter<IList<T>, ISet<Product<int, T>>> get asSetOfProducts => asGetter().asSetOfProducts;
 }
 
 extension ListOpticsGetterExtension<Whole, T> on Getter<Whole, IList<T>> {
-  FoldList<Whole, T> get folded => asPreview().folded;
+  Getter<Whole, ISet<Product<int, T>>> get asSetOfProducts => compose(Getter((whole) {
+        ISet<Product<int, T>> set = const ISet.empty();
 
-  Preview<Whole, T> find(bool Function(T element) function) {
-    return asPreview().find(function);
-  }
+        for (int i = 0; i < whole.length; i++) {
+          set = set.add(Product(i, whole[i]));
+        }
 
-  Getter<Whole, int> get length => compose(Getter((list) => list.length));
+        return set;
+      }));
 }
 
 extension ListOpticsPreviewExtension<Whole, T> on Preview<Whole, IList<T>> {
-  FoldList<Whole, T> get folded => asFoldSet().folded;
+  Preview<Whole, ISet<Product<int, T>>> get asSetOfProducts => composeWithGetter(Getter((whole) {
+        ISet<Product<int, T>> set = const ISet.empty();
 
-  Preview<Whole, T> find(bool Function(T element) function) {
-    return compose(
-      Preview(
-        (whole) {
-          for (final element in whole) {
-            if (function(element)) {
-              return Optional.some(element);
-            }
-          }
-          return const Optional.none();
-        },
-      ),
-    );
-  }
+        for (int i = 0; i < whole.length; i++) {
+          set = set.add(Product(i, whole[i]));
+        }
 
-  Preview<Whole, int> get length => composeWithGetter(Getter((list) => list.length));
+        return set;
+      }));
 }
 
 extension ListOpticsFoldSetExtension<Whole, T> on FoldSet<Whole, IList<T>> {
-  FoldList<Whole, T> get folded => compose(FoldSet((list) {
-        return list.toISetOfProducts();
+  FoldSet<Whole, ISet<Product<int, T>>> get asSetOfProducts => composeWithGetter(Getter((whole) {
+        ISet<Product<int, T>> set = const ISet.empty();
+
+        for (int i = 0; i < whole.length; i++) {
+          set = set.add(Product(i, whole[i]));
+        }
+
+        return set;
       }));
-
-  FoldSet<Whole, T> find(bool Function(T element) function) {
-    return composeWithPreview(
-      Preview<IList<T>, T>(
-        (whole) {
-          for (final element in whole) {
-            if (function(element)) {
-              return Optional.some(element);
-            }
-          }
-          return const Optional.none();
-        },
-      ),
-    );
-  }
-
-  FoldSet<Whole, int> get length => composeWithGetter(Getter((list) => list.length));
 }
 
 extension ListOpticsMutatorExtension<Whole, T> on Mutator<Whole, IList<T>> {
-  Mutator<Whole, Product<int, T>> get traversed => compose(
-        Mutator.traversalSet<IList<T>, Product<int, T>>(
-          FoldList<IList<T>, T>((whole) => whole.toISetOfProducts()),
-          Getter((part) => Getter((_) => part.fromSetOfProductToList().toIList())),
-        ),
-      );
+  Mutator<Whole, ISet<Product<int, T>>> get asSetOfProducts => compose(Mutator.iso(
+        Getter((whole) {
+          ISet<Product<int, T>> set = const ISet.empty();
 
-  Mutator<Whole, Product<int, T>> find(bool Function(T element) function) {
-    return compose(
-      Mutator.affine(
-        Preview<IList<T>, Product<int, T>>(
+          for (int i = 0; i < whole.length; i++) {
+            set = set.add(Product(i, whole[i]));
+          }
+
+          return set;
+        }),
+        Getter(
           (whole) {
+            IList<T> result = const IList.empty();
             for (int i = 0; i < whole.length; i++) {
-              final element = whole[i];
-              if (function(element)) {
-                return Optional.some(Product(i, element));
+              final product = whole[i];
+              final index = product.left;
+              final item = product.right;
+
+              if (index < result.length) {
+                result = result.insert(index, item);
+              } else {
+                result = result.add(item);
               }
             }
 
-            return const Optional.none();
+            return result;
           },
         ),
-        Getter(
-          (part) {
-            return Getter(
-              (whole) {
-                return whole.removeAt(part.left).insert(part.left, part.right);
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
+      ));
 }

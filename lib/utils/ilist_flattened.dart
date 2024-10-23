@@ -10,10 +10,8 @@ extension IListFlattenedExtension<T> on IList<IList<T>> {
 
     for (int i = 0; i < length; i++) {
       final iItem = this[i];
-      for (int j = 0; j < iItem.length; j++) {
-        final item = iItem[j];
-
-        result = result.add(item);
+      for (int j = 0; j < this[i].length; j++) {
+        result = result.add(iItem[j]);
       }
     }
 

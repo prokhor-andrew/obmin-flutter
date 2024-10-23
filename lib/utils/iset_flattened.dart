@@ -9,8 +9,8 @@ extension ISetFlattenedExtension<T> on ISet<ISet<T>> {
     ISet<T> result = const ISet.empty();
 
     forEach((set) {
-      set.forEach((val) {
-        result = result.add(val);
+      set.forEach((e) {
+        result = result.add(e);
       });
     });
 

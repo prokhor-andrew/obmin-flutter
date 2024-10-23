@@ -2,11 +2,9 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:meta/meta.dart';
 import 'package:obmin/fp/either.dart';
-import 'package:obmin/fp/non_empty_list.dart';
-import 'package:obmin/fp/non_empty_map.dart';
-import 'package:obmin/fp/non_empty_set.dart';
 import 'package:obmin/fp/product.dart';
 import 'package:obmin/optics/readonly/fold_list.dart';
 import 'package:obmin/optics/readonly/fold_map.dart';
@@ -162,15 +160,31 @@ final class PMutator<S, S1, F, F1> {
   @useResult
   static Mutator<Whole, Product<int, Part>> traversalList<Whole, Part>(
     FoldList<Whole, Part> fold,
-    Getter<NonEmptyList<Part>, Update<Whole>> reconstruct,
+    Getter<IList<Part>, Update<Whole>> reconstruct,
   ) {
     return Mutator(Getter((modify) {
       return Getter((whole) {
-        final zoomedOrNone = NonEmptySet.fromISet(fold.get(whole));
-        return zoomedOrNone.map((zoomed) {
-          final modified = zoomed.map(modify.get).fromSetOfProductToList();
-          return reconstruct.get(modified).get(whole);
-        }).valueOr(whole);
+        final set = fold.get(whole);
+        if (set.isEmpty) {
+          return whole;
+        }
+
+        final mapped = set.map(modify.get).toISet();
+
+        IList<Part> result = const IList.empty();
+        for (int i = 0; i < mapped.length; i++) {
+          final product = mapped[i];
+          final index = product.left;
+          final item = product.right;
+
+          if (index < result.length) {
+            result = result.insert(index, item);
+          } else {
+            result = result.add(item);
+          }
+        }
+
+        return reconstruct.get(result).get(whole);
       });
     }));
   }
@@ -178,15 +192,25 @@ final class PMutator<S, S1, F, F1> {
   @useResult
   static Mutator<Whole, Product<Key, Part>> traversalMap<Whole, Key, Part>(
     FoldMap<Whole, Key, Part> fold,
-    Getter<NonEmptyMap<Key, Part>, Update<Whole>> reconstruct,
+    Getter<IMap<Key, Part>, Update<Whole>> reconstruct,
   ) {
     return Mutator(Getter((modify) {
       return Getter((whole) {
-        final zoomedOrNone = NonEmptySet.fromISet(fold.get(whole));
-        return zoomedOrNone.map((zoomed) {
-          final modified = zoomed.map(modify.get).fromSetOfProductToMap();
-          return reconstruct.get(modified).get(whole);
-        }).valueOr(whole);
+        final set = fold.get(whole);
+        if (set.isEmpty) {
+          return whole;
+        }
+
+        final mapped = set.map(modify.get).toISet();
+        IMap<Key, Part> result = const IMap.empty();
+        for (int i = 0; i < mapped.length; i++) {
+          final product = mapped[i];
+          final key = product.left;
+          final item = product.right;
+
+          result = result.add(key, item);
+        }
+        return reconstruct.get(result).get(whole);
       });
     }));
   }
@@ -194,15 +218,16 @@ final class PMutator<S, S1, F, F1> {
   @useResult
   static Mutator<Whole, Part> traversalSet<Whole, Part>(
     FoldSet<Whole, Part> fold,
-    Getter<NonEmptySet<Part>, Update<Whole>> reconstruct,
+    Getter<ISet<Part>, Update<Whole>> reconstruct,
   ) {
     return Mutator(Getter((modify) {
       return Getter((whole) {
-        final zoomedOrNone = NonEmptySet.fromISet(fold.get(whole));
-        return zoomedOrNone.map((zoomed) {
-          final modified = zoomed.map(modify.get);
-          return reconstruct.get(modified).get(whole);
-        }).valueOr(whole);
+        final set = fold.get(whole);
+        if (set.isEmpty) {
+          return whole;
+        }
+        final modified = set.map(modify.get).toISet();
+        return reconstruct.get(modified).get(whole);
       });
     }));
   }

@@ -6,7 +6,6 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:obmin/fp/non_empty_list.dart';
 
 final class NavItem {
   final String tag;
@@ -121,14 +120,14 @@ final class _TheRouterDelegate extends RouterDelegate {
     IList<NavItem> tuples = const IList.empty();
     tuples = tuples.add(box.main).addAll(box.others);
 
-    final IList<Page<dynamic>> pages = tuples.mapList((tuple) {
+    final IList<Page<dynamic>> pages = tuples.map((tuple) {
       final tag = tuple.tag;
       final widget = tuple.child;
       return MaterialPage(
         key: ValueKey(tag),
         child: widget,
       );
-    });
+    }).toIList();
 
     final navigator = Navigator(
       key: _key,
