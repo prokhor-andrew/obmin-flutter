@@ -2,7 +2,6 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +19,7 @@ final class NavItem {
 final class NavBox extends InheritedWidget {
   final bool Function(bool isForced) onPopTriggered;
   final NavItem main;
-  final IList<NavItem> others;
+  final List<NavItem> others;
 
   NavBox({
     super.key,
@@ -117,21 +116,22 @@ final class _TheRouterDelegate extends RouterDelegate {
   Widget build(BuildContext context) {
     final NavBox box = NavBox._of(context);
 
-    IList<NavItem> tuples = const IList.empty();
-    tuples = tuples.add(box.main).addAll(box.others);
+    final List<NavItem> tuples = [];
+    tuples.add(box.main);
+    tuples.addAll(box.others);
 
-    final IList<Page<dynamic>> pages = tuples.map((tuple) {
+    final List<Page<dynamic>> pages = tuples.map((tuple) {
       final tag = tuple.tag;
       final widget = tuple.child;
       return MaterialPage(
         key: ValueKey(tag),
         child: widget,
       );
-    }).toIList();
+    }).toList();
 
     final navigator = Navigator(
       key: _key,
-      pages: pages.toList(),
+      pages: pages,
       onPopPage: (route, result) {
         if (!route.didPop(result)) {
           return false;

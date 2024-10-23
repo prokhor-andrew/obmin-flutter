@@ -6,16 +6,13 @@ library channel;
 
 import 'dart:async';
 
-import 'package:obmin/fp/optional.dart';
+import 'package:obmin/types/optional.dart';
+import 'package:obmin/utils/list_minus.dart';
+import 'package:obmin/utils/list_plus.dart';
 import 'package:uuid/uuid.dart';
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 part 'channel_buffer_data.dart';
-
 part 'channel_buffer_event.dart';
-
 part 'channel_buffer_strategy.dart';
-
 part 'channel_task.dart';
-
 part 'channel.dart';

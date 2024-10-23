@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:obmin/core/core_widget.dart';
 import 'package:obmin/core/core_x/widget_machine_x.dart';
 import 'package:obmin/machine_ext/silo_machine.dart';
-import 'package:obmin/optics/readonly/update.dart';
+import 'package:obmin/types/update.dart';
 
 WidgetMachine<State, State, Update<State>> WidgetMachineY<State>({
   required String id,
