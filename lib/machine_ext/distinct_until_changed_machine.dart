@@ -18,10 +18,10 @@ extension DistinctUntilChangedMachineExtension<Input, Output> on Machine<Input, 
   }) {
     return filterInputWithState<Optional<Input>>(
       Optional.none(),
-      (state, input) {
+          (state, input) {
         return (
-          Optional.some(input),
-          state.map((oldInput) => oldInput != input).valueOr(true),
+        Optional.some(input),
+        state.map((oldInput) => oldInput != input).valueOr(true),
         );
       },
       inputBufferStrategy: inputBufferStrategy,
@@ -31,17 +31,17 @@ extension DistinctUntilChangedMachineExtension<Input, Output> on Machine<Input, 
   }
 
   Machine<Input, Output> distinctUntilChangedOutput({
-    required bool shouldWaitOnEffects,
+    bool shouldWaitOnEffects = false,
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<Output, Input>>? internalBufferStrategy,
   }) {
     return filterOutputWithState<Optional<Output>>(
       Optional.none(),
-      (state, output) {
+          (state, output) {
         return (
-          Optional.some(output),
-          state.map((oldInput) => oldInput != output).valueOr(true),
+        Optional.some(output),
+        state.map((oldInput) => oldInput != output).valueOr(true),
         );
       },
       inputBufferStrategy: inputBufferStrategy,
@@ -53,7 +53,7 @@ extension DistinctUntilChangedMachineExtension<Input, Output> on Machine<Input, 
 
 extension DistinctUntilChangedSiloExtension<T> on Silo<T> {
   Silo<T> distinctUntilChanged({
-    required bool shouldWaitOnEffects,
+    bool shouldWaitOnEffects = false,
     ChannelBufferStrategy<T>? outputBufferStrategy,
     ChannelBufferStrategy<FeatureEvent<T, Never>>? internalBufferStrategy,
   }) {
