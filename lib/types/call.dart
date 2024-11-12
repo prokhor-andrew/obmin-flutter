@@ -3,7 +3,8 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold.dart';
+import 'package:obmin/optics/readonly/fold_list.dart';
+import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
@@ -145,11 +146,18 @@ extension CallObminOpticPreviewExtension<Whole, Req, Res> on Preview<Whole, Call
   Preview<Whole, Res> get returned => compose(Preview<Call<Req, Res>, Res>((whole) => whole.returnedOrNone));
 }
 
-extension CallObminOpticFoldExtension<Whole, Req, Res> on Fold<Whole, Call<Req, Res>> {
-  Fold<Whole, Req> get launched => composeWithPreview(Preview<Call<Req, Res>, Req>((whole) => whole.launchedOrNone));
+extension CallObminOpticFoldListExtension<Whole, Req, Res> on FoldList<Whole, Call<Req, Res>> {
+  FoldList<Whole, Req> get launched => composeWithPreview(Preview<Call<Req, Res>, Req>((whole) => whole.launchedOrNone));
 
-  Fold<Whole, Res> get returned => composeWithPreview(Preview<Call<Req, Res>, Res>((whole) => whole.returnedOrNone));
+  FoldList<Whole, Res> get returned => composeWithPreview(Preview<Call<Req, Res>, Res>((whole) => whole.returnedOrNone));
 }
+
+extension CallObminOpticFoldSetExtension<Whole, Req, Res> on FoldSet<Whole, Call<Req, Res>> {
+  FoldSet<Whole, Req> get launched => composeWithPreview(Preview<Call<Req, Res>, Req>((whole) => whole.launchedOrNone));
+
+  FoldSet<Whole, Res> get returned => composeWithPreview(Preview<Call<Req, Res>, Res>((whole) => whole.returnedOrNone));
+}
+
 
 extension CallObminOpticMutatorExtension<Whole, Req, Res> on Mutator<Whole, Call<Req, Res>> {
   Mutator<Whole, Req> get launched => composeWithPrism(

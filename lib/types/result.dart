@@ -3,7 +3,8 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold.dart';
+import 'package:obmin/optics/readonly/fold_list.dart';
+import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
@@ -145,10 +146,16 @@ extension ResultObminOpticPreviewExtension<Whole, Res, Err> on Preview<Whole, Re
   Preview<Whole, Err> get failure => compose(Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone));
 }
 
-extension ResultObminOpticFoldExtension<Whole, Res, Err> on Fold<Whole, Result<Res, Err>> {
-  Fold<Whole, Res> get success => composeWithPreview(Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone));
+extension ResultObminOpticFoldListExtension<Whole, Res, Err> on FoldList<Whole, Result<Res, Err>> {
+  FoldList<Whole, Res> get success => composeWithPreview(Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone));
 
-  Fold<Whole, Err> get failure => composeWithPreview(Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone));
+  FoldList<Whole, Err> get failure => composeWithPreview(Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone));
+}
+
+extension ResultObminOpticFoldSetExtension<Whole, Res, Err> on FoldSet<Whole, Result<Res, Err>> {
+  FoldSet<Whole, Res> get success => composeWithPreview(Preview<Result<Res, Err>, Res>((whole) => whole.successOrNone));
+
+  FoldSet<Whole, Err> get failure => composeWithPreview(Preview<Result<Res, Err>, Err>((whole) => whole.failureOrNone));
 }
 
 extension ResultObminOpticMutatorExtension<Whole, Res, Err> on Mutator<Whole, Result<Res, Err>> {

@@ -4,30 +4,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core_widget.dart';
-import 'package:obmin/machine_ext/distinct_until_changed_machine.dart';
-import 'package:obmin/types/optional.dart';
+import 'package:obmin/machine_ext/silo_machine.dart';
 
 WidgetMachine<State, State, Event> WidgetMachineX<State, Event>({
   required String id,
-  required Widget Function(BuildContext context, State state, Optional<void Function(Event event)> update) builder,
-  bool isDistinctUntilChanged = true,
+  required Widget Function(BuildContext context) stopped,
+  required Widget Function(BuildContext context, Silo<State> Function() states, void Function(Event output) callback) started,
 }) {
-  return WidgetMachine.create<(State, Optional<void Function(Event event)>), State, State, Event>(
+  return WidgetMachine.create<State, State, Event>(
     id: id,
-    init: (state) {
-      return (state, Optional<void Function(Event event)>.none());
-    },
-    activate: (initial, update) {
-      return (initial.$1, Optional.some(update));
-    },
-    process: (cur, input) {
-      return (input, cur.$2);
-    },
-    build: (context, pack) {
-      final (state, update) = pack;
-      return builder(context, state, update);
-    },
-  ).transform((machine) {
-    return isDistinctUntilChanged ? machine.distinctUntilChangedInput(shouldWaitOnEffects: false) : machine;
-  });
+    stopped: stopped,
+    started: started,
+  );
 }

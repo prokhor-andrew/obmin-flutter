@@ -3,7 +3,8 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold.dart';
+import 'package:obmin/optics/readonly/fold_list.dart';
+import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
 import 'package:obmin/optics/transformers/bi_preview.dart';
 import 'package:obmin/optics/transformers/iso.dart';
@@ -163,10 +164,16 @@ extension EitherObminOpticPreviewExtension<Whole, L, R> on Preview<Whole, Either
   Preview<Whole, R> get right => compose(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
 }
 
-extension EitherObminOpticFoldExtension<Whole, L, R> on Fold<Whole, Either<L, R>> {
-  Fold<Whole, L> get left => composeWithPreview(Preview<Either<L, R>, L>((whole) => whole.leftOrNone));
+extension EitherObminOpticFoldListExtension<Whole, L, R> on FoldList<Whole, Either<L, R>> {
+  FoldList<Whole, L> get left => composeWithPreview(Preview<Either<L, R>, L>((whole) => whole.leftOrNone));
 
-  Fold<Whole, R> get right => composeWithPreview(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
+  FoldList<Whole, R> get right => composeWithPreview(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
+}
+
+extension EitherObminOpticFoldSetExtension<Whole, L, R> on FoldSet<Whole, Either<L, R>> {
+  FoldSet<Whole, L> get left => composeWithPreview(Preview<Either<L, R>, L>((whole) => whole.leftOrNone));
+
+  FoldSet<Whole, R> get right => composeWithPreview(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
 }
 
 extension EitherObminOpticMutatorExtension<Whole, L, R> on Mutator<Whole, Either<L, R>> {

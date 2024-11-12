@@ -3,9 +3,11 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold.dart';
+import 'package:obmin/optics/readonly/fold_list.dart';
+import 'package:obmin/optics/readonly/fold_set.dart';
 import 'package:obmin/optics/readonly/getter.dart';
-import 'package:obmin/types/non_empty_iterable.dart';
+import 'package:obmin/types/non_empty_list.dart';
+import 'package:obmin/types/non_empty_set.dart';
 import 'package:obmin/types/optional.dart';
 
 final class Preview<Whole, Part> {
@@ -44,14 +46,26 @@ final class Preview<Whole, Part> {
     return zipWith(other.asPreview(), function);
   }
 
-  Fold<Whole, R> zipWithFold<Part2, R>(
-    Fold<Whole, Part2> other,
-    NonEmptyIterable<R> Function(Part value1, NonEmptyIterable<Part2> value) function,
+  FoldList<Whole, R> zipWithFoldList<Part2, R>(
+    FoldList<Whole, Part2> other,
+    NonEmptyList<R> Function(Part value1, NonEmptyList<Part2> value) function,
   ) {
-    return asFold().zipWith(
+    return asFoldList().zipWith(
       other,
       (value1, value2) {
         return function(value1.head, value2);
+      },
+    );
+  }
+
+  FoldSet<Whole, R> zipWithFoldSet<Part2, R>(
+    FoldSet<Whole, Part2> other,
+    NonEmptySet<R> Function(Part value1, NonEmptySet<Part2> value) function,
+  ) {
+    return asFoldSet().zipWith(
+      other,
+      (value1, value2) {
+        return function(value1.any, value2);
       },
     );
   }
@@ -70,8 +84,12 @@ final class Preview<Whole, Part> {
     return compose(other.asPreview());
   }
 
-  Fold<Whole, Sub> composeWithFold<Sub>(Fold<Part, Sub> other) {
-    return asFold().compose(other);
+  FoldList<Whole, Sub> composeWithFoldList<Sub>(FoldList<Part, Sub> other) {
+    return asFoldList().compose(other);
+  }
+
+  FoldSet<Whole, Sub> composeWithFoldSet<Sub>(FoldSet<Part, Sub> other) {
+    return asFoldSet().compose(other);
   }
 
   @override
@@ -83,9 +101,15 @@ final class Preview<Whole, Part> {
     return Getter(get);
   }
 
-  Fold<Whole, Part> asFold() {
-    return Fold((whole) {
+  FoldList<Whole, Part> asFoldList() {
+    return FoldList((whole) {
       return get(whole).map((value) => [value]).valueOr([]);
+    });
+  }
+
+  FoldSet<Whole, Part> asFoldSet() {
+    return FoldSet((whole) {
+      return get(whole).map((value) => {value}).valueOr({});
     });
   }
 }

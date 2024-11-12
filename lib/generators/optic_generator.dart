@@ -234,7 +234,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
     buffer.writeln('}');
 
     buffer.writeln(
-        "extension ${caseName}ObminOpticFoldExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Fold<Whole, $caseName$generics> {");
+        "extension ${caseName}ObminOpticFoldListExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldList<Whole, $caseName$generics> {");
 
     for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
@@ -243,7 +243,23 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln('  Fold<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName));');
+        buffer.writeln('  FoldList<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName));');
+      }
+    }
+
+    buffer.writeln('}');
+
+    buffer.writeln(
+        "extension ${caseName}ObminOpticFoldSetExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldSet<Whole, $caseName$generics> {");
+
+    for (final field in caseE.fields) {
+      if (!_isComputedProperty(field)) {
+        buffer.writeln("");
+
+        final fieldName = field.displayName;
+        final fieldType = field.type;
+
+        buffer.writeln('  FoldSet<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName));');
       }
     }
 
@@ -260,6 +276,27 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         final fieldType = field.type;
 
         buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => compose(");
+        buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
+        buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
+        buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+        buffer.writeln("    ),");
+        buffer.writeln("  );");
+      }
+    }
+
+    buffer.writeln('}');
+
+    buffer.writeln(
+        "extension ${caseName}ObminOpticBiEqvExtension${generics.isEmpty ? "" : "<${_dropFirstChar(_dropLastChar(generics))}>"} on BiEqv<$caseName$generics> {");
+
+    for (final field in caseE.fields) {
+      if (!_isComputedProperty(field)) {
+        buffer.writeln("");
+
+        final fieldName = field.displayName;
+        final fieldType = field.type;
+
+        buffer.writeln("  Mutator<$caseName$generics, $fieldType> get $fieldName => asMutator().compose(");
         buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
         buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
         buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
@@ -421,7 +458,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
   buffer.writeln("");
 
   buffer.writeln(
-      "extension ${className}ObminOpticFoldExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Fold<Whole, $className$generics> {");
+      "extension ${className}ObminOpticFoldListExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldList<Whole, $className$generics> {");
 
   for (final caseE in cases) {
     final caseName = caseE.displayName;
@@ -429,7 +466,21 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
     buffer.writeln("");
 
     buffer.writeln(
-        "Fold<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPreview(Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone));");
+        "FoldList<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPreview(Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone));");
+  }
+
+  buffer.writeln('}');
+
+  buffer.writeln(
+      "extension ${className}ObminOpticFoldSetExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldSet<Whole, $className$generics> {");
+
+  for (final caseE in cases) {
+    final caseName = caseE.displayName;
+
+    buffer.writeln("");
+
+    buffer.writeln(
+        "FoldSet<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPreview(Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone));");
   }
 
   buffer.writeln('}');
@@ -455,6 +506,23 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
 
   buffer.writeln("");
   buffer.writeln("");
+
+
+  buffer.writeln(
+      "extension ${className}ObminOpticBiEqvExtension${generics.isEmpty ? "" : "<${_dropFirstChar(_dropLastChar(generics))}>"} on BiEqv<$className$generics> {");
+
+  for (final caseE in cases) {
+    final caseName = caseE.displayName;
+
+    buffer.writeln("  Prism<$className$generics, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
+    buffer.writeln("    Prism<$className$generics, $caseName$generics>(");
+    buffer.writeln("      Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone),");
+    buffer.writeln("      Getter<$caseName$generics, $className$generics>((part) => part),");
+    buffer.writeln("    ),");
+    buffer.writeln("  );");
+  }
+
+  buffer.writeln('}');
 
   buffer.writeln(
       "extension ${className}ObminOpticIsoExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Iso<Whole, $className$generics> {");
@@ -804,7 +872,7 @@ void _generateForFold(StringBuffer buffer, ClassElement element) {
   }
 
   buffer.writeln(
-      "extension ${className}ObminOpticFoldExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Fold<Whole, $className$generics> {");
+      "extension ${className}ObminOpticFoldListExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldList<Whole, $className$generics> {");
 
   for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
@@ -813,7 +881,23 @@ void _generateForFold(StringBuffer buffer, ClassElement element) {
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln('  Fold<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$className$generics, $fieldType>((whole) => whole.$fieldName));');
+      buffer.writeln('  FoldList<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$className$generics, $fieldType>((whole) => whole.$fieldName));');
+    }
+  }
+
+  buffer.writeln('}');
+
+  buffer.writeln(
+      "extension ${className}ObminOpticFoldSetExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on FoldSet<Whole, $className$generics> {");
+
+  for (final field in element.fields) {
+    if (!_isComputedProperty(field)) {
+      buffer.writeln("");
+
+      final fieldName = field.displayName;
+      final fieldType = field.type;
+
+      buffer.writeln('  FoldSet<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$className$generics, $fieldType>((whole) => whole.$fieldName));');
     }
   }
 
@@ -906,6 +990,27 @@ void _generateForMutator(StringBuffer buffer, ClassElement element) {
       final fieldType = field.type;
 
       buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => compose(");
+      buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
+      buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
+      buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+      buffer.writeln("    ),");
+      buffer.writeln("  );");
+    }
+  }
+
+  buffer.writeln('}');
+
+  buffer.writeln(
+      "extension ${className}ObminOpticBiEqvExtension${generics.isEmpty ? "" : "<${_dropFirstChar(_dropLastChar(generics))}>"} on BiEqv<$className$generics> {");
+
+  for (final field in element.fields) {
+    if (!_isComputedProperty(field)) {
+      buffer.writeln("");
+
+      final fieldName = field.displayName;
+      final fieldType = field.type;
+
+      buffer.writeln("  Mutator<$className$generics, $fieldType> get $fieldName => asMutator().compose(");
       buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
       buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
       buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");

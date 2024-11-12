@@ -21,5 +21,3 @@ dev_dependencies:
 
   source_gen: ^1.5.0
   build_runner: ^2.4.11
-
-flutter:

@@ -14,4 +14,16 @@ extension PlusOnListExtension<T> on List<T> {
     copy.addAll(elements);
     return copy;
   }
+
+  List<T> plusAtStart(T element) {
+    final List<T> copy = toList();
+    copy.insert(0, element);
+    return copy;
+  }
+
+  List<T> plusMultipleAtStart(List<T> elements) {
+    final List<T> copy = toList();
+    copy.insertAll(0, elements);
+    return copy;
+  }
 }
