@@ -31,7 +31,7 @@ final class Option<T> {
     if (other is! Option<T>) return false;
 
     return match(
-      () => other.match(() => true, constant(false)),
+      () => other.match(() => true, constfunc(false)),
       (val) => other.match(() => false, (val2) => val == val2),
     );
   }
@@ -63,7 +63,7 @@ final class Option<T> {
     );
   }
 
-  bool isSome() => map(constant(true)).valueOr(false);
+  bool isSome() => map(constfunc(true)).valueOr(false);
 
   bool isNone() => !isSome();
 

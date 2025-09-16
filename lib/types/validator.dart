@@ -34,8 +34,8 @@ final class Validator<E, A> {
     if (other is! Validator<E, A>) return false;
 
     return match(
-      (errors) => other.match((errors2) => errors == errors2, constant(false)),
-      (value) => other.match(constant(false), (value2) => value == value2),
+      (errors) => other.match((errors2) => errors == errors2, constfunc(false)),
+      (value) => other.match(constfunc(false), (value2) => value == value2),
     );
   }
 
@@ -69,15 +69,15 @@ final class Validator<E, A> {
 
   Option<IList<E>> errorsOrNone() => match<Option<IList<E>>>(
         Option.some,
-        constant(Option.none()),
+        constfunc(Option.none()),
       );
 
   Option<A> valueOrNone() => match<Option<A>>(
-        constant(Option.none()),
+        constfunc(Option.none()),
         Option.some,
       );
 
-  bool isErrors() => errorsOrNone().map(constant(true)).valueOr(false);
+  bool isErrors() => errorsOrNone().map(constfunc(true)).valueOr(false);
 
   bool isValue() => !isErrors();
 

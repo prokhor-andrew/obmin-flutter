@@ -37,17 +37,17 @@ final class These<A, B> {
     return match(
       (a) => other.match(
         (a2) => a == a2,
-        constant(false),
+        constfunc(false),
         (_, __) => false,
       ),
       (b) => other.match(
-        constant(false),
+        constfunc(false),
         (b2) => b == b2,
         (_, __) => false,
       ),
       (a, b) => other.match(
-        constant(false),
-        constant(false),
+        constfunc(false),
+        constfunc(false),
         (a2, b2) => a == a2 && b == b2,
       ),
     );

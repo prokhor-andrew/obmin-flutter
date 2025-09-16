@@ -9,6 +9,14 @@ A idfunc<A>(A value) => value;
 
 A absurd<A>(Never v) => v;
 
-Func<A, B> constant<A, B>(B value) {
+Func<A, B> constfunc<A, B>(B value) {
   return (_) => value;
+}
+
+Func<A, Func<B, C>> curry<A, B, C>(BiFunc<A, B, C> f) {
+  return (a) => (b) => f(a, b);
+}
+
+BiFunc<A, B, C> uncurry<A, B, C>(Func<A, Func<B, C>> f) {
+  return (a, b) => f(a)(b);
 }

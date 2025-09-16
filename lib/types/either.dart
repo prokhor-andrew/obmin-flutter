@@ -48,8 +48,8 @@ final class Either<A, B> {
     if (other is! Either<A, B>) return false;
 
     return match(
-      (left1) => other.match((left2) => left1 == left2, constant(false)),
-      (right1) => other.match(constant(false), (right2) => right1 == right2),
+      (left1) => other.match((left2) => left1 == left2, constfunc(false)),
+      (right1) => other.match(constfunc(false), (right2) => right1 == right2),
     );
   }
 
@@ -106,7 +106,7 @@ final class Either<A, B> {
 
   Option<A> leftOrNone() => match<Option<A>>(
         Option.some,
-        constant(Option.none()),
+        constfunc(Option.none()),
       );
 
   Option<B> rightOrNone() => swapped().leftOrNone();
@@ -119,7 +119,7 @@ final class Either<A, B> {
 
   Option<B> successOrNone() => rightOrNone();
 
-  bool isLeft() => leftOrNone().map(constant(true)).valueOr(false);
+  bool isLeft() => leftOrNone().map(constfunc(true)).valueOr(false);
 
   bool isRight() => !isLeft();
 
