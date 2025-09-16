@@ -5,15 +5,15 @@
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core_widget.dart';
 import 'package:obmin/core/core_x/widget_machine_x.dart';
-import 'package:obmin/types/optional.dart';
-import 'package:obmin/types/update.dart';
+import 'package:obmin/types/func.dart';
+import 'package:obmin/types/option.dart';
 
-WidgetMachine<State, State, Update<State>> WidgetMachineY<State>({
+WidgetMachine<State, State, Func<State, State>> WidgetMachineY<State>({
   required String id,
-  required Widget Function(BuildContext context, State state, Optional<void Function(Update<State> transition)> update) builder,
+  required Widget Function(BuildContext context, State state, Option<void Function(Func<State, State> transition)> update) builder,
   bool isDistinctUntilChanged = true,
 }) {
-  return WidgetMachineX<State, Update<State>>(
+  return WidgetMachineX<State, Func<State, State>>(
     id: id,
     builder: builder,
     isDistinctUntilChanged: isDistinctUntilChanged,

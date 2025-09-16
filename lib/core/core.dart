@@ -2,19 +2,18 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/machine/machine.dart';
-import 'package:obmin/machine/machine_factory.dart';
-import 'package:obmin/machine_ext/feature_machine/feature_machine.dart';
-import 'package:obmin/machine_ext/feature_machine/scene.dart';
+import 'package:obmin/machine/plan.dart';
 
 final class Core<State, Input, Output> {
-  final Scene<State, Output, Input> Function() scene;
-  final Set<Machine<Input, Output>> Function(State state) machines;
+  final Plan<State, Output, Input, Never, Never> Function() plan;
+  final ISet<Machine<Input, Output>> Function(State state) machines;
 
-  Process<void>? _process;
+  Process? _process;
 
   Core({
-    required this.scene,
+    required this.plan,
     required this.machines,
   });
 
@@ -25,21 +24,19 @@ final class Core<State, Input, Output> {
       return false;
     }
 
-    _process = MachineFactory.shared
-        .feature(
-          id: "core",
-          onCreateFeature: () async {
-            final aScene = scene();
-            final aMachines = machines(aScene.state);
-            return aScene.asIntTriggerIntEffect<void, void>().asFeature(aMachines);
-          },
-          onDestroyFeature: (_) async {},
-          shouldWaitOnEffects: false,
-        )
-        .run(
-          onChange: (_) async {},
-          onConsume: (_) async {},
-        );
+    _process = Machine.fromMealy(
+      id: "core",
+      onCreateMealy: () async {
+        final aPlan = plan();
+        final aMachines = machines(aPlan.state);
+        return aPlan.asMealy(aMachines);
+      },
+      onDestroyMealy: (_) async {},
+      shouldWaitOnEffects: false,
+    ).run(
+      onChange: (_) async {},
+      onConsume: (_) async {},
+    );
 
     return true;
   }

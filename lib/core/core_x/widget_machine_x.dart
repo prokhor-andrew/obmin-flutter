@@ -4,21 +4,20 @@
 
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core_widget.dart';
-import 'package:obmin/machine_ext/distinct_until_changed_machine.dart';
-import 'package:obmin/types/optional.dart';
+import 'package:obmin/types/option.dart';
 
 WidgetMachine<State, State, Event> WidgetMachineX<State, Event>({
   required String id,
-  required Widget Function(BuildContext context, State state, Optional<void Function(Event event)> update) builder,
+  required Widget Function(BuildContext context, State state, Option<void Function(Event event)> update) builder,
   bool isDistinctUntilChanged = true,
 }) {
-  return WidgetMachine.create<(State, Optional<void Function(Event event)>), State, State, Event>(
+  return WidgetMachine.create<(State, Option<void Function(Event event)>), State, State, Event>(
     id: id,
     init: (state) {
-      return (state, Optional<void Function(Event event)>.none());
+      return (state, Option.none());
     },
     activate: (initial, update) {
-      return (initial.$1, Optional.some(update));
+      return (initial.$1, Option.some(update));
     },
     process: (cur, input) {
       return (input, cur.$2);

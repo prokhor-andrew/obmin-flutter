@@ -27,7 +27,7 @@ final class Channel<T> {
       case _AwaitingForProducer<T>(cur: final cur, rest: final rest):
         _state = _IdleChannelState();
         for (final element in [cur].plusMultiple(rest)) {
-          element.comp.complete(Optional<T>.some(val));
+          element.comp.complete(Option.some(val));
         }
         completer.complete(true);
         break;
@@ -56,9 +56,9 @@ final class Channel<T> {
     );
   }
 
-  ChannelTask<Optional<T>> next() {
+  ChannelTask<Option<T>> next() {
     final String id = const Uuid().v4().toString();
-    final Completer<Optional<T>> completer = Completer();
+    final Completer<Option<T>> completer = Completer();
 
     switch (_state) {
       case _IdleChannelState<T>():
@@ -69,7 +69,7 @@ final class Channel<T> {
         break;
       case _AwaitingForConsumer<T>(buffer: final array):
         array[0]._completer.complete(true);
-        completer.complete(Optional<T>.some(array[0].data));
+        completer.complete(Option.some(array[0].data));
         _handleBuffer(event: ChannelBufferRemovedEvent(isConsumed: true), currentArray: array.minusFirst());
         break;
     }
@@ -85,17 +85,17 @@ final class Channel<T> {
             if (cur.id == id) {
               if (rest.isEmpty) {
                 _state = _IdleChannelState();
-                cur.comp.complete(Optional<T>.none());
+                cur.comp.complete(Option.none());
               } else {
                 _state = _AwaitingForProducer(cur: rest[0], rest: rest.minusFirst());
-                cur.comp.complete(Optional<T>.none());
+                cur.comp.complete(Option.none());
               }
             } else {
               final newList = rest.where((item) {
                 if (item.id != id) {
                   return true;
                 } else {
-                  item.comp.complete(Optional<T>.none());
+                  item.comp.complete(Option.none());
                   return false;
                 }
               }).toList();
@@ -151,7 +151,39 @@ final class _AwaitingForConsumer<T> extends _ChannelState<T> {
 
 final class _ChannelConsumer<T> {
   final String id;
-  final Completer<Optional<T>> comp;
+  final Completer<Option<T>> comp;
 
   _ChannelConsumer(this.id, this.comp);
+}
+
+extension _ListHelpersExtension<T> on List<T> {
+  List<T> minusFirst([int count = 1]) {
+    assert(count >= 0);
+
+    if (isEmpty || count == 0) {
+      return this;
+    }
+
+    if (length <= count) {
+      return [];
+    }
+
+    final List<T> copy = toList();
+    for (int i = 0; i < count; i++) {
+      copy.removeAt(0);
+    }
+    return copy;
+  }
+
+  List<T> plus(T element) {
+    final List<T> copy = toList();
+    copy.add(element);
+    return copy;
+  }
+
+  List<T> plusMultiple(List<T> elements) {
+    final List<T> copy = toList();
+    copy.addAll(elements);
+    return copy;
+  }
 }

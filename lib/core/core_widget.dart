@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core.dart';
 import 'package:obmin/machine/machine.dart';
-import 'package:obmin/machine/machine_factory.dart';
-import 'package:obmin/machine_ext/basic_machine.dart';
 
 final class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
   final Core<DomainState, Input, Output> _initialCore;
@@ -29,13 +27,13 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
   @override
   void initState() {
     super.initState();
-    final coreScene = widget._initialCore.scene();
+    final coreScene = widget._initialCore.plan();
     final coreMachines = widget._initialCore.machines(coreScene.state);
 
     _state = widget.uiMachine._init(coreScene.state);
 
     _core = Core<DomainState, Input, Output>(
-      scene: () {
+      plan: () {
         return coreScene;
       },
       machines: (state) {
@@ -103,7 +101,7 @@ final class WidgetMachine<State, Input, Output> {
         return init(state) as Object;
       },
       machine: (setState) {
-        return MachineFactory.shared.basic<(), Input, Output>(
+        return Machine.fromResource<(), Input, Output>(
           id: id,
           onCreate: (id) {
             return ();

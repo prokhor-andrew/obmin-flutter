@@ -2,249 +2,178 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/optics/readonly/eqv.dart';
-import 'package:obmin/optics/readonly/fold.dart';
-import 'package:obmin/optics/readonly/getter.dart';
-import 'package:obmin/optics/transformers/bi_preview.dart';
-import 'package:obmin/optics/transformers/iso.dart';
-import 'package:obmin/optics/mutable/mutator.dart';
-import 'package:obmin/optics/transformers/prism.dart';
-import 'package:obmin/optics/transformers/reflector.dart';
-import 'package:obmin/optics/readonly/preview.dart';
-import 'package:obmin/types/optional.dart';
-import 'package:obmin/types/product.dart';
-import 'package:obmin/utils/bool_fold.dart';
+import 'package:obmin/types/func.dart';
+import 'package:obmin/types/option.dart';
 
-final class Either<L, R> {
-  final bool _isLeft;
-  final L? _left;
-  final R? _right;
+typedef Call<Req, Res> = Either<Req, Res>;
+typedef Result<Err, Val> = Either<Err, Val>;
 
-  const Either.left(L left)
+final class Either<A, B> {
+  final bool _isRight;
+  final A? _left;
+  final B? _right;
+
+  const Either._left(A left)
       : _left = left,
         _right = null,
-        _isLeft = true;
+        _isRight = false;
 
-  const Either.right(R right)
+  const Either._right(B right)
       : _right = right,
         _left = null,
-        _isLeft = false;
+        _isRight = true;
 
-  T fold<T>(
-    T Function(L value) ifLeft,
-    T Function(R value) ifRight,
+  static Either<A, B> left<A, B>(A value) => Either._left(value);
+
+  static Either<A, B> right<A, B>(B value) => Either._right(value);
+
+  static Either<A, B> launched<A, B>(A req) => Either.left(req);
+
+  static Either<A, B> returned<A, B>(B res) => Either.right(res);
+
+  static Either<A, B> failure<A, B>(A err) => Either.left(err);
+
+  static Either<A, B> success<A, B>(B val) => Either.right(val);
+
+  T match<T>(
+    Func<A, T> ifLeft,
+    Func<B, T> ifRight,
   ) {
-    return _isLeft.fold<T>(
-      () => ifLeft(_left!),
-      () => ifRight(_right!),
-    );
-  }
-
-  @override
-  String toString() {
-    return fold<String>(
-      (value) => "Either<$L, $R> Left=$value",
-      (value) => "Either<$L, $R> Right=$value",
-    );
+    return _isRight ? ifLeft(_left as A) : ifRight(_right as B);
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    if (other is! Either<L, R>) return false;
+    if (other is! Either<A, B>) return false;
 
-    if (_isLeft != other._isLeft) {
-      return false;
-    }
-    if (_isLeft) {
-      return _left == other._left;
-    } else {
-      return _right == other._right;
-    }
+    return match(
+      (left1) => other.match((left2) => left1 == left2, constant(false)),
+      (right1) => other.match(constant(false), (right2) => right1 == right2),
+    );
   }
 
   @override
-  int get hashCode => _isLeft ? _left.hashCode : _right.hashCode;
+  int get hashCode => match((value) => value.hashCode, (value) => value.hashCode);
 
-  Either<R, L> swapped() {
-    return fold<Either<R, L>>(
-      Either<R, L>.right,
-      Either<R, L>.left,
+  Either<B, A> swapped() {
+    return match<Either<B, A>>(
+      Either.right,
+      Either.left,
     );
   }
 
-  Either<T, R> bindLeft<T>(Either<T, R> Function(L value) function) {
-    return fold<Either<T, R>>(
+  Either<T, B> lbind<T>(Func<A, Either<T, B>> function) {
+    return match<Either<T, B>>(
       function,
-      Either<T, R>.right,
+      Either.right,
     );
   }
 
-  Either<T, R> mapLeft<T>(T Function(L value) function) {
-    return bindLeft<T>((value) => Either<T, R>.left(function(value)));
+  Either<T, B> lmap<T>(Func<A, T> function) {
+    return lbind<T>((value) => Either.left(function(value)));
   }
 
-  Either<T, R> mapLeftTo<T>(T value) {
-    return mapLeft<T>((_) => value);
-  }
-
-  Either<L, T> bindRight<T>(Either<L, T> Function(R value) function) {
-    return fold<Either<L, T>>(
-      Either<L, T>.left,
+  Either<A, T> rbind<T>(Func<B, Either<A, T>> function) {
+    return match<Either<A, T>>(
+      Either.left,
       function,
     );
   }
 
-  Either<L, T> mapRight<T>(T Function(R value) function) {
-    return swapped().mapLeft<T>(function).swapped();
+  Either<A, T> bind<T>(Func<B, Either<A, T>> function) {
+    return rbind(function);
   }
 
-  Either<L, T> mapRightTo<T>(T value) {
-    return mapRight<T>((_) => value);
+  Either<A, T> rmap<T>(Func<B, T> function) {
+    return swapped().lmap<T>(function).swapped();
   }
 
-  Optional<L> get leftOrNone => fold<Optional<L>>(
-        (left) => Optional<L>.some(left),
-        (right) => Optional<L>.none(),
+  Either<A, T> map<T>(Func<B, T> function) {
+    return rmap(function);
+  }
+
+  Either<A2, B2> bimap<A2, B2>(Func<A, A2> lf, Func<B, B2> rf) {
+    return lmap(lf).rmap(rf);
+  }
+
+  Either<A, (B, T2)> zipWith<T2>(Either<A, T2> other) {
+    return match(
+      Either.left,
+      (val1) => other.match(Either.left, (val2) => Either.right((val1, val2))),
+    );
+  }
+
+  Option<A> leftOrNone() => match<Option<A>>(
+        Option.some,
+        constant(Option.none()),
       );
 
-  Optional<R> get rightOrNone => swapped().leftOrNone;
+  Option<B> rightOrNone() => swapped().leftOrNone();
 
-  bool get isLeft => leftOrNone.mapTo(true).valueOr(false);
+  Option<A> launchedOrNone() => leftOrNone();
 
-  bool get isRight => !isLeft;
+  Option<B> returnedOrNone() => rightOrNone();
 
-  void executeIfLeft(void Function(L value) function) {
-    fold<void Function()>(
-      (value) => () => function(value),
-      (_) => () {},
-    )();
+  Option<A> failureOrNone() => leftOrNone();
+
+  Option<B> successOrNone() => rightOrNone();
+
+  bool isLeft() => leftOrNone().map(constant(true)).valueOr(false);
+
+  bool isRight() => !isLeft();
+
+  bool isLaunched() => isLeft();
+
+  bool isReturned() => isRight();
+
+  bool isFailure() => isLeft();
+
+  bool isSuccess() => isRight();
+
+  void run(void Function(A value) ifLeft, void Function(B value) ifRight) {
+    match<void Function()>(
+        (value) => () {
+              ifLeft(value);
+            },
+        (value) => () {
+              ifRight(value);
+            })();
   }
 
-  void executeIfRight(void Function(R value) function) {
-    swapped().executeIfLeft(function);
+  void runIfLeft(void Function(A value) function) {
+    run(function, (_) {});
   }
 
-  Either<Product<L, T>, Product<R, T>> attach<T>(T value) {
-    return mapLeft((left) {
-      return Product(left, value);
-    }).mapRight((right) {
-      return Product(right, value);
-    });
+  void runIfRight(void Function(B value) function) {
+    swapped().runIfLeft(function);
   }
 
-  static Eqv<Either<L, R>> eqv<L, R>() => Eqv<Either<L, R>>();
+  void runIfLaunched(void Function(A value) f) {
+    runIfLeft(f);
+  }
 
-  static Mutator<Either<L, R>, Either<L, R>> reducer<L, R>() => Mutator.reducer<Either<L, R>>();
+  void runIfReturned(void Function(B value) f) {
+    runIfRight(f);
+  }
+
+  void runIfFailure(void Function(A value) f) {
+    runIfLeft(f);
+  }
+
+  void runIfSuccess(void Function(B value) f) {
+    runIfRight(f);
+  }
 }
 
 extension EitherValueWhenBothExtension<T> on Either<T, T> {
-  T get value => fold<T>(
-        (val) => val,
-        (val) => val,
-      );
+  T value() => match<T>(idfunc, idfunc);
 }
 
-extension EitherObminOpticEqvExtension<L, R> on Eqv<Either<L, R>> {
-  Preview<Either<L, R>, L> get left => Preview<Either<L, R>, L>((whole) => whole.leftOrNone);
-
-  Preview<Either<L, R>, R> get right => Preview<Either<L, R>, R>((whole) => whole.rightOrNone);
+extension EitherNeverLeftExtension<T> on Either<Never, T> {
+  T value() => match<T>(absurd, idfunc);
 }
 
-extension EitherObminOpticGetterExtension<Whole, L, R> on Getter<Whole, Either<L, R>> {
-  Preview<Whole, L> get left => composeWithPreview(Preview<Either<L, R>, L>((whole) => whole.leftOrNone));
-
-  Preview<Whole, R> get right => composeWithPreview(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
-}
-
-extension EitherObminOpticPreviewExtension<Whole, L, R> on Preview<Whole, Either<L, R>> {
-  Preview<Whole, L> get left => compose(Preview<Either<L, R>, L>((whole) => whole.leftOrNone));
-
-  Preview<Whole, R> get right => compose(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
-}
-
-extension EitherObminOpticFoldExtension<Whole, L, R> on Fold<Whole, Either<L, R>> {
-  Fold<Whole, L> get left => composeWithPreview(Preview<Either<L, R>, L>((whole) => whole.leftOrNone));
-
-  Fold<Whole, R> get right => composeWithPreview(Preview<Either<L, R>, R>((whole) => whole.rightOrNone));
-}
-
-extension EitherObminOpticMutatorExtension<Whole, L, R> on Mutator<Whole, Either<L, R>> {
-  Mutator<Whole, L> get left => composeWithPrism(
-        Prism<Either<L, R>, L>(
-          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
-          Getter<L, Either<L, R>>(Either<L, R>.left),
-        ),
-      );
-
-  Mutator<Whole, R> get right => composeWithPrism(
-        Prism<Either<L, R>, R>(
-          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
-          Getter<R, Either<L, R>>(Either<L, R>.right),
-        ),
-      );
-}
-
-extension EitherObminOpticIsoExtension<Whole, L, R> on Iso<Whole, Either<L, R>> {
-  Prism<Whole, L> get left => composeWithPrism(
-        Prism<Either<L, R>, L>(
-          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
-          Getter<L, Either<L, R>>(Either<L, R>.left),
-        ),
-      );
-
-  Prism<Whole, R> get right => composeWithPrism(
-        Prism<Either<L, R>, R>(
-          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
-          Getter<R, Either<L, R>>(Either<L, R>.right),
-        ),
-      );
-}
-
-extension EitherObminOpticPrismExtension<Whole, L, R> on Prism<Whole, Either<L, R>> {
-  Prism<Whole, L> get left => compose(
-        Prism<Either<L, R>, L>(
-          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
-          Getter<L, Either<L, R>>(Either<L, R>.left),
-        ),
-      );
-
-  Prism<Whole, R> get right => compose(
-        Prism<Either<L, R>, R>(
-          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
-          Getter<R, Either<L, R>>(Either<L, R>.right),
-        ),
-      );
-}
-
-extension EitherObminOpticReflectorExtension<Whole, L, R> on Reflector<Whole, Either<L, R>> {
-  BiPreview<Whole, L> get left => composeWithPrism(
-        Prism<Either<L, R>, L>(
-          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
-          Getter<L, Either<L, R>>(Either<L, R>.left),
-        ),
-      );
-
-  BiPreview<Whole, R> get right => composeWithPrism(
-        Prism<Either<L, R>, R>(
-          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
-          Getter<R, Either<L, R>>(Either<L, R>.right),
-        ),
-      );
-}
-
-extension EitherObminOpticBiPreviewExtension<Whole, L, R> on BiPreview<Whole, Either<L, R>> {
-  BiPreview<Whole, L> get left => composeWithPrism(
-        Prism<Either<L, R>, L>(
-          Preview<Either<L, R>, L>((whole) => whole.leftOrNone),
-          Getter<L, Either<L, R>>(Either<L, R>.left),
-        ),
-      );
-
-  BiPreview<Whole, R> get right => composeWithPrism(
-        Prism<Either<L, R>, R>(
-          Preview<Either<L, R>, R>((whole) => whole.rightOrNone),
-          Getter<R, Either<L, R>>(Either<L, R>.right),
-        ),
-      );
+extension EitherNeverRightExtension<T> on Either<T, Never> {
+  T value() => match<T>(idfunc, absurd);
 }

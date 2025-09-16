@@ -1,0 +1,77 @@
+// Copyright (c) 2024 Andrii Prokhorenko
+// This file is part of Obmin, licensed under the MIT License.
+// See the LICENSE file in the project root for license information.
+
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/machine/machine.dart';
+import 'package:obmin/types/either.dart';
+
+final class Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
+  final State state;
+  final ISet<Machine<IntEffect, IntTrigger>> machines;
+
+  final MealyTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
+    Either<IntTrigger, ExtTrigger> event,
+    String machineId,
+  ) transit;
+
+  const Mealy._({
+    required this.state,
+    required this.machines,
+    required this.transit,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> && other.state == state && other.machines == machines;
+  }
+
+  @override
+  int get hashCode => state.hashCode ^ machines.hashCode;
+
+  static Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> create<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({
+    required State state,
+    required ISet<Machine<IntEffect, IntTrigger>> machines,
+    required MealyTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
+      State state,
+      ISet<Machine<IntEffect, IntTrigger>> machines,
+      Either<IntTrigger, ExtTrigger> trigger,
+      String machineId,
+    ) transit,
+  }) {
+    return Mealy._(
+      state: state,
+      machines: machines,
+      transit: (trigger, machineId) {
+        return transit(
+          state,
+          machines,
+          trigger,
+          machineId,
+        );
+      },
+    );
+  }
+}
+
+final class MealyTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
+  final Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> mealy;
+  final IList<Either<IntEffect, ExtEffect>> effects;
+
+  const MealyTransition(
+    this.mealy, {
+    this.effects = const IList.empty(),
+  });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is MealyTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> && other.mealy == mealy && other.effects == effects;
+  }
+
+  @override
+  int get hashCode => mealy.hashCode ^ effects.hashCode;
+}

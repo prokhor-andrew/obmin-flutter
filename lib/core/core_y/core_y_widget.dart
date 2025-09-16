@@ -5,13 +5,13 @@
 import 'package:obmin/core/core.dart';
 import 'package:obmin/core/core_widget.dart';
 import 'package:obmin/core/core_x/core_x_widget.dart';
-import 'package:obmin/types/update.dart';
+import 'package:obmin/types/func.dart';
 
-CoreWidget<State, State, Update<State>> CoreYWidget<State>({
-  required Core<State, State, Update<State>> core,
-  required WidgetMachine<State, State, Update<State>> uiMachine,
+CoreWidget<State, State, Func<State, State>> CoreYWidget<State>({
+  required Core<State, State, Func<State, State>> core,
+  required WidgetMachine<State, State, Func<State, State>> uiMachine,
 }) {
-  return CoreXWidget<State, Update<State>>(
+  return CoreXWidget<State, Func<State, State>>(
     core: core,
     uiMachine: uiMachine,
   );
