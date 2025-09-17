@@ -10,6 +10,12 @@ final class WriterArrow<E, Whole, Part> {
 
   const WriterArrow(this.run);
 
+  WriterArrow<E, Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
+    return WriterArrow((whole) {
+      return run(whole).rmap(f);
+    });
+  }
+
   static WriterArrow<E, A, A> id<E, A>() {
     return WriterArrow(Writer.of);
   }

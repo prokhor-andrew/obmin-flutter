@@ -10,6 +10,12 @@ final class ValidatorArrow<E, Whole, Part> {
 
   const ValidatorArrow(this.run);
 
+  ValidatorArrow<E, Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
+    return ValidatorArrow((whole) {
+      return run(whole).rmap(f);
+    });
+  }
+
   static ValidatorArrow<E, A, A> id<E, A>() {
     return ValidatorArrow(Validator.of);
   }

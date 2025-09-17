@@ -17,6 +17,12 @@ final class GetArrow<Whole, Part> {
     return GetArrow(idfunc);
   }
 
+  GetArrow<Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
+    return GetArrow((whole) {
+      return f(run(whole));
+    });
+  }
+
   GetArrow<Whole, Sub> compose<Sub>(GetArrow<Part, Sub> other) {
     return GetArrow((whole) {
       return other.run(run(whole));

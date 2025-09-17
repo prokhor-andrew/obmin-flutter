@@ -56,6 +56,10 @@ final class Option<T> {
     });
   }
 
+  Option<R> rmap<R>(Func<T, R> f) {
+    return map(f);
+  }
+
   T valueOr(T replacement) {
     return match<T>(
       () => replacement,

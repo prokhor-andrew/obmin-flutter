@@ -14,6 +14,12 @@ final class EitherArrow<E, Whole, Part> {
     return EitherArrow(Either.right);
   }
 
+  EitherArrow<E, Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
+    return EitherArrow((whole) {
+      return run(whole).rmap(f);
+    });
+  }
+
   EitherArrow<E, Whole, Sub> compose<Sub>(EitherArrow<E, Part, Sub> other) {
     return EitherArrow((whole) {
       return run(whole).bind(other.run);

@@ -18,6 +18,12 @@ final class OptionArrow<Whole, Part> {
     return OptionArrow(Option.some);
   }
 
+  OptionArrow<Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
+    return OptionArrow((whole) {
+      return run(whole).rmap(f);
+    });
+  }
+
   OptionArrow<Whole, Sub> compose<Sub>(OptionArrow<Part, Sub> other) {
     return OptionArrow((whole) {
       return run(whole).bind(other.run);

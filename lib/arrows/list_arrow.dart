@@ -15,6 +15,12 @@ final class ListArrow<Whole, Part> {
     return ListArrow((value) => [value].lock);
   }
 
+  ListArrow<Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
+    return ListArrow((whole) {
+      return run(whole).rmap(f);
+    });
+  }
+
   ListArrow<Whole, Sub> compose<Sub>(ListArrow<Part, Sub> other) {
     return ListArrow((whole) {
       return run(whole).bind(other.run);
@@ -32,7 +38,4 @@ final class ListArrow<Whole, Part> {
       return run(whole).pointIndexZipWith(other.run(whole));
     });
   }
-
-
-
 }
