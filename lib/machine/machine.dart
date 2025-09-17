@@ -399,7 +399,7 @@ final class Machine<Input, Output> {
             (value) {
               return PlanTransition(
                 outline(Option.some(value)),
-                effects: state.map<IList<Either<Input, Output>>>((state) {
+                effects: state.rmap<IList<Either<Input, Output>>>((state) {
                   return state == value ? const IList.empty() : [Either.left<Input, Output>(value)].lock;
                 }).valueOr([Either.left<Input, Output>(value)].lock),
               );
@@ -435,7 +435,7 @@ final class Machine<Input, Output> {
             (value) {
               return PlanTransition(
                 outline(Option.some(value)),
-                effects: state.map<IList<Either<Input, Output>>>((state) {
+                effects: state.rmap<IList<Either<Input, Output>>>((state) {
                   return state == value ? const IList.empty() : [Either.right<Input, Output>(value)].lock;
                 }).valueOr([Either.right<Input, Output>(value)].lock),
               );

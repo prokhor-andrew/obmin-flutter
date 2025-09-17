@@ -64,16 +64,12 @@ final class These<A, B> {
     return match(These.right, These.left, (a, b) => These.both(b, a));
   }
 
-  These<A, B2> map<B2>(Func<B, B2> f) {
+  These<A, B2> rmap<B2>(Func<B, B2> f) {
     return match(
       These.left,
       (b) => These.right(f(b)),
       (a, b) => These.both(a, f(b)),
     );
-  }
-
-  These<A, B2> rmap<B2>(Func<B, B2> f) {
-    return map(f);
   }
 
   These<A2, B> lmap<A2>(Func<A, A2> f) {

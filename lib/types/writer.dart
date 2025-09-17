@@ -17,10 +17,6 @@ final class Writer<A, B> {
     return Writer(list, f(value));
   }
 
-  Writer<A, T2> map<T2>(Func<B, T2> f) {
-    return rmap(f);
-  }
-
   Writer<C2, B> lmap<C2>(Func<A, C2> f) {
     return Writer(list.map(f).toIList(), value);
   }

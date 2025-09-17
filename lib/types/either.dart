@@ -89,10 +89,6 @@ final class Either<A, B> {
     return swapped().lmap<T>(function).swapped();
   }
 
-  Either<A, T> map<T>(Func<B, T> function) {
-    return rmap(function);
-  }
-
   Either<A2, B2> bimap<A2, B2>(Func<A, A2> lf, Func<B, B2> rf) {
     return lmap(lf).rmap(rf);
   }
@@ -119,7 +115,7 @@ final class Either<A, B> {
 
   Option<B> successOrNone() => rightOrNone();
 
-  bool isLeft() => leftOrNone().map(constfunc(true)).valueOr(false);
+  bool isLeft() => leftOrNone().rmap(constfunc(true)).valueOr(false);
 
   bool isRight() => !isLeft();
 

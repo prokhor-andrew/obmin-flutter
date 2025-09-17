@@ -50,14 +50,10 @@ final class Option<T> {
     return match(Option.none, function);
   }
 
-  Option<R> map<R>(Func<T, R> function) {
-    return bind((value) {
-      return Option.some(function(value));
-    });
-  }
-
   Option<R> rmap<R>(Func<T, R> f) {
-    return map(f);
+    return bind((value) {
+      return Option.some(f(value));
+    });
   }
 
   T valueOr(T replacement) {
@@ -67,7 +63,7 @@ final class Option<T> {
     );
   }
 
-  bool isSome() => map(constfunc(true)).valueOr(false);
+  bool isSome() => rmap(constfunc(true)).valueOr(false);
 
   bool isNone() => !isSome();
 

@@ -50,10 +50,6 @@ final class Validator<E, A> {
     return match(Validator.errors, (value) => Validator.of(function(value)));
   }
 
-  Validator<E, T> map<T>(Func<A, T> function) {
-    return rmap(function);
-  }
-
   Validator<E, (A, T2)> zipWith<T2>(Validator<E, T2> other) {
     return match((errors) {
       return other.match(
@@ -77,7 +73,7 @@ final class Validator<E, A> {
         Option.some,
       );
 
-  bool isErrors() => errorsOrNone().map(constfunc(true)).valueOr(false);
+  bool isErrors() => errorsOrNone().rmap(constfunc(true)).valueOr(false);
 
   bool isValue() => !isErrors();
 
