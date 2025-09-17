@@ -24,6 +24,12 @@ final class OptionArrow<Whole, Part> {
     });
   }
 
+  OptionArrow<Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
+    return OptionArrow((whole2) {
+      return run(f(whole2));
+    });
+  }
+
   OptionArrow<Whole, Sub> compose<Sub>(OptionArrow<Part, Sub> other) {
     return OptionArrow((whole) {
       return run(whole).bind(other.run);

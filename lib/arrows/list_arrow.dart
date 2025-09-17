@@ -21,6 +21,12 @@ final class ListArrow<Whole, Part> {
     });
   }
 
+  ListArrow<Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
+    return ListArrow((whole2) {
+      return run(f(whole2));
+    });
+  }
+
   ListArrow<Whole, Sub> compose<Sub>(ListArrow<Part, Sub> other) {
     return ListArrow((whole) {
       return run(whole).bind(other.run);

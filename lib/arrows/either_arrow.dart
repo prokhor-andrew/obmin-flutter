@@ -20,6 +20,18 @@ final class EitherArrow<E, Whole, Part> {
     });
   }
 
+  EitherArrow<E2, Whole, Part> lmap<E2>(Func<E, E2> f) {
+    return EitherArrow((whole) {
+      return run(whole).lmap(f);
+    });
+  }
+
+  EitherArrow<E, Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
+    return EitherArrow((whole2) {
+      return run(f(whole2));
+    });
+  }
+
   EitherArrow<E, Whole, Sub> compose<Sub>(EitherArrow<E, Part, Sub> other) {
     return EitherArrow((whole) {
       return run(whole).bind(other.run);

@@ -16,6 +16,18 @@ final class ValidatorArrow<E, Whole, Part> {
     });
   }
 
+  ValidatorArrow<E2, Whole, Part> lmap<E2>(Func<E, E2> f) {
+    return ValidatorArrow((whole) {
+      return run(whole).lmap(f);
+    });
+  }
+
+  ValidatorArrow<E, Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
+    return ValidatorArrow((whole2) {
+      return run(f(whole2));
+    });
+  }
+
   static ValidatorArrow<E, A, A> id<E, A>() {
     return ValidatorArrow(Validator.of);
   }

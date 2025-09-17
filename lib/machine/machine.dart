@@ -217,7 +217,7 @@ final class Machine<Input, Output> {
     );
   }
 
-  Machine<R, Output> lmap<R>(
+  Machine<R, Output> cmap<R>(
     Input Function(R input) function, {
     bool shouldWaitOnEffects = false,
     ChannelBufferStrategy<R>? inputBufferStrategy,
