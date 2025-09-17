@@ -11,14 +11,14 @@ import 'package:obmin/types/either.dart';
 Core<State, State, Event> CoreX<State, Event>({
   required State Function() state,
   required State Function(State state, Event event) reducer,
-  required ISet<Machine<State, Event>> Function(State state) machines,
+  required IMap<String, Machine<State, Event>> Function(State state) machines,
 }) {
   return Core(
     plan: () {
       Plan<State, Event, State, Never, Never> scene(State state) {
         return Plan.create(
           state: state,
-          transit: (state, trigger, machineId) {
+          transit: (state, trigger) {
             final value = reducer(state, trigger.value());
             return PlanTransition(
               scene(value),

@@ -8,7 +8,7 @@ import 'package:obmin/machine/plan.dart';
 
 final class Core<State, Input, Output> {
   final Plan<State, Output, Input, Never, Never> Function() plan;
-  final ISet<Machine<Input, Output>> Function(State state) machines;
+  final IMap<String, Machine<Input, Output>> Function(State state) machines;
 
   Process? _process;
 
@@ -25,7 +25,6 @@ final class Core<State, Input, Output> {
     }
 
     _process = Machine.fromMealy(
-      id: "core",
       onCreateMealy: () async {
         final aPlan = plan();
         final aMachines = machines(aPlan.state);

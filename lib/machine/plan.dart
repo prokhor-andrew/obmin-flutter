@@ -11,7 +11,6 @@ final class Plan<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   final State state;
   final PlanTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
     Either<IntTrigger, ExtTrigger>,
-    String,
   ) transit;
 
   const Plan._({
@@ -24,16 +23,14 @@ final class Plan<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
     required PlanTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
       State state,
       Either<IntTrigger, ExtTrigger> trigger,
-      String machineId,
     ) transit,
   }) {
     return Plan._(
       state: state,
-      transit: (trigger, machineId) {
+      transit: (trigger) {
         return transit(
           state,
           trigger,
-          machineId,
         );
       },
     );
@@ -47,12 +44,12 @@ final class Plan<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   @override
   int get hashCode => state.hashCode;
 
-  Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> asMealy(ISet<Machine<IntEffect, IntTrigger>> machines) {
+  Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> asMealy(IMap<String, Machine<IntEffect, IntTrigger>> machines) {
     return Mealy.create(
       state: state,
       machines: machines,
-      transit: (state, machines, trigger, machineId) {
-        final transition = transit(trigger, machineId);
+      transit: (state, machines, trigger) {
+        final transition = transit(trigger);
         return MealyTransition(
           transition.plan.asMealy(machines),
           effects: transition.effects,

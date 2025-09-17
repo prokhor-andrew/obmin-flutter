@@ -8,12 +8,9 @@ import 'package:obmin/types/either.dart';
 
 final class Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   final State state;
-  final ISet<Machine<IntEffect, IntTrigger>> machines;
+  final IMap<String, Machine<IntEffect, IntTrigger>> machines;
 
-  final MealyTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
-    Either<IntTrigger, ExtTrigger> event,
-    String machineId,
-  ) transit;
+  final MealyTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(Either<IntTrigger, ExtTrigger> event) transit;
 
   const Mealy._({
     required this.state,
@@ -33,23 +30,21 @@ final class Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
 
   static Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> create<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({
     required State state,
-    required ISet<Machine<IntEffect, IntTrigger>> machines,
+    required IMap<String, Machine<IntEffect, IntTrigger>> machines,
     required MealyTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
       State state,
-      ISet<Machine<IntEffect, IntTrigger>> machines,
+      IMap<String, Machine<IntEffect, IntTrigger>> machines,
       Either<IntTrigger, ExtTrigger> trigger,
-      String machineId,
     ) transit,
   }) {
     return Mealy._(
       state: state,
       machines: machines,
-      transit: (trigger, machineId) {
+      transit: (trigger) {
         return transit(
           state,
           machines,
           trigger,
-          machineId,
         );
       },
     );

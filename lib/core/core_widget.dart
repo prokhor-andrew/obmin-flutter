@@ -45,9 +45,7 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
           });
         });
 
-        return coreMachines.union({
-          uiMachine,
-        });
+        return coreMachines.add("ui_machine", uiMachine);
       },
     );
     _core?.start();
@@ -102,8 +100,7 @@ final class WidgetMachine<State, Input, Output> {
       },
       machine: (setState) {
         return Machine.fromResource<(), Input, Output>(
-          id: id,
-          onCreate: (id) {
+          onCreate: () {
             return ();
           },
           onChange: (_, callback) async {

@@ -10,7 +10,7 @@ import 'package:obmin/types/func.dart';
 
 Core<State, State, Func<State, State>> CoreY<State>({
   required State Function() state,
-  required ISet<Machine<State, Func<State, State>>> Function(State state) machines,
+  required IMap<String, Machine<State, Func<State, State>>> Function(State state) machines,
 }) {
   return CoreX(
     state: state,

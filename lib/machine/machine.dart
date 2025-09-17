@@ -16,8 +16,6 @@ final class Machine<Input, Output> {
   final ChannelBufferStrategy<Input>? inputBufferStrategy;
   final ChannelBufferStrategy<Output>? outputBufferStrategy;
 
-  final String id;
-
   final (
     Future<void> Function(ChannelTask<bool> Function(Output output)? callback) onChange,
     Future<void> Function(Input input) onProcess,
@@ -25,19 +23,10 @@ final class Machine<Input, Output> {
       Function() onCreate;
 
   const Machine({
-    required this.id,
     this.inputBufferStrategy,
     this.outputBufferStrategy,
     required this.onCreate,
   });
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) || other is Machine<Input, Output> && runtimeType == other.runtimeType && id == other.id;
-  }
-
-  @override
-  int get hashCode => id.hashCode;
 
   Process run({
     ChannelBufferStrategy<Input>? inputBufferStrategy,
@@ -116,7 +105,6 @@ final class Machine<Input, Output> {
     });
 
     return Process._(
-      id: id,
       cancel: () {
         isCancelled = true;
         inputTask?.cancel();
@@ -128,19 +116,17 @@ final class Machine<Input, Output> {
   }
 
   static Machine<Input, Output> fromResource<Object, Input, Output>({
-    required String id,
-    required Object Function(String id) onCreate,
+    required Object Function() onCreate,
     required Future<void> Function(Object object, ChannelTask<bool> Function(Output output)? callback) onChange,
     required Future<void> Function(Object object, Input input) onProcess,
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,
   }) {
     return Machine<Input, Output>(
-      id: id,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       onCreate: () {
-        final Object object = onCreate(id);
+        final Object object = onCreate();
 
         return (
           (callback) async {
@@ -155,7 +141,6 @@ final class Machine<Input, Output> {
   }
 
   static Machine<ExtTrigger, ExtEffect> fromMealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({
-    required String id,
     required Future<Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() onCreateMealy,
     required Future<void> Function(State state) onDestroyMealy,
     bool shouldWaitOnEffects = true,
@@ -164,12 +149,10 @@ final class Machine<Input, Output> {
     ChannelBufferStrategy<Either<IntTrigger, ExtTrigger>>? internalBufferStrategy,
   }) {
     return Machine.fromResource<_MealyHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>, ExtTrigger, ExtEffect>(
-      id: id,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
-      onCreate: (id) {
+      onCreate: () {
         return _MealyHolder(
-          id: id,
           bufferStrategy: internalBufferStrategy,
           onCreate: onCreateMealy,
           onDestroy: onDestroyMealy,
@@ -186,14 +169,12 @@ final class Machine<Input, Output> {
   }
 
   static Machine<Never, T> fromProducer<Object, T>({
-    required String id,
     required Object Function(void Function(T response) callback) onStart,
     required void Function(Object object) onStop,
     ChannelBufferStrategy<T>? bufferStrategy,
   }) {
     return Machine.fromResource<_ProducerHolder<Object>, Never, T>(
-      id: id,
-      onCreate: (id) {
+      onCreate: () {
         return _ProducerHolder<Object>();
       },
       onChange: (object, callback) async {
@@ -213,12 +194,10 @@ final class Machine<Input, Output> {
     );
   }
 
-  static Machine<Never, Res> fromStream<Res>({
-    required String id,
-    required Stream<Res> Function() stream,
-  }) {
+  static Machine<Never, Res> fromStream<Res>(
+    Stream<Res> Function() stream,
+  ) {
     return Machine.fromProducer<StreamSubscription<Res>, Res>(
-      id: id,
       onStart: (callback) {
         return stream().listen(callback);
       },
@@ -228,13 +207,11 @@ final class Machine<Input, Output> {
     );
   }
 
-  Machine<Never, Res> fromFuture<Res>({
-    required String id,
-    required Future<Res> Function() future,
-  }) {
+  Machine<Never, Res> fromFuture<Res>(
+    Future<Res> Function() future,
+  ) {
     return Machine.fromStream<Res>(
-      id: id,
-      stream: () {
+      () {
         return future().asStream();
       },
     );
@@ -248,7 +225,6 @@ final class Machine<Input, Output> {
     ChannelBufferStrategy<Either<Output, R>>? internalBufferStrategy,
   }) {
     return Machine.fromMealy<(), Output, Input, R, Output>(
-      id: id,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
@@ -256,7 +232,7 @@ final class Machine<Input, Output> {
         Plan<(), Output, Input, R, Output> outline() {
           return Plan.create(
             state: (),
-            transit: (state, trigger, id) {
+            transit: (state, trigger) {
               return trigger.match(
                 (value) {
                   return PlanTransition(
@@ -279,7 +255,7 @@ final class Machine<Input, Output> {
           );
         }
 
-        return outline().asMealy({this}.lock);
+        return outline().asMealy({"key": this}.lock);
       },
       onDestroyMealy: (_) async {},
       shouldWaitOnEffects: shouldWaitOnEffects,
@@ -294,7 +270,6 @@ final class Machine<Input, Output> {
     ChannelBufferStrategy<Either<Output, Input>>? internalBufferStrategy,
   }) {
     return Machine.fromMealy<(), Output, Input, Input, R>(
-      id: id,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
       internalBufferStrategy: internalBufferStrategy,
@@ -302,7 +277,7 @@ final class Machine<Input, Output> {
         Plan<(), Output, Input, Input, R> outline() {
           return Plan.create(
             state: (),
-            transit: (state, trigger, id) {
+            transit: (state, trigger) {
               return trigger.match(
                 (value) {
                   return PlanTransition(
@@ -325,7 +300,7 @@ final class Machine<Input, Output> {
           );
         }
 
-        return outline().asMealy({this}.lock);
+        return outline().asMealy({"key": this}.lock);
       },
       onDestroyMealy: (_) async {},
       shouldWaitOnEffects: shouldWaitOnEffects,
@@ -333,21 +308,20 @@ final class Machine<Input, Output> {
   }
 
   static Machine<Input, Output> fromPool<Input, Output, Helper>({
-    required String id,
     required Future<Helper> Function() onCreateHelper,
     required Future<void> Function(Helper helper) onDestroyHelper,
-    required ISet<Machine<Never, Output>> Function(Helper helper) initial,
-    required ISet<Machine<Never, Output>> Function(Helper helper, Input input) map,
+    required IMap<String, Machine<Never, Output>> Function(Helper helper) initial,
+    required IMap<String, Machine<Never, Output>> Function(Helper helper, Input input) map,
     bool shouldWaitOnEffects = true,
     ChannelBufferStrategy<Input>? inputBufferStrategy,
     ChannelBufferStrategy<Output>? outputBufferStrategy,
     ChannelBufferStrategy<Either<Output, Input>>? internalBufferStrategy,
   }) {
-    Mealy<Helper, Output, Never, Input, Output> config(Helper helper, ISet<Machine<Never, Output>> machines) {
+    Mealy<Helper, Output, Never, Input, Output> config(Helper helper, IMap<String, Machine<Never, Output>> machines) {
       return Mealy.create(
         state: helper,
         machines: machines,
-        transit: (state, machines, trigger, machineId) {
+        transit: (state, machines, trigger) {
           return trigger.match(
             (value) {
               return MealyTransition(
@@ -364,7 +338,6 @@ final class Machine<Input, Output> {
     }
 
     return Machine.fromMealy(
-      id: id,
       shouldWaitOnEffects: shouldWaitOnEffects,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
@@ -381,11 +354,10 @@ final class Machine<Input, Output> {
   }
 
   static Machine<State, Func<State, State>> fromPoolX<State, Helper>({
-    required String id,
     required Future<Helper> Function() onCreateHelper,
     required Future<void> Function(Helper helper) onDestroyHelper,
     required State initial,
-    required ISet<Machine<Never, Func<State, State>>> Function(Helper helper, State state) map,
+    required IMap<String, Machine<Never, Func<State, State>>> Function(Helper helper, State state) map,
     bool isDistinctUntilChangedOn = true,
     bool shouldWaitOnEffects = true,
     ChannelBufferStrategy<State>? inputBufferStrategy,
@@ -393,7 +365,6 @@ final class Machine<Input, Output> {
     ChannelBufferStrategy<Either<Func<State, State>, State>>? internalBufferStrategy,
   }) {
     final machine = Machine.fromPool<State, Func<State, State>, Helper>(
-      id: id,
       onCreateHelper: onCreateHelper,
       onDestroyHelper: onDestroyHelper,
       initial: (helper) {
@@ -417,7 +388,7 @@ final class Machine<Input, Output> {
     Plan<Option<Input>, Output, Input, Input, Output> outline(Option<Input> state) {
       return Plan.create(
         state: state,
-        transit: (state, trigger, _) {
+        transit: (state, trigger) {
           return trigger.match(
             (value) {
               return PlanTransition(
@@ -439,9 +410,8 @@ final class Machine<Input, Output> {
     }
 
     return Machine.fromMealy(
-      id: id,
       onCreateMealy: () async {
-        return outline(Option.none()).asMealy({this}.lock);
+        return outline(Option.none()).asMealy({"key": this}.lock);
       },
       onDestroyMealy: (_) async {},
       shouldWaitOnEffects: shouldWaitOnEffects,
@@ -460,7 +430,7 @@ final class Machine<Input, Output> {
     Plan<Option<Output>, Output, Input, Input, Output> outline(Option<Output> state) {
       return Plan.create(
         state: state,
-        transit: (state, trigger, _) {
+        transit: (state, trigger) {
           return trigger.match(
             (value) {
               return PlanTransition(
@@ -482,9 +452,8 @@ final class Machine<Input, Output> {
     }
 
     return Machine.fromMealy(
-      id: id,
       onCreateMealy: () async {
-        return outline(Option.none()).asMealy({this}.lock);
+        return outline(Option.none()).asMealy({"key": this}.lock);
       },
       onDestroyMealy: (_) async {},
       shouldWaitOnEffects: shouldWaitOnEffects,
@@ -496,29 +465,14 @@ final class Machine<Input, Output> {
 }
 
 final class Process {
-  final String id;
   final void Function() _cancel;
 
   const Process._({
-    required this.id,
     required void Function() cancel,
   }) : _cancel = cancel;
 
   void cancel() {
     _cancel();
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) || other is Process && runtimeType == other.runtimeType && id == other.id;
-  }
-
-  @override
-  int get hashCode => id.hashCode;
-
-  @override
-  String toString() {
-    return "Process{ id=$id }";
   }
 }
 
@@ -527,7 +481,6 @@ final class _ProducerHolder<Object> {
 }
 
 final class _MealyHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
-  final String _id;
   final Future<Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() _onCreate;
   final Future<void> Function(State state) _onDestroy;
   final bool shouldWaitOnEffects;
@@ -536,7 +489,7 @@ final class _MealyHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
 
   ChannelTask<bool> Function(ExtEffect)? _callback;
 
-  ISet<Process> _processes = const ISet.empty();
+  IMap<String, Process> _processes = const IMap.empty();
   final Map<String, ChannelTask<bool> Function(IntEffect)> _senders = {};
 
   final Channel<Either<IntTrigger, ExtTrigger>> _channel;
@@ -546,17 +499,14 @@ final class _MealyHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
 
   MealyTransition<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> Function(
     Either<IntTrigger, ExtTrigger>,
-    String,
   )? _transit;
 
   _MealyHolder({
-    required String id,
     ChannelBufferStrategy<Either<IntTrigger, ExtTrigger>>? bufferStrategy,
     required Future<Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>> Function() onCreate,
     required Future<void> Function(State state) onDestroy,
     required this.shouldWaitOnEffects,
-  })  : _id = id,
-        _onCreate = onCreate,
+  })  : _onCreate = onCreate,
         _onDestroy = onDestroy,
         _channel = Channel(
           bufferStrategy: bufferStrategy ?? ChannelBufferStrategy.defaultStrategy(id: "default"),
@@ -570,20 +520,22 @@ final class _MealyHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
       _state = state.state;
       _transit = state.transit;
 
-      _processes = state.machines.map((machine) {
-        return machine.run(
-          onChange: (sender) async {
-            if (sender != null) {
-              _senders[machine.id] = sender;
-            } else {
-              _senders.remove(machine.id);
-            }
-          },
-          onConsume: (event) async {
-            await _channel.send(Either.left(event)).future;
-          },
-        );
-      }).toISet();
+      _processes = state.machines.map((key, machine) {
+        return MapEntry(
+            key,
+            machine.run(
+              onChange: (sender) async {
+                if (sender != null) {
+                  _senders[key] = sender;
+                } else {
+                  _senders.remove(key);
+                }
+              },
+              onConsume: (event) async {
+                await _channel.send(Either.left(event)).future;
+              },
+            ));
+      });
 
       Future(() async {
         while (true) {
@@ -606,10 +558,10 @@ final class _MealyHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
       _task?.cancel();
       _task = null;
       _transit = null;
-      for (final process in _processes) {
-        process.cancel();
+      for (final process in _processes.entries) {
+        process.value.cancel();
       }
-      _processes = const ISet.empty();
+      _processes = const IMap.empty();
 
       await _onDestroy(_state);
     }
@@ -624,59 +576,57 @@ final class _MealyHolder<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
     if (transit == null) {
       return;
     }
-    final transition = transit(event, _id);
+    final transition = transit(event);
 
     final resultingMachines = transition.mealy.machines;
 
-    final machinesToAdd = resultingMachines.where((machine) {
-      return _processes.where((process) {
-            return process.id == machine.id;
-          }).firstOrNull ==
-          null;
+    final machinesToAdd = resultingMachines.where((machineKey, machine) {
+      return _processes.where((processKey, process) {
+        return processKey == machineKey;
+      }).isEmpty;
     });
 
-    final processesToRemove = _processes.where((process) {
-      return resultingMachines.where((machine) {
-            return machine.id == process.id;
-          }).firstOrNull ==
-          null;
+    final processesToRemove = _processes.where((processKey, process) {
+      return resultingMachines.where((machineKey, machine) {
+        return machineKey == processKey;
+      }).isEmpty;
     });
 
-    final processesToKeep = _processes.where((process) {
+    final processesToKeep = _processes.where((processKey, process) {
       return machinesToAdd.where(
-                (machine) {
-                  return machine.id == process.id;
-                },
-              ).firstOrNull ==
-              null &&
+            (machineKey, machine) {
+              return machineKey == processKey;
+            },
+          ).isEmpty &&
           processesToRemove.where(
-                (processToRemove) {
-                  return processToRemove.id == process.id;
-                },
-              ).firstOrNull ==
-              null;
-    }).toISet();
+            (processToRemoveKey, processToRemove) {
+              return processToRemoveKey == processKey;
+            },
+          ).isEmpty;
+    });
 
-    for (final process in processesToRemove) {
-      process.cancel();
+    for (final process in processesToRemove.entries) {
+      process.value.cancel();
     }
 
-    final processesToAdd = machinesToAdd.map((machine) {
-      return machine.run(
-        onChange: (sender) async {
-          if (sender != null) {
-            _senders[machine.id] = sender;
-          } else {
-            _senders.remove(machine.id);
-          }
-        },
-        onConsume: (output) async {
-          await _channel.send(Either.left(output)).future;
-        },
-      );
-    }).toISet();
+    final processesToAdd = machinesToAdd.map((key, machine) {
+      return MapEntry(
+          key,
+          machine.run(
+            onChange: (sender) async {
+              if (sender != null) {
+                _senders[key] = sender;
+              } else {
+                _senders.remove(key);
+              }
+            },
+            onConsume: (output) async {
+              await _channel.send(Either.left(output)).future;
+            },
+          ));
+    });
 
-    _processes = processesToAdd.union(processesToKeep);
+    _processes = processesToAdd.addAll(processesToKeep);
     _state = transition.mealy.state;
     _transit = transition.mealy.transit;
 
