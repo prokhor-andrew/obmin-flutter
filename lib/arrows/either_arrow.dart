@@ -26,6 +26,14 @@ final class EitherArrow<E, Whole, Part> {
     });
   }
 
+  EitherArrow<E2, Whole, Part2> bimap<E2, Part2>(Func<E, E2> lf, Func<Part, Part2> rf) {
+    return lmap(lf).rmap(rf);
+  }
+
+  EitherArrow<E, Whole2, Part2> promap<Whole2, Part2>(Func<Whole2, Whole> lf, Func<Part, Part2> rf) {
+    return cmap(lf).rmap(rf);
+  }
+
   EitherArrow<E, Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
     return EitherArrow((whole2) {
       return run(f(whole2));

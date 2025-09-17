@@ -28,6 +28,14 @@ final class ValidatorArrow<E, Whole, Part> {
     });
   }
 
+  ValidatorArrow<E2, Whole, Part2> bimap<E2, Part2>(Func<E, E2> lf, Func<Part, Part2> rf) {
+    return lmap(lf).rmap(rf);
+  }
+
+  ValidatorArrow<E, Whole2, Part2> promap<Whole2, Part2>(Func<Whole2, Whole> lf, Func<Part, Part2> rf) {
+    return cmap(lf).rmap(rf);
+  }
+
   static ValidatorArrow<E, A, A> id<E, A>() {
     return ValidatorArrow(Validator.of);
   }

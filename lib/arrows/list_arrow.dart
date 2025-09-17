@@ -27,6 +27,10 @@ final class ListArrow<Whole, Part> {
     });
   }
 
+  ListArrow<Whole2, Part2> promap<Whole2, Part2>(Func<Whole2, Whole> lf, Func<Part, Part2> rf) {
+    return cmap(lf).rmap(rf);
+  }
+
   ListArrow<Whole, Sub> compose<Sub>(ListArrow<Part, Sub> other) {
     return ListArrow((whole) {
       return run(whole).bind(other.run);

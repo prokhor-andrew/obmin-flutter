@@ -29,6 +29,10 @@ final class GetArrow<Whole, Part> {
     });
   }
 
+  GetArrow<Whole2, Part2> promap<Whole2, Part2>(Func<Whole2, Whole> lf, Func<Part, Part2> rf) {
+    return cmap(lf).rmap(rf);
+  }
+
   GetArrow<Whole, Sub> compose<Sub>(GetArrow<Part, Sub> other) {
     return GetArrow((whole) {
       return other.run(run(whole));

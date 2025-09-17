@@ -30,6 +30,10 @@ final class OptionArrow<Whole, Part> {
     });
   }
 
+  OptionArrow<Whole2, Part2> promap<Whole2, Part2>(Func<Whole2, Whole> lf, Func<Part, Part2> rf) {
+    return cmap(lf).rmap(rf);
+  }
+
   OptionArrow<Whole, Sub> compose<Sub>(OptionArrow<Part, Sub> other) {
     return OptionArrow((whole) {
       return run(whole).bind(other.run);
