@@ -39,3 +39,9 @@ final class Writer<A, B> {
     return (list, value);
   }
 }
+
+extension WriterMonadExtension<E, T> on Writer<E, Writer<E, T>> {
+  Writer<E, T> joined() {
+    return bind(idfunc);
+  }
+}

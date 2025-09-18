@@ -44,3 +44,9 @@ extension IListExtensions<A> on IList<A> {
     return expand(f).toIList();
   }
 }
+
+extension ListMonadExtension<T> on IList<IList<T>> {
+  IList<T> joined() {
+    return bind(idfunc);
+  }
+}

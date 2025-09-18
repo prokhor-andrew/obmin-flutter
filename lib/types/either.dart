@@ -169,3 +169,9 @@ extension EitherNeverLeftExtension<T> on Either<Never, T> {
 extension EitherNeverRightExtension<T> on Either<T, Never> {
   T value() => match<T>(idfunc, absurd);
 }
+
+extension EitherMonadExtension<E, T> on Either<E, Either<E, T>> {
+  Either<E, T> joined() {
+    return bind(idfunc);
+  }
+}

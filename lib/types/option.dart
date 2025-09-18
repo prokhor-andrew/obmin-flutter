@@ -92,3 +92,9 @@ extension EitherToOptionalExtension<T> on Either<(), T> {
     );
   }
 }
+
+extension OptionMonadExtension<T> on Option<Option<T>> {
+  Option<T> joined() {
+    return bind(idfunc);
+  }
+}
