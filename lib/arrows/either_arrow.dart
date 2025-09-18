@@ -62,16 +62,14 @@ final class EitherArrow<E, Whole, Part> {
     });
   }
 
-  EitherArrow<E, Whole, Part> orElse(EitherArrow<E, Whole, Part> fallback) {
-    return orElseWith(constfunc(fallback));
+  EitherArrow<E, Whole, Part> orElseWith(EitherArrow<E, Whole, Part> fallback) {
+    return orElse(constfunc(fallback));
   }
 
-  EitherArrow<E2, Whole, Part> orElseWith<E2>(
-    Func<E, EitherArrow<E2, Whole, Part>> k,
-  ) {
+  EitherArrow<E2, Whole, Part> orElse<E2>(Func<E, EitherArrow<E2, Whole, Part>> f) {
     return EitherArrow((whole) {
       return run(whole).match(
-        (e) => k(e).run(whole),
+        (e) => f(e).run(whole),
         Either.right,
       );
     });
