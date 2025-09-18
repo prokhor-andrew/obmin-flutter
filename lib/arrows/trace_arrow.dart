@@ -64,4 +64,18 @@ final class TraceArrow<State, Whole, Part> {
   TraceArrow<State, Whole2, Part> after<Whole2>(TraceArrow<State, Whole2, Whole> other) {
     return other.then(this);
   }
+
+  TraceArrow<State, Whole, (Part, Part2)> zipWith<Part2>(TraceArrow<State, Whole, Part2> other) {
+    return TraceArrow((sw) {
+      IList<Writer<String, (State, (Part, Part2))>> out = const IList.empty();
+      for (final w1 in run(sw)) {
+        final (log1, (s1, p1)) = (w1.list, w1.value);
+        for (final w2 in other.run((s1, sw.$2))) {
+          final (log2, (s2, p2)) = (w2.list, w2.value);
+          out = out.add(Writer(log1 + log2, (s2, (p1, p2))));
+        }
+      }
+      return out;
+    });
+  }
 }
