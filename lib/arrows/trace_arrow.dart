@@ -14,6 +14,16 @@ final class TraceArrow<State, Whole, Part> {
 
   const TraceArrow(this.run);
 
+  static TraceArrow<State, Whole, ()> unit<State, Whole>() {
+    return TraceArrow((tuple) {
+      return [Writer.of<String, (State, ())>((tuple.$1, ()))].lock;
+    });
+  }
+
+  static TraceArrow<State, Whole, Never> zero<State, Whole>() {
+    return TraceArrow(constfunc(const IList.empty()));
+  }
+
   static TraceArrow<State, A, A> id<State, A>() {
     return TraceArrow((tuple) {
       return [Writer<String, (State, A)>(const IList.empty(), tuple)].lock;

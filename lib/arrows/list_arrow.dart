@@ -12,6 +12,14 @@ final class ListArrow<Whole, Part> {
 
   const ListArrow(this.run);
 
+  static ListArrow<Whole, ()> unit<Whole>() {
+    return ListArrow(constfunc([()].lock));
+  }
+
+  static ListArrow<Whole, Never> zero<Whole>() {
+    return ListArrow(constfunc(const IList.empty()));
+  }
+
   static ListArrow<A, A> id<A>() {
     return ListArrow((value) => [value].lock);
   }

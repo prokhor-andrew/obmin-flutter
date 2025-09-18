@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/validator.dart';
@@ -10,6 +11,14 @@ final class ValidatorArrow<E, Whole, Part> {
   final Func<Whole, Validator<E, Part>> run;
 
   const ValidatorArrow(this.run);
+
+  static ValidatorArrow<E, Whole, ()> unit<E, Whole>() {
+    return ValidatorArrow(constfunc(Validator.of(())));
+  }
+
+  static ValidatorArrow<E, Whole, Never> zero<E, Whole>() {
+    return ValidatorArrow(constfunc(Validator.errors(const IList.empty())));
+  }
 
   ValidatorArrow<E, Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
     return ValidatorArrow((whole) {

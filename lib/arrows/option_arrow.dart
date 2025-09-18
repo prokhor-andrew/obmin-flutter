@@ -18,6 +18,14 @@ final class OptionArrow<Whole, Part> {
     return OptionArrow(Option.some);
   }
 
+  static OptionArrow<Whole, ()> unit<Whole>() {
+    return OptionArrow(constfunc(Option.some(())));
+  }
+
+  static OptionArrow<Whole, Never> zero<Whole>() {
+    return OptionArrow(constfunc(Option.none()));
+  }
+
   OptionArrow<Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
     return OptionArrow((whole) {
       return run(whole).rmap(f);

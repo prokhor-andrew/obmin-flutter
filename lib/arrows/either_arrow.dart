@@ -10,6 +10,10 @@ final class EitherArrow<E, Whole, Part> {
 
   const EitherArrow(this.run);
 
+  static EitherArrow<E, Whole, ()> unit<E, Whole>() {
+    return EitherArrow(constfunc(Either.right(())));
+  }
+
   static EitherArrow<E, A, A> id<E, A>() {
     return EitherArrow(Either.right);
   }

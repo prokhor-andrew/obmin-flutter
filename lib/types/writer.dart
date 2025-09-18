@@ -13,7 +13,7 @@ final class Writer<A, B> {
 
   const Writer(this.list, this.value);
 
-  const Writer.of(this.value) : list = const IList.empty();
+  static Writer<A, B> of<A, B>(B value) => Writer(const IList.empty(), value);
 
   Writer<A, T2> rmap<T2>(Func<B, T2> f) {
     return Writer(list, f(value));

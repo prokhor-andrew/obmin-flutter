@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/writer.dart';
@@ -10,6 +11,10 @@ final class WriterArrow<E, Whole, Part> {
   final Func<Whole, Writer<E, Part>> run;
 
   const WriterArrow(this.run);
+
+  static WriterArrow<E, Whole, ()> unit<E, Whole>() {
+    return WriterArrow(constfunc(Writer(const IList.empty(), ())));
+  }
 
   WriterArrow<E, Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
     return WriterArrow((whole) {
@@ -58,10 +63,6 @@ final class WriterArrow<E, Whole, Part> {
   }
 
   WriterArrow<E, Whole, Either<Part, Part2>> altWith<Part2>(WriterArrow<E, Whole, Part2> other) {
-    return WriterArrow((whole) {
-      final part = run(whole);
-      final part2 = other.run(whole);
-      return part.altWith(part2);
-    });
+    return rmap(Either.left);
   }
 }

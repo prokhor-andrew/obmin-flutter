@@ -14,6 +14,10 @@ final class GetArrow<Whole, Part> {
 
   const GetArrow(this.run);
 
+  static GetArrow<Whole, ()> unit<Whole>() {
+    return GetArrow(constfunc(()));
+  }
+
   static GetArrow<A, A> id<A>() {
     return GetArrow(idfunc);
   }
