@@ -55,4 +55,25 @@ final class EitherArrow<E, Whole, Part> {
       return run(whole).zipWith(other.run(whole));
     });
   }
+
+  EitherArrow<E2, Whole, Part> recoverWith<E2>(EitherArrow<E2, E, Part> other) {
+    return EitherArrow((whole) {
+      return run(whole).rescue(other.run);
+    });
+  }
+
+  EitherArrow<E, Whole, Part> orElse(EitherArrow<E, Whole, Part> fallback) {
+    return orElseWith(constfunc(fallback));
+  }
+
+  EitherArrow<E2, Whole, Part> orElseWith<E2>(
+    Func<E, EitherArrow<E2, Whole, Part>> k,
+  ) {
+    return EitherArrow((whole) {
+      return run(whole).match(
+        (e) => k(e).run(whole),
+        Either.right,
+      );
+    });
+  }
 }
