@@ -60,4 +60,8 @@ final class TraceArrow<State, Whole, Part> {
       });
     });
   }
+
+  TraceArrow<State, Whole2, Part> after<Whole2>(TraceArrow<State, Whole2, Whole> other) {
+    return other.then(this);
+  }
 }
