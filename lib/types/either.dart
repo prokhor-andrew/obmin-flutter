@@ -63,26 +63,22 @@ final class Either<A, B> {
     );
   }
 
-  Either<T, B> lbind<T>(Func<A, Either<T, B>> function) {
+  Either<T, B> rescue<T>(Func<A, Either<T, B>> function) {
     return match<Either<T, B>>(
       function,
       Either.right,
     );
   }
 
-  Either<T, B> lmap<T>(Func<A, T> function) {
-    return lbind<T>((value) => Either.left(function(value)));
+  Either<T, B> lmap<T>(Func<A, T> f) {
+    return swapped().rmap(f).swapped();
   }
 
-  Either<A, T> rbind<T>(Func<B, Either<A, T>> function) {
+  Either<A, T> bind<T>(Func<B, Either<A, T>> function) {
     return match<Either<A, T>>(
       Either.left,
       function,
     );
-  }
-
-  Either<A, T> bind<T>(Func<B, Either<A, T>> function) {
-    return rbind(function);
   }
 
   Either<A, T> rmap<T>(Func<B, T> function) {
