@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/list.dart';
 
@@ -50,6 +51,22 @@ final class ListArrow<Whole, Part> {
   ListArrow<Whole, (Part, Part2)> pointIndexZipWith<Part2>(ListArrow<Whole, Part2> other) {
     return ListArrow((whole) {
       return run(whole).pointIndexZipWith(other.run(whole));
+    });
+  }
+
+  ListArrow<Whole, Either<Part, Part2>> altWithConcat<Part2>(ListArrow<Whole, Part2> other) {
+    return ListArrow((whole) {
+      final part = run(whole);
+      final part2 = other.run(whole);
+      return part.altWithConcat(part2);
+    });
+  }
+
+  ListArrow<Whole, Either<Part, Part2>> altWithLeftBiased<Part2>(ListArrow<Whole, Part2> other) {
+    return ListArrow((whole) {
+      final part = run(whole);
+      final part2 = other.run(whole);
+      return part.altWithLeftBiased(part2);
     });
   }
 }

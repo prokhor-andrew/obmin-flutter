@@ -56,6 +56,14 @@ final class EitherArrow<E, Whole, Part> {
     });
   }
 
+  EitherArrow<E, Whole, Either<Part, Part2>> altWith<Part2>(EitherArrow<E, Whole, Part2> other) {
+    return EitherArrow((whole) {
+      final part = run(whole);
+      final part2 = other.run(whole);
+      return part.altWith(part2);
+    });
+  }
+
   EitherArrow<E2, Whole, Part> recoverWith<E2>(EitherArrow<E2, E, Part> other) {
     return EitherArrow((whole) {
       return run(whole).rescue(other.run);

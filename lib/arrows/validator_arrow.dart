@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/validator.dart';
 
@@ -43,6 +44,22 @@ final class ValidatorArrow<E, Whole, Part> {
   ValidatorArrow<E, Whole, (Part, Part2)> zipWith<Part2>(ValidatorArrow<E, Whole, Part2> other) {
     return ValidatorArrow((whole) {
       return run(whole).zipWith(other.run(whole));
+    });
+  }
+
+  ValidatorArrow<E, Whole, Either<Part, Part2>> altWithLeftBiased<Part2>(ValidatorArrow<E, Whole, Part2> other) {
+    return ValidatorArrow((whole) {
+      final part = run(whole);
+      final part2 = other.run(whole);
+      return part.altWithLeftBiased(part2);
+    });
+  }
+
+  ValidatorArrow<E, Whole, Either<Part, Part2>> altWithConcat<Part2>(ValidatorArrow<E, Whole, Part2> other) {
+    return ValidatorArrow((whole) {
+      final part = run(whole);
+      final part2 = other.run(whole);
+      return part.altWithConcat(part2);
     });
   }
 }

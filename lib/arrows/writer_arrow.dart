@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/writer.dart';
 
@@ -53,6 +54,14 @@ final class WriterArrow<E, Whole, Part> {
   WriterArrow<E, Whole, (Part, Part2)> zipWith<Part2>(WriterArrow<E, Whole, Part2> other) {
     return WriterArrow((whole) {
       return run(whole).zipWith(other.run(whole));
+    });
+  }
+
+  WriterArrow<E, Whole, Either<Part, Part2>> altWith<Part2>(WriterArrow<E, Whole, Part2> other) {
+    return WriterArrow((whole) {
+      final part = run(whole);
+      final part2 = other.run(whole);
+      return part.altWith(part2);
     });
   }
 }

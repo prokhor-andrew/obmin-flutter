@@ -50,6 +50,14 @@ final class OptionArrow<Whole, Part> {
     });
   }
 
+  OptionArrow<Whole, Either<Part, Part2>> altWith<Part2>(OptionArrow<Whole, Part2> other) {
+    return OptionArrow((whole) {
+      final part = run(whole);
+      final part2 = other.run(whole);
+      return part.altWith(part2);
+    });
+  }
+
   ListArrow<Whole, Part> asListArrow() {
     return ListArrow((whole) {
       return run(whole).match(IList.empty, (value) => [value].lock);

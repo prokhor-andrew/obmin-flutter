@@ -5,6 +5,7 @@
 import 'package:obmin/arrows/either_arrow.dart';
 import 'package:obmin/arrows/list_arrow.dart';
 import 'package:obmin/arrows/option_arrow.dart';
+import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/option.dart';
 
@@ -49,6 +50,10 @@ final class GetArrow<Whole, Part> {
       final part2 = other.run(whole);
       return (part, part2);
     });
+  }
+
+  GetArrow<Whole, Either<Part, Part2>> altWith<Part2>(GetArrow<Whole, Part2> other) {
+    return rmap(Either.left);
   }
 
   OptionArrow<Whole, Part> asOptionArrow() {

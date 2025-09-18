@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/list.dart';
 import 'package:obmin/types/tuple.dart';
@@ -76,6 +77,21 @@ final class TraceArrow<State, Whole, Part> {
         }
       }
       return out;
+    });
+  }
+
+  TraceArrow<State, Whole, Either<Part, Part2>> altWithConcat<Part2>(TraceArrow<State, Whole, Part2> other) {
+    return TraceArrow((tuple) {
+      final arr1 = rmap(Either.left<Part, Part2>);
+      final arr2 = other.rmap(Either.right<Part, Part2>);
+
+      return arr1.run(tuple).addAll(arr2.run(tuple));
+    });
+  }
+
+  TraceArrow<State, Whole, Either<Part, Part2>> altWithLeftBiased<Part2>(TraceArrow<State, Whole, Part2> other) {
+    return TraceArrow((tuple) {
+      return rmap(Either.left<Part, Part2>).run(tuple);
     });
   }
 }
