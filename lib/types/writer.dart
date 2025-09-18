@@ -5,6 +5,8 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/func.dart';
 
+import 'either.dart';
+
 final class Writer<A, B> {
   final IList<A> list;
   final B value;
@@ -33,6 +35,10 @@ final class Writer<A, B> {
   Writer<A, (B, T2)> zipWith<T2>(Writer<A, T2> other) {
     final newList = list.addAll(other.list);
     return Writer(newList, (value, other.value));
+  }
+
+  Writer<A, Either<B, T2>> altWith<T2>(Writer<A, T2> other) {
+    return rmap(Either.left);
   }
 
   (IList<A>, B) asTuple() {

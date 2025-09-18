@@ -96,6 +96,18 @@ final class Either<A, B> {
     );
   }
 
+  Either<A, Either<B, T2>> altWith<T2>(Either<A, T2> other) {
+    return match(
+      (a) {
+        return other.match(
+          constfunc(Either.left(a)),
+          (t2) => Either.right(Either.right(t2)),
+        );
+      },
+      (b) => Either.right(Either.left(b)),
+    );
+  }
+
   Option<A> leftOrNone() => match<Option<A>>(
         Option.some,
         constfunc(Option.none()),

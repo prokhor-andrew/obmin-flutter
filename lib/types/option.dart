@@ -82,6 +82,13 @@ final class Option<T> {
   void runIfNone(void Function() function) {
     run(function, (_) {});
   }
+
+  Option<Either<T, T2>> altWith<T2>(Option<T2> other) {
+    return match(
+      () => other.rmap(Either.right),
+      (value) => Option.some(Either.left(value)),
+    );
+  }
 }
 
 extension EitherToOptionalExtension<T> on Either<(), T> {

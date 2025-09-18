@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/types/either.dart';
 
 import 'func.dart';
 
@@ -42,6 +43,18 @@ extension IListExtensions<A> on IList<A> {
 
   IList<A2> bind<A2>(Func<A, IList<A2>> f) {
     return expand(f).toIList();
+  }
+
+  IList<Either<A, A2>> altWithConcat<A2>(IList<A2> other) {
+    return rmap(Either.left<A, A2>).addAll(other.rmap(Either.right<A, A2>));
+  }
+
+  IList<Either<A, A2>> altWithLeftBiased<A2>(IList<A2> other) {
+    if (isNotEmpty) {
+      return rmap(Either.left);
+    } else {
+      return other.rmap(Either.right);
+    }
   }
 }
 

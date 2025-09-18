@@ -63,6 +63,34 @@ final class Validator<E, A> {
     });
   }
 
+  Validator<E, Either<A, T2>> altWithConcat<T2>(Validator<E, T2> other) {
+    return match(
+      (errors) {
+        return other.match(
+          (errors2) {
+            return Validator.errors(errors.addAll(errors2));
+          },
+          (value2) => Validator.of(Either.right(value2)),
+        );
+      },
+      (value) => Validator.of(Either.left(value)),
+    );
+  }
+
+  Validator<E, Either<A, T2>> altWithLeftBiased<T2>(Validator<E, T2> other) {
+    return match(
+      (errors) {
+        return other.match(
+          (errors2) {
+            return Validator.errors(errors);
+          },
+          (value2) => Validator.of(Either.right(value2)),
+        );
+      },
+      (value) => Validator.of(Either.left(value)),
+    );
+  }
+
   Option<IList<E>> errorsOrNone() => match<Option<IList<E>>>(
         Option.some,
         constfunc(Option.none()),
