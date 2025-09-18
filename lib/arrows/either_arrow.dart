@@ -40,10 +40,14 @@ final class EitherArrow<E, Whole, Part> {
     });
   }
 
-  EitherArrow<E, Whole, Sub> compose<Sub>(EitherArrow<E, Part, Sub> other) {
+  EitherArrow<E, Whole, Sub> then<Sub>(EitherArrow<E, Part, Sub> other) {
     return EitherArrow((whole) {
       return run(whole).bind(other.run);
     });
+  }
+
+  EitherArrow<E, Whole2, Part> after<Whole2>(EitherArrow<E, Whole2, Whole> other) {
+    return other.then(this);
   }
 
   EitherArrow<E, Whole, (Part, Part2)> zipWith<Part2>(EitherArrow<E, Whole, Part2> other) {

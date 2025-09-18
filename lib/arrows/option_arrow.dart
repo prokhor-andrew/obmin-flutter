@@ -34,10 +34,14 @@ final class OptionArrow<Whole, Part> {
     return cmap(lf).rmap(rf);
   }
 
-  OptionArrow<Whole, Sub> compose<Sub>(OptionArrow<Part, Sub> other) {
+  OptionArrow<Whole, Sub> then<Sub>(OptionArrow<Part, Sub> other) {
     return OptionArrow((whole) {
       return run(whole).bind(other.run);
     });
+  }
+
+  OptionArrow<Whole2, Part> after<Whole2>(OptionArrow<Whole2, Whole> other) {
+    return other.then(this);
   }
 
   OptionArrow<Whole, (Part, Part2)> zipWith<Part2>(OptionArrow<Whole, Part2> other) {

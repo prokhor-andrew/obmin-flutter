@@ -40,10 +40,14 @@ final class WriterArrow<E, Whole, Part> {
     return WriterArrow(Writer.of);
   }
 
-  WriterArrow<E, Whole, Sub> compose<Sub>(WriterArrow<E, Part, Sub> other) {
+  WriterArrow<E, Whole, Sub> then<Sub>(WriterArrow<E, Part, Sub> other) {
     return WriterArrow((whole) {
       return run(whole).bind(other.run);
     });
+  }
+
+  WriterArrow<E, Whole2, Part> after<Whole2>(WriterArrow<E, Whole2, Whole> other) {
+    return other.then(this);
   }
 
   WriterArrow<E, Whole, (Part, Part2)> zipWith<Part2>(WriterArrow<E, Whole, Part2> other) {

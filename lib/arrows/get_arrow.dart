@@ -33,10 +33,14 @@ final class GetArrow<Whole, Part> {
     return cmap(lf).rmap(rf);
   }
 
-  GetArrow<Whole, Sub> compose<Sub>(GetArrow<Part, Sub> other) {
+  GetArrow<Whole, Sub> then<Sub>(GetArrow<Part, Sub> other) {
     return GetArrow((whole) {
       return other.run(run(whole));
     });
+  }
+
+  GetArrow<Whole2, Part> after<Whole2>(GetArrow<Whole2, Whole> other) {
+    return other.then(this);
   }
 
   GetArrow<Whole, (Part, Part2)> zipWith<Part2>(GetArrow<Whole, Part2> other) {

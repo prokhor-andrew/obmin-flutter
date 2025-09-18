@@ -51,7 +51,7 @@ final class TraceArrow<State, Whole, Part> {
     return cmap(lf).rmap(rf);
   }
 
-  TraceArrow<State, Whole, C> compose<C>(TraceArrow<State, Part, C> other) {
+  TraceArrow<State, Whole, C> then<C>(TraceArrow<State, Part, C> other) {
     return TraceArrow((tuple) {
       return run(tuple).bind((writer) {
         return other.run(writer.value).rmap((writer2) {

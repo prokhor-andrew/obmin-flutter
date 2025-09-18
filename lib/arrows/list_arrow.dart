@@ -31,10 +31,14 @@ final class ListArrow<Whole, Part> {
     return cmap(lf).rmap(rf);
   }
 
-  ListArrow<Whole, Sub> compose<Sub>(ListArrow<Part, Sub> other) {
+  ListArrow<Whole, Sub> then<Sub>(ListArrow<Part, Sub> other) {
     return ListArrow((whole) {
       return run(whole).bind(other.run);
     });
+  }
+
+  ListArrow<Whole2, Part> after<Whole2>(ListArrow<Whole2, Whole> other) {
+    return other.then(this);
   }
 
   ListArrow<Whole, (Part, Part2)> crossJoinZipWith<Part2>(ListArrow<Whole, Part2> other) {
