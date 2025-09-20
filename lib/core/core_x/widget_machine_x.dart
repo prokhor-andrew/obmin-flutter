@@ -7,12 +7,10 @@ import 'package:obmin/core/core_widget.dart';
 import 'package:obmin/types/option.dart';
 
 WidgetMachine<State, State, Event> WidgetMachineX<State, Event>({
-  required String id,
   required Widget Function(BuildContext context, State state, Option<void Function(Event event)> update) builder,
   bool isDistinctUntilChanged = true,
 }) {
   return WidgetMachine.create<(State, Option<void Function(Event event)>), State, State, Event>(
-    id: id,
     init: (state) {
       return (state, Option.none());
     },

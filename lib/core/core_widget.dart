@@ -88,7 +88,6 @@ final class WidgetMachine<State, Input, Output> {
   }
 
   static WidgetMachine<State, Input, Output> create<UiState, State, Input, Output>({
-    required String id,
     required UiState Function(State state) init,
     required UiState Function(UiState state, void Function(Output output) callback) activate,
     required UiState Function(UiState state, Input input) process,
