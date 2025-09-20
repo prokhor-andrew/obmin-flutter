@@ -50,31 +50,65 @@ final class ListArrow<Whole, Part> {
     return other.then(this);
   }
 
-  ListArrow<Whole, (Part, Part2)> crossJoinZipWith<Part2>(ListArrow<Whole, Part2> other) {
+  ListArrow<Whole, (Part, Part2)> zipCrossJoin<Part2>(ListArrow<Whole, Part2> other) {
     return ListArrow((whole) {
-      return run(whole).crossJoinZipWith(other.run(whole));
+      return run(whole).zipCrossJoin(other.run(whole));
     });
   }
 
-  ListArrow<Whole, (Part, Part2)> pointIndexZipWith<Part2>(ListArrow<Whole, Part2> other) {
+  ListArrow<Whole, (Part, Part2)> zipPointIndex<Part2>(ListArrow<Whole, Part2> other) {
     return ListArrow((whole) {
-      return run(whole).pointIndexZipWith(other.run(whole));
+      return run(whole).zipPointIndex(other.run(whole));
     });
   }
 
-  ListArrow<Whole, Either<Part, Part2>> altWithConcat<Part2>(ListArrow<Whole, Part2> other) {
+  ListArrow<Whole, Either<Part, Part2>> altConcat<Part2>(ListArrow<Whole, Part2> other) {
     return ListArrow((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
-      return part.altWithConcat(part2);
+      return part.altConcat(part2);
     });
   }
 
-  ListArrow<Whole, Either<Part, Part2>> altWithLeftBiased<Part2>(ListArrow<Whole, Part2> other) {
+  ListArrow<Whole, Either<Part, Part2>> altLeftBiased<Part2>(ListArrow<Whole, Part2> other) {
     return ListArrow((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
-      return part.altWithLeftBiased(part2);
+      return part.altLeftBiased(part2);
+    });
+  }
+
+  static ListArrow<Whole, IList<Part>> zipAllCrossJoin<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
+    return list.fold(ListArrow.id(), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zipCrossJoin(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  static ListArrow<Whole, IList<Part>> zipAllPointIndex<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
+    return list.fold(ListArrow.id(), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zipCrossJoin(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  static ListArrow<Whole, (int, Part)> altAllLeftBiased<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
+    return list.indexed.fold(ListArrow.id(), (current, element) {
+      final (index, option) = element;
+      final indexedOption = option.rmap((value) => (index, value));
+      return current.altLeftBiased(indexedOption).rmap((either) {
+        return either.value();
+      });
+    });
+  }
+
+  static ListArrow<Whole, (int, Part)> altAllConcat<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
+    return list.indexed.fold(ListArrow.id(), (current, element) {
+      final (index, option) = element;
+      final indexedOption = option.rmap((value) => (index, value));
+      return current.altConcat(indexedOption).rmap((either) {
+        return either.value();
+      });
     });
   }
 }

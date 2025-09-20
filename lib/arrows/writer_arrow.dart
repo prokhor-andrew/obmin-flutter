@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/writer.dart';
 
@@ -56,13 +55,16 @@ final class WriterArrow<E, Whole, Part> {
     return other.then(this);
   }
 
-  WriterArrow<E, Whole, (Part, Part2)> zipWith<Part2>(WriterArrow<E, Whole, Part2> other) {
+  WriterArrow<E, Whole, (Part, Part2)> zip<Part2>(WriterArrow<E, Whole, Part2> other) {
     return WriterArrow((whole) {
-      return run(whole).zipWith(other.run(whole));
+      return run(whole).zip(other.run(whole));
     });
   }
 
-  WriterArrow<E, Whole, Either<Part, Part2>> altWith<Part2>(WriterArrow<E, Whole, Part2> other) {
-    return rmap(Either.left);
+  static WriterArrow<E, Whole, IList<Part>> zipAll<E, Whole, Part>(IList<WriterArrow<E, Whole, Part>> list) {
+    return list.fold(WriterArrow.id(), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
   }
 }

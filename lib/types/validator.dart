@@ -21,6 +21,10 @@ final class Validator<E, A> {
 
   static Validator<E, A> errors<A, E>(IList<E> errors) => Validator._(Either.left(errors));
 
+  static Validator<E, ()> unit<E>() => Validator.of(());
+
+  static Validator<E, Never> zero<E>() => Validator.errors(const IList.empty());
+
   T match<T>(
     Func<IList<E>, T> ifErrors,
     Func<A, T> ifValue,
@@ -63,7 +67,7 @@ final class Validator<E, A> {
     });
   }
 
-  Validator<E, Either<A, T2>> altWithConcat<T2>(Validator<E, T2> other) {
+  Validator<E, Either<A, T2>> altConcat<T2>(Validator<E, T2> other) {
     return match(
       (errors) {
         return other.match(
@@ -77,7 +81,7 @@ final class Validator<E, A> {
     );
   }
 
-  Validator<E, Either<A, T2>> altWithLeftBiased<T2>(Validator<E, T2> other) {
+  Validator<E, Either<A, T2>> altLeftBiased<T2>(Validator<E, T2> other) {
     return match(
       (errors) {
         return other.match(
@@ -121,6 +125,33 @@ final class Validator<E, A> {
 
   void runIfValue(void Function(A value) function) {
     run((_) {}, function);
+  }
+
+  static Validator<E, IList<Part>> zipAll<E, Part>(IList<Validator<E, Part>> list) {
+    return list.fold(Validator.of(const IList.empty()), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zipWith(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  static Validator<E, (int, Part)> altAllConcat<E, Part>(IList<Validator<E, Part>> list) {
+    return list.indexed.fold(Validator.errors(const IList.empty()), (current, element) {
+      final (index, option) = element;
+      final indexedOption = option.rmap((value) => (index, value));
+      return current.altConcat(indexedOption).rmap((either) {
+        return either.value();
+      });
+    });
+  }
+
+  static Validator<E, (int, Part)> altAllLeftBiased<E, Part>(IList<Validator<E, Part>> list) {
+    return list.indexed.fold(Validator.errors(const IList.empty()), (current, element) {
+      final (index, option) = element;
+      final indexedOption = option.rmap((value) => (index, value));
+      return current.altLeftBiased(indexedOption).rmap((either) {
+        return either.value();
+      });
+    });
   }
 
   Either<IList<E>, A> asEither() => _either;

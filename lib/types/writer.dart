@@ -5,8 +5,6 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/func.dart';
 
-import 'either.dart';
-
 final class Writer<A, B> {
   final IList<A> list;
   final B value;
@@ -14,6 +12,8 @@ final class Writer<A, B> {
   const Writer(this.list, this.value);
 
   static Writer<A, B> of<A, B>(B value) => Writer(const IList.empty(), value);
+
+  static Writer<A, ()> unit<A>() => Writer.of(());
 
   Writer<A, T2> rmap<T2>(Func<B, T2> f) {
     return Writer(list, f(value));
@@ -32,13 +32,16 @@ final class Writer<A, B> {
     return Writer(list.addAll(newWriter.list), newWriter.value);
   }
 
-  Writer<A, (B, T2)> zipWith<T2>(Writer<A, T2> other) {
+  Writer<A, (B, T2)> zip<T2>(Writer<A, T2> other) {
     final newList = list.addAll(other.list);
     return Writer(newList, (value, other.value));
   }
 
-  Writer<A, Either<B, T2>> altWith<T2>(Writer<A, T2> other) {
-    return rmap(Either.left);
+  static Writer<E, IList<Part>> zipAll<E, Part>(IList<Writer<E, Part>> list) {
+    return list.fold(Writer.of(const IList.empty()), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
   }
 
   (IList<A>, B) asTuple() {

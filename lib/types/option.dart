@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 
@@ -13,6 +14,10 @@ final class Option<T> {
   static Option<A> some<A>(A value) => Option._(Either.right(value));
 
   static Option<A> none<A>() => Option._(Either.left(()));
+
+  static Option<()> unit() => Option.some(());
+
+  static Option<Never> zero() => Option.none();
 
   V match<V>(
     V Function() ifNone,
@@ -39,7 +44,7 @@ final class Option<T> {
   @override
   int get hashCode => match(() => 0, (val) => val.hashCode);
 
-  Option<(T, R)> zipWith<R>(Option<R> other) {
+  Option<(T, R)> zip<R>(Option<R> other) {
     return match(
       Option.none,
       (val1) => other.match(Option.none, (val2) => Option.some((val1, val2))),
@@ -83,18 +88,35 @@ final class Option<T> {
     run(function, (_) {});
   }
 
-  Option<Either<T, T2>> altWith<T2>(Option<T2> other) {
+  Option<Either<T, T2>> alt<T2>(Option<T2> other) {
     return match(
       () => other.rmap(Either.right),
       (value) => Option.some(Either.left(value)),
     );
+  }
+
+  static Option<IList<Part>> zipAll<Part>(IList<Option<Part>> list) {
+    return list.fold(Option.some(const IList.empty()), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  static Option<(int, Part)> altAll<Part>(IList<Option<Part>> list) {
+    return list.indexed.fold(Option.none(), (current, element) {
+      final (index, option) = element;
+      final indexedOption = option.rmap((value) => (index, value));
+      return current.alt(indexedOption).rmap((either) {
+        return either.value();
+      });
+    });
   }
 }
 
 extension EitherToOptionalExtension<T> on Either<(), T> {
   Option<T> asOption() {
     return match<Option<T>>(
-      (_) => Option.none(),
+      constfunc(Option.none()),
       Option.some,
     );
   }

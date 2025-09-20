@@ -14,7 +14,7 @@ extension IListExtensions<A> on IList<A> {
     return map(f).toIList();
   }
 
-  IList<(A, A2)> crossJoinZipWith<A2>(IList<A2> other) {
+  IList<(A, A2)> zipCrossJoin<A2>(IList<A2> other) {
     IList<(A, A2)> result = const IList.empty();
 
     for (final a in this) {
@@ -26,7 +26,7 @@ extension IListExtensions<A> on IList<A> {
     return result;
   }
 
-  IList<(A, A2)> pointIndexZipWith<A2>(IList<A2> other) {
+  IList<(A, A2)> zipPointIndex<A2>(IList<A2> other) {
     IList<(A, A2)> result = const IList.empty();
 
     final maxLength = min(length, other.length);
@@ -45,11 +45,11 @@ extension IListExtensions<A> on IList<A> {
     return expand(f).toIList();
   }
 
-  IList<Either<A, A2>> altWithConcat<A2>(IList<A2> other) {
+  IList<Either<A, A2>> altConcat<A2>(IList<A2> other) {
     return rmap(Either.left<A, A2>).addAll(other.rmap(Either.right<A, A2>));
   }
 
-  IList<Either<A, A2>> altWithLeftBiased<A2>(IList<A2> other) {
+  IList<Either<A, A2>> altLeftBiased<A2>(IList<A2> other) {
     if (isNotEmpty) {
       return rmap(Either.left);
     } else {

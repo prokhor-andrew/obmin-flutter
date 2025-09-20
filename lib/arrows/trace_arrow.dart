@@ -76,7 +76,7 @@ final class TraceArrow<State, Whole, Part> {
     return other.then(this);
   }
 
-  TraceArrow<State, Whole, (Part, Part2)> zipWith<Part2>(TraceArrow<State, Whole, Part2> other) {
+  TraceArrow<State, Whole, (Part, Part2)> zip<Part2>(TraceArrow<State, Whole, Part2> other) {
     return TraceArrow((sw) {
       IList<Writer<String, (State, (Part, Part2))>> out = const IList.empty();
       for (final w1 in run(sw)) {
@@ -90,7 +90,7 @@ final class TraceArrow<State, Whole, Part> {
     });
   }
 
-  TraceArrow<State, Whole, Either<Part, Part2>> altWithConcat<Part2>(TraceArrow<State, Whole, Part2> other) {
+  TraceArrow<State, Whole, Either<Part, Part2>> altConcat<Part2>(TraceArrow<State, Whole, Part2> other) {
     return TraceArrow((tuple) {
       final arr1 = rmap(Either.left<Part, Part2>);
       final arr2 = other.rmap(Either.right<Part, Part2>);
@@ -99,9 +99,36 @@ final class TraceArrow<State, Whole, Part> {
     });
   }
 
-  TraceArrow<State, Whole, Either<Part, Part2>> altWithLeftBiased<Part2>(TraceArrow<State, Whole, Part2> other) {
+  TraceArrow<State, Whole, Either<Part, Part2>> altLeftBiased<Part2>(TraceArrow<State, Whole, Part2> other) {
     return TraceArrow((tuple) {
       return rmap(Either.left<Part, Part2>).run(tuple);
+    });
+  }
+
+  static TraceArrow<E, Whole, IList<Part>> zipAll<E, Whole, Part>(IList<TraceArrow<E, Whole, Part>> list) {
+    return list.fold(TraceArrow.id(), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  static TraceArrow<E, Whole, (int, Part)> altAllLeftBiased<E, Whole, Part>(IList<TraceArrow<E, Whole, Part>> list) {
+    return list.indexed.fold(TraceArrow.id(), (current, element) {
+      final (index, option) = element;
+      final indexedOption = option.rmap((value) => (index, value));
+      return current.altLeftBiased(indexedOption).rmap((either) {
+        return either.value();
+      });
+    });
+  }
+
+  static TraceArrow<E, Whole, (int, Part)> altAllConcat<E, Whole, Part>(IList<TraceArrow<E, Whole, Part>> list) {
+    return list.indexed.fold(TraceArrow.id(), (current, element) {
+      final (index, option) = element;
+      final indexedOption = option.rmap((value) => (index, value));
+      return current.altConcat(indexedOption).rmap((either) {
+        return either.value();
+      });
     });
   }
 }

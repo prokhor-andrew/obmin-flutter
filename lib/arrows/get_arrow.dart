@@ -2,10 +2,10 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/arrows/either_arrow.dart';
 import 'package:obmin/arrows/list_arrow.dart';
 import 'package:obmin/arrows/option_arrow.dart';
-import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/option.dart';
 
@@ -48,7 +48,7 @@ final class GetArrow<Whole, Part> {
     return other.then(this);
   }
 
-  GetArrow<Whole, (Part, Part2)> zipWith<Part2>(GetArrow<Whole, Part2> other) {
+  GetArrow<Whole, (Part, Part2)> zip<Part2>(GetArrow<Whole, Part2> other) {
     return GetArrow((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
@@ -56,8 +56,11 @@ final class GetArrow<Whole, Part> {
     });
   }
 
-  GetArrow<Whole, Either<Part, Part2>> altWith<Part2>(GetArrow<Whole, Part2> other) {
-    return rmap(Either.left);
+  static GetArrow<Whole, IList<Part>> zipAll<Whole, Part>(IList<GetArrow<Whole, Part>> list) {
+    return list.fold(GetArrow.id(), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
   }
 
   OptionArrow<Whole, Part> asOptionArrow() {

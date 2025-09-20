@@ -52,17 +52,34 @@ final class OptionArrow<Whole, Part> {
     return other.then(this);
   }
 
-  OptionArrow<Whole, (Part, Part2)> zipWith<Part2>(OptionArrow<Whole, Part2> other) {
+  OptionArrow<Whole, (Part, Part2)> zip<Part2>(OptionArrow<Whole, Part2> other) {
     return OptionArrow((whole) {
-      return run(whole).zipWith(other.run(whole));
+      return run(whole).zip(other.run(whole));
     });
   }
 
-  OptionArrow<Whole, Either<Part, Part2>> altWith<Part2>(OptionArrow<Whole, Part2> other) {
+  OptionArrow<Whole, Either<Part, Part2>> alt<Part2>(OptionArrow<Whole, Part2> other) {
     return OptionArrow((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
-      return part.altWith(part2);
+      return part.alt(part2);
+    });
+  }
+
+  static OptionArrow<Whole, IList<Part>> zipAll<Whole, Part>(IList<OptionArrow<Whole, Part>> list) {
+    return list.fold(OptionArrow.id(), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  static OptionArrow<Whole, (int, Part)> altAll<Whole, Part>(IList<OptionArrow<Whole, Part>> list) {
+    return list.indexed.fold(OptionArrow.id(), (current, element) {
+      final (index, option) = element;
+      final indexedOption = option.rmap((value) => (index, value));
+      return current.alt(indexedOption).rmap((either) {
+        return either.value();
+      });
     });
   }
 

@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 
@@ -54,36 +55,35 @@ final class EitherArrow<E, Whole, Part> {
     return other.then(this);
   }
 
-  EitherArrow<E, Whole, (Part, Part2)> zipWith<Part2>(EitherArrow<E, Whole, Part2> other) {
+  EitherArrow<E, Whole, (Part, Part2)> zip<Part2>(EitherArrow<E, Whole, Part2> other) {
     return EitherArrow((whole) {
-      return run(whole).zipWith(other.run(whole));
+      return run(whole).zip(other.run(whole));
     });
   }
 
-  EitherArrow<E, Whole, Either<Part, Part2>> altWith<Part2>(EitherArrow<E, Whole, Part2> other) {
-    return EitherArrow((whole) {
-      final part = run(whole);
-      final part2 = other.run(whole);
-      return part.altWith(part2);
-    });
-  }
-
-  EitherArrow<E2, Whole, Part> recoverWith<E2>(EitherArrow<E2, E, Part> other) {
+  EitherArrow<E2, Whole, Part> recover<E2>(EitherArrow<E2, E, Part> other) {
     return EitherArrow((whole) {
       return run(whole).rescue(other.run);
     });
   }
 
-  EitherArrow<E, Whole, Part> orElseWith(EitherArrow<E, Whole, Part> fallback) {
-    return orElse(constfunc(fallback));
+  EitherArrow<E, Whole, Part> orElseArrow(EitherArrow<E, Whole, Part> fallback) {
+    return orElseFunc(constfunc(fallback));
   }
 
-  EitherArrow<E2, Whole, Part> orElse<E2>(Func<E, EitherArrow<E2, Whole, Part>> f) {
+  EitherArrow<E2, Whole, Part> orElseFunc<E2>(Func<E, EitherArrow<E2, Whole, Part>> f) {
     return EitherArrow((whole) {
       return run(whole).match(
         (e) => f(e).run(whole),
         Either.right,
       );
+    });
+  }
+
+  static EitherArrow<E, Whole, IList<Part>> zipAll<E, Whole, Part>(IList<EitherArrow<E, Whole, Part>> list) {
+    return list.fold(EitherArrow.id(), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 }

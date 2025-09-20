@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/option.dart';
 
@@ -34,6 +35,8 @@ final class Either<A, B> {
   static Either<A, B> failure<A, B>(A err) => Either.left(err);
 
   static Either<A, B> success<A, B>(B val) => Either.right(val);
+
+  static Either<A, ()> unit<A>() => Either.right(());
 
   T match<T>(
     Func<A, T> ifLeft,
@@ -89,22 +92,10 @@ final class Either<A, B> {
     return lmap(lf).rmap(rf);
   }
 
-  Either<A, (B, T2)> zipWith<T2>(Either<A, T2> other) {
+  Either<A, (B, T2)> zip<T2>(Either<A, T2> other) {
     return match(
       Either.left,
       (val1) => other.match(Either.left, (val2) => Either.right((val1, val2))),
-    );
-  }
-
-  Either<A, Either<B, T2>> altWith<T2>(Either<A, T2> other) {
-    return match(
-      (a) {
-        return other.match(
-          constfunc(Either.left(a)),
-          (t2) => Either.right(Either.right(t2)),
-        );
-      },
-      (b) => Either.right(Either.left(b)),
     );
   }
 
@@ -167,6 +158,13 @@ final class Either<A, B> {
 
   void runIfSuccess(void Function(B value) f) {
     runIfRight(f);
+  }
+
+  static Either<E, IList<Part>> zipAll<E, Part>(IList<Either<E, Part>> list) {
+    return list.fold(Either.right(const IList.empty()), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
   }
 }
 

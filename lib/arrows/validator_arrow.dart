@@ -50,25 +50,52 @@ final class ValidatorArrow<E, Whole, Part> {
     return ValidatorArrow(Validator.of);
   }
 
-  ValidatorArrow<E, Whole, (Part, Part2)> zipWith<Part2>(ValidatorArrow<E, Whole, Part2> other) {
+  ValidatorArrow<E, Whole, (Part, Part2)> zip<Part2>(ValidatorArrow<E, Whole, Part2> other) {
     return ValidatorArrow((whole) {
       return run(whole).zipWith(other.run(whole));
     });
   }
 
-  ValidatorArrow<E, Whole, Either<Part, Part2>> altWithLeftBiased<Part2>(ValidatorArrow<E, Whole, Part2> other) {
+  ValidatorArrow<E, Whole, Either<Part, Part2>> altLeftBiased<Part2>(ValidatorArrow<E, Whole, Part2> other) {
     return ValidatorArrow((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
-      return part.altWithLeftBiased(part2);
+      return part.altLeftBiased(part2);
     });
   }
 
-  ValidatorArrow<E, Whole, Either<Part, Part2>> altWithConcat<Part2>(ValidatorArrow<E, Whole, Part2> other) {
+  ValidatorArrow<E, Whole, Either<Part, Part2>> altConcat<Part2>(ValidatorArrow<E, Whole, Part2> other) {
     return ValidatorArrow((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
-      return part.altWithConcat(part2);
+      return part.altConcat(part2);
+    });
+  }
+
+  static ValidatorArrow<E, Whole, IList<Part>> zipAll<E, Whole, Part>(IList<ValidatorArrow<E, Whole, Part>> list) {
+    return list.fold(ValidatorArrow.id(), (current, element) {
+      final listInOption = element.rmap((value) => [value].lock);
+      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  static ValidatorArrow<E, Whole, (int, Part)> altAllConcat<E, Whole, Part>(IList<ValidatorArrow<E, Whole, Part>> list) {
+    return list.indexed.fold(ValidatorArrow.id(), (current, element) {
+      final (index, option) = element;
+      final indexedOption = option.rmap((value) => (index, value));
+      return current.altConcat(indexedOption).rmap((either) {
+        return either.value();
+      });
+    });
+  }
+
+  static ValidatorArrow<E, Whole, (int, Part)> altAllLeftBiased<E, Whole, Part>(IList<ValidatorArrow<E, Whole, Part>> list) {
+    return list.indexed.fold(ValidatorArrow.id(), (current, element) {
+      final (index, option) = element;
+      final indexedOption = option.rmap((value) => (index, value));
+      return current.altLeftBiased(indexedOption).rmap((either) {
+        return either.value();
+      });
     });
   }
 }
