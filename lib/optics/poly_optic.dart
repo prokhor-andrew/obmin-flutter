@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/optics/optic.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/list.dart';
@@ -76,5 +77,11 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
 
   PolyOptic<Whole2, TWhole2, Part, TPart> after<Whole2, TWhole2>(PolyOptic<Whole2, TWhole2, Whole, TWhole> other) {
     return other.then(this);
+  }
+}
+
+extension PolyOpticToOpticExtension<Whole, Part> on PolyOptic<Whole, Whole, Part, Part> {
+  Optic<Whole, Part> asOptic() {
+    return Optic(run);
   }
 }
