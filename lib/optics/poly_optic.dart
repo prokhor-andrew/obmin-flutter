@@ -17,6 +17,19 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     return PolyOptic(idfunc);
   }
 
+  static PolyOptic<Whole, TWhole, Part, TPart> iso<Whole, TWhole, Part, TPart>(
+    Func<Whole, Part> focus,
+    Func<TPart, TWhole> reconstruct,
+  ) {
+    return PolyOptic((update) {
+      return (whole) {
+        final part = focus(whole);
+        final updated = update(part);
+        return reconstruct(updated);
+      };
+    });
+  }
+
   static PolyOptic<Whole, TWhole, Part, TPart> lens<Whole, TWhole, Part, TPart>(
     Func<Whole, Part> focus,
     Func<Whole, Func<TPart, TWhole>> reconstruct,

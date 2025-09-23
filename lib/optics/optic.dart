@@ -17,6 +17,19 @@ final class Optic<Whole, Part> {
     return Optic(idfunc);
   }
 
+  static Optic<Whole, Part> iso<Whole, Part>(
+    Func<Whole, Part> focus,
+    Func<Part, Whole> reconstruct,
+  ) {
+    return Optic((update) {
+      return (whole) {
+        final part = focus(whole);
+        final updated = update(part);
+        return reconstruct(updated);
+      };
+    });
+  }
+
   static Optic<Whole, Part> lens<Whole, Part>(
     Func<Whole, Part> focus,
     Func<Whole, Func<Part, Whole>> reconstruct,
