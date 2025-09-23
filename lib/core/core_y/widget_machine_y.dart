@@ -9,7 +9,7 @@ import 'package:obmin/types/func.dart';
 import 'package:obmin/types/option.dart';
 
 WidgetMachine<State, State, Func<State, State>> WidgetMachineY<State>({
-  required Widget Function(BuildContext context, State state, Option<void Function(Func<State, State> transition)> update) builder,
+  required Widget Function(BuildContext context, ValueNotifier<(State state, Option<void Function(Func<State, State> transition)>)> notifier) builder,
   bool isDistinctUntilChanged = true,
 }) {
   return WidgetMachineX<State, Func<State, State>>(
