@@ -42,7 +42,7 @@ final class Either<A, B> {
     Func<A, T> ifLeft,
     Func<B, T> ifRight,
   ) {
-    return _isRight ? ifLeft(_left as A) : ifRight(_right as B);
+    return _isRight ? ifRight(_right as B) : ifLeft(_left as A);
   }
 
   @override
