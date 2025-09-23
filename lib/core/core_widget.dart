@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core.dart';
 import 'package:obmin/machine/machine.dart';
@@ -38,7 +39,7 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
       },
       machines: (state) {
         final Machine<Input, Output> uiMachine = widget.uiMachine._machine((reduce) {
-          _notifier.value = reduce(_notifier);
+          _notifier.value = reduce(_notifier.value);
         });
 
         return coreMachines.add("ui_machine", uiMachine);
@@ -63,12 +64,12 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
 final class WidgetMachine<State, Input, Output> {
   final Object Function(State state) _init;
   final Machine<Input, Output> Function(void Function(Object Function(Object)) setState) _machine;
-  final Widget Function(BuildContext context, ValueNotifier<Object> notifier) _build;
+  final Widget Function(BuildContext context, ValueListenable<Object> notifier) _build;
 
   const WidgetMachine._({
     required Object Function(State state) init,
     required Machine<Input, Output> Function(void Function(Object Function(Object)) setState) machine,
-    required Widget Function(BuildContext context, ValueNotifier<Object> notifier) build,
+    required Widget Function(BuildContext context, ValueListenable<Object> notifier) build,
   })  : _init = init,
         _machine = machine,
         _build = build;
@@ -87,7 +88,7 @@ final class WidgetMachine<State, Input, Output> {
     required UiState Function(State state) init,
     required UiState Function(UiState state, void Function(Output output) callback) activate,
     required UiState Function(UiState state, Input input) process,
-    required Widget Function(BuildContext context, ValueNotifier<UiState> notifier) build,
+    required Widget Function(BuildContext context, ValueListenable<UiState> notifier) build,
   }) {
     return WidgetMachine<State, Input, Output>._(
       init: (state) {
@@ -115,8 +116,32 @@ final class WidgetMachine<State, Input, Output> {
         );
       },
       build: (context, notifier) {
-        return build(context, notifier as ValueNotifier<UiState>);
+        return build(context, notifier.map((value) => value as UiState));
       },
     );
+  }
+}
+
+extension _MapValueListenable<T> on ValueListenable<T> {
+  ValueListenable<R> map<R>(R Function(T value) transform) {
+    return _MappedValueListenable(this, transform);
+  }
+}
+
+final class _MappedValueListenable<T, R> extends ChangeNotifier implements ValueListenable<R> {
+  final ValueListenable<T> _source;
+  final R Function(T) _transform;
+
+  _MappedValueListenable(this._source, this._transform) {
+    _source.addListener(notifyListeners);
+  }
+
+  @override
+  R get value => _transform(_source.value);
+
+  @override
+  void dispose() {
+    _source.removeListener(notifyListeners);
+    super.dispose();
   }
 }

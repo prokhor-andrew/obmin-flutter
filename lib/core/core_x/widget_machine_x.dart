@@ -2,12 +2,13 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core_widget.dart';
 import 'package:obmin/types/option.dart';
 
 WidgetMachine<State, State, Event> WidgetMachineX<State, Event>({
-  required Widget Function(BuildContext context, ValueNotifier<(State state, Option<void Function(Event event)> update)>) builder,
+  required Widget Function(BuildContext context, ValueListenable<(State state, Option<void Function(Event event)> update)>) builder,
   bool isDistinctUntilChanged = true,
 }) {
   return WidgetMachine.create<(State, Option<void Function(Event event)>), State, State, Event>(
