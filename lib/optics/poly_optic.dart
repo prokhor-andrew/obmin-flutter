@@ -25,7 +25,7 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     return PolyOptic.fromRun(idfunc);
   }
 
-  static PolyOptic<Whole, TWhole, Part, TPart> iso<Whole, TWhole, Part, TPart>(
+  static PolyOptic<Whole, TWhole, Part, TPart> adapter<Whole, TWhole, Part, TPart>(
     Func<Whole, Part> focus,
     Func<TPart, TWhole> reconstruct,
   ) {
