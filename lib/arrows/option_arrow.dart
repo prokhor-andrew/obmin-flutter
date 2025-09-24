@@ -12,28 +12,32 @@ import 'package:obmin/types/option.dart';
 final class OptionArrow<Whole, Part> {
   final Func<Whole, Option<Part>> run;
 
-  const OptionArrow(this.run);
+  const OptionArrow._(this.run);
+
+  static OptionArrow<Whole, Part> fromRun<Whole, Part>(Func<Whole, Option<Part>> run) {
+    return OptionArrow._(run);
+  }
 
   static OptionArrow<A, A> id<E, A>() {
-    return OptionArrow(Option.some);
+    return OptionArrow.fromRun(Option.some);
   }
 
   static OptionArrow<Whole, ()> unit<Whole>() {
-    return OptionArrow(constfunc(Option.some(())));
+    return OptionArrow.fromRun(constfunc(Option.some(())));
   }
 
   static OptionArrow<Whole, Never> zero<Whole>() {
-    return OptionArrow(constfunc(Option.none()));
+    return OptionArrow.fromRun(constfunc(Option.none()));
   }
 
   OptionArrow<Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
-    return OptionArrow((whole) {
+    return OptionArrow.fromRun((whole) {
       return run(whole).rmap(f);
     });
   }
 
   OptionArrow<Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return OptionArrow((whole2) {
+    return OptionArrow.fromRun((whole2) {
       return run(f(whole2));
     });
   }
@@ -43,7 +47,7 @@ final class OptionArrow<Whole, Part> {
   }
 
   OptionArrow<Whole, Sub> then<Sub>(OptionArrow<Part, Sub> other) {
-    return OptionArrow((whole) {
+    return OptionArrow.fromRun((whole) {
       return run(whole).bind(other.run);
     });
   }
@@ -53,13 +57,13 @@ final class OptionArrow<Whole, Part> {
   }
 
   OptionArrow<Whole, (Part, Part2)> zip<Part2>(OptionArrow<Whole, Part2> other) {
-    return OptionArrow((whole) {
+    return OptionArrow.fromRun((whole) {
       return run(whole).zip(other.run(whole));
     });
   }
 
   OptionArrow<Whole, Either<Part, Part2>> alt<Part2>(OptionArrow<Whole, Part2> other) {
-    return OptionArrow((whole) {
+    return OptionArrow.fromRun((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
       return part.alt(part2);
@@ -84,13 +88,13 @@ final class OptionArrow<Whole, Part> {
   }
 
   ListArrow<Whole, Part> asListArrow() {
-    return ListArrow((whole) {
+    return ListArrow.fromRun((whole) {
       return run(whole).match(IList.empty, (value) => [value].lock);
     });
   }
 
   EitherArrow<(), Whole, Part> asEitherArrow() {
-    return EitherArrow((whole) {
+    return EitherArrow.fromRun((whole) {
       return run(whole).match(() => Either.left(()), Either.right);
     });
   }

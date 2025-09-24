@@ -12,24 +12,28 @@ import 'package:obmin/types/option.dart';
 final class GetArrow<Whole, Part> {
   final Func<Whole, Part> run;
 
-  const GetArrow(this.run);
+  const GetArrow._(this.run);
+
+  static GetArrow<Whole, Part> fromRun<Whole, Part>(Func<Whole, Part> run) {
+    return GetArrow._(run);
+  }
 
   static GetArrow<Whole, ()> unit<Whole>() {
-    return GetArrow(constfunc(()));
+    return GetArrow.fromRun(constfunc(()));
   }
 
   static GetArrow<A, A> id<A>() {
-    return GetArrow(idfunc);
+    return GetArrow.fromRun(idfunc);
   }
 
   GetArrow<Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
-    return GetArrow((whole) {
+    return GetArrow.fromRun((whole) {
       return f(run(whole));
     });
   }
 
   GetArrow<Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return GetArrow((whole2) {
+    return GetArrow.fromRun((whole2) {
       return run(f(whole2));
     });
   }
@@ -39,7 +43,7 @@ final class GetArrow<Whole, Part> {
   }
 
   GetArrow<Whole, Sub> then<Sub>(GetArrow<Part, Sub> other) {
-    return GetArrow((whole) {
+    return GetArrow.fromRun((whole) {
       return other.run(run(whole));
     });
   }
@@ -49,7 +53,7 @@ final class GetArrow<Whole, Part> {
   }
 
   GetArrow<Whole, (Part, Part2)> zip<Part2>(GetArrow<Whole, Part2> other) {
-    return GetArrow((whole) {
+    return GetArrow.fromRun((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
       return (part, part2);
@@ -64,7 +68,7 @@ final class GetArrow<Whole, Part> {
   }
 
   OptionArrow<Whole, Part> asOptionArrow() {
-    return OptionArrow((whole) {
+    return OptionArrow.fromRun((whole) {
       return Option.some(run(whole));
     });
   }

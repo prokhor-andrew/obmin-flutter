@@ -12,26 +12,30 @@ import 'package:obmin/types/writer.dart';
 final class TraceArrow<State, Whole, Part> {
   final Func<(State, Whole), IList<Writer<String, (State, Part)>>> run;
 
-  const TraceArrow(this.run);
+  const TraceArrow._(this.run);
+
+  static TraceArrow<State, Whole, Part> fromRun<State, Whole, Part>(Func<(State, Whole), IList<Writer<String, (State, Part)>>> run) {
+    return TraceArrow._(run);
+  }
 
   static TraceArrow<State, Whole, ()> unit<State, Whole>() {
-    return TraceArrow((tuple) {
+    return TraceArrow.fromRun((tuple) {
       return [Writer.of<String, (State, ())>((tuple.$1, ()))].lock;
     });
   }
 
   static TraceArrow<State, Whole, Never> zero<State, Whole>() {
-    return TraceArrow(constfunc(const IList.empty()));
+    return TraceArrow.fromRun(constfunc(const IList.empty()));
   }
 
   static TraceArrow<State, A, A> id<State, A>() {
-    return TraceArrow((tuple) {
+    return TraceArrow.fromRun((tuple) {
       return [Writer<String, (State, A)>(const IList.empty(), tuple)].lock;
     });
   }
 
   TraceArrow<State, Whole, C> rmap<C>(Func<Part, C> f) {
-    return TraceArrow((tuple) {
+    return TraceArrow.fromRun((tuple) {
       return run(tuple).rmap((writer) {
         return writer.rmap((tuple) {
           return tuple.rmap(f);
@@ -41,13 +45,13 @@ final class TraceArrow<State, Whole, Part> {
   }
 
   TraceArrow<State, Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return TraceArrow((tuple) {
+    return TraceArrow.fromRun((tuple) {
       return run(tuple.rmap(f));
     });
   }
 
   TraceArrow<State2, Whole, Part> imap<State2>(Func<State2, State> lf, Func<State, State2> rf) {
-    return TraceArrow((tuple) {
+    return TraceArrow.fromRun((tuple) {
       final list = run(tuple.lmap(lf));
 
       return list.rmap((writer) {
@@ -63,7 +67,7 @@ final class TraceArrow<State, Whole, Part> {
   }
 
   TraceArrow<State, Whole, C> then<C>(TraceArrow<State, Part, C> other) {
-    return TraceArrow((tuple) {
+    return TraceArrow.fromRun((tuple) {
       return run(tuple).bind((writer) {
         return other.run(writer.value).rmap((writer2) {
           return Writer(writer.list.addAll(writer2.list), writer2.value);
@@ -77,7 +81,7 @@ final class TraceArrow<State, Whole, Part> {
   }
 
   TraceArrow<State, Whole, (Part, Part2)> zip<Part2>(TraceArrow<State, Whole, Part2> other) {
-    return TraceArrow((sw) {
+    return TraceArrow.fromRun((sw) {
       IList<Writer<String, (State, (Part, Part2))>> out = const IList.empty();
       for (final w1 in run(sw)) {
         final (log1, (s1, p1)) = (w1.list, w1.value);
@@ -91,7 +95,7 @@ final class TraceArrow<State, Whole, Part> {
   }
 
   TraceArrow<State, Whole, Either<Part, Part2>> altConcat<Part2>(TraceArrow<State, Whole, Part2> other) {
-    return TraceArrow((tuple) {
+    return TraceArrow.fromRun((tuple) {
       final arr1 = rmap(Either.left<Part, Part2>);
       final arr2 = other.rmap(Either.right<Part, Part2>);
 
@@ -100,7 +104,7 @@ final class TraceArrow<State, Whole, Part> {
   }
 
   TraceArrow<State, Whole, Either<Part, Part2>> altLeftBiased<Part2>(TraceArrow<State, Whole, Part2> other) {
-    return TraceArrow((tuple) {
+    return TraceArrow.fromRun((tuple) {
       return rmap(Either.left<Part, Part2>).run(tuple);
     });
   }

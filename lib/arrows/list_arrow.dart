@@ -10,28 +10,32 @@ import 'package:obmin/types/list.dart';
 final class ListArrow<Whole, Part> {
   final Func<Whole, IList<Part>> run;
 
-  const ListArrow(this.run);
+  const ListArrow._(this.run);
+
+  static ListArrow<Whole, Part> fromRun<Whole, Part>(Func<Whole, IList<Part>> run) {
+    return ListArrow._(run);
+  }
 
   static ListArrow<Whole, ()> unit<Whole>() {
-    return ListArrow(constfunc([()].lock));
+    return ListArrow.fromRun(constfunc([()].lock));
   }
 
   static ListArrow<Whole, Never> zero<Whole>() {
-    return ListArrow(constfunc(const IList.empty()));
+    return ListArrow.fromRun(constfunc(const IList.empty()));
   }
 
   static ListArrow<A, A> id<A>() {
-    return ListArrow((value) => [value].lock);
+    return ListArrow.fromRun((value) => [value].lock);
   }
 
   ListArrow<Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
-    return ListArrow((whole) {
+    return ListArrow.fromRun((whole) {
       return run(whole).rmap(f);
     });
   }
 
   ListArrow<Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return ListArrow((whole2) {
+    return ListArrow.fromRun((whole2) {
       return run(f(whole2));
     });
   }
@@ -41,7 +45,7 @@ final class ListArrow<Whole, Part> {
   }
 
   ListArrow<Whole, Sub> then<Sub>(ListArrow<Part, Sub> other) {
-    return ListArrow((whole) {
+    return ListArrow.fromRun((whole) {
       return run(whole).bind(other.run);
     });
   }
@@ -51,19 +55,19 @@ final class ListArrow<Whole, Part> {
   }
 
   ListArrow<Whole, (Part, Part2)> zipCrossJoin<Part2>(ListArrow<Whole, Part2> other) {
-    return ListArrow((whole) {
+    return ListArrow.fromRun((whole) {
       return run(whole).zipCrossJoin(other.run(whole));
     });
   }
 
   ListArrow<Whole, (Part, Part2)> zipPointIndex<Part2>(ListArrow<Whole, Part2> other) {
-    return ListArrow((whole) {
+    return ListArrow.fromRun((whole) {
       return run(whole).zipPointIndex(other.run(whole));
     });
   }
 
   ListArrow<Whole, Either<Part, Part2>> altConcat<Part2>(ListArrow<Whole, Part2> other) {
-    return ListArrow((whole) {
+    return ListArrow.fromRun((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
       return part.altConcat(part2);
@@ -71,7 +75,7 @@ final class ListArrow<Whole, Part> {
   }
 
   ListArrow<Whole, Either<Part, Part2>> altLeftBiased<Part2>(ListArrow<Whole, Part2> other) {
-    return ListArrow((whole) {
+    return ListArrow.fromRun((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
       return part.altLeftBiased(part2);

@@ -9,26 +9,30 @@ import 'package:obmin/types/writer.dart';
 final class WriterArrow<E, Whole, Part> {
   final Func<Whole, Writer<E, Part>> run;
 
-  const WriterArrow(this.run);
+  const WriterArrow._(this.run);
+
+  static WriterArrow<E, Whole, Part> fromRun<E, Whole, Part>(Func<Whole, Writer<E, Part>> run) {
+    return WriterArrow._(run);
+  }
 
   static WriterArrow<E, Whole, ()> unit<E, Whole>() {
-    return WriterArrow(constfunc(Writer(const IList.empty(), ())));
+    return WriterArrow.fromRun(constfunc(Writer(const IList.empty(), ())));
   }
 
   WriterArrow<E, Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
-    return WriterArrow((whole) {
+    return WriterArrow.fromRun((whole) {
       return run(whole).rmap(f);
     });
   }
 
   WriterArrow<E2, Whole, Part> lmap<E2>(Func<E, E2> f) {
-    return WriterArrow((whole) {
+    return WriterArrow.fromRun((whole) {
       return run(whole).lmap(f);
     });
   }
 
   WriterArrow<E, Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return WriterArrow((whole2) {
+    return WriterArrow.fromRun((whole2) {
       return run(f(whole2));
     });
   }
@@ -42,11 +46,11 @@ final class WriterArrow<E, Whole, Part> {
   }
 
   static WriterArrow<E, A, A> id<E, A>() {
-    return WriterArrow(Writer.of);
+    return WriterArrow.fromRun(Writer.of);
   }
 
   WriterArrow<E, Whole, Sub> then<Sub>(WriterArrow<E, Part, Sub> other) {
-    return WriterArrow((whole) {
+    return WriterArrow.fromRun((whole) {
       return run(whole).bind(other.run);
     });
   }
@@ -56,7 +60,7 @@ final class WriterArrow<E, Whole, Part> {
   }
 
   WriterArrow<E, Whole, (Part, Part2)> zip<Part2>(WriterArrow<E, Whole, Part2> other) {
-    return WriterArrow((whole) {
+    return WriterArrow.fromRun((whole) {
       return run(whole).zip(other.run(whole));
     });
   }

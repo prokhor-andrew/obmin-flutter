@@ -10,30 +10,34 @@ import 'package:obmin/types/validator.dart';
 final class ValidatorArrow<E, Whole, Part> {
   final Func<Whole, Validator<E, Part>> run;
 
-  const ValidatorArrow(this.run);
+  const ValidatorArrow._(this.run);
+
+  static ValidatorArrow<E, Whole, Part> fromRun<E, Whole, Part>(Func<Whole, Validator<E, Part>> run) {
+    return ValidatorArrow._(run);
+  }
 
   static ValidatorArrow<E, Whole, ()> unit<E, Whole>() {
-    return ValidatorArrow(constfunc(Validator.of(())));
+    return ValidatorArrow.fromRun(constfunc(Validator.of(())));
   }
 
   static ValidatorArrow<E, Whole, Never> zero<E, Whole>() {
-    return ValidatorArrow(constfunc(Validator.errors(const IList.empty())));
+    return ValidatorArrow.fromRun(constfunc(Validator.errors(const IList.empty())));
   }
 
   ValidatorArrow<E, Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
-    return ValidatorArrow((whole) {
+    return ValidatorArrow.fromRun((whole) {
       return run(whole).rmap(f);
     });
   }
 
   ValidatorArrow<E2, Whole, Part> lmap<E2>(Func<E, E2> f) {
-    return ValidatorArrow((whole) {
+    return ValidatorArrow.fromRun((whole) {
       return run(whole).lmap(f);
     });
   }
 
   ValidatorArrow<E, Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return ValidatorArrow((whole2) {
+    return ValidatorArrow.fromRun((whole2) {
       return run(f(whole2));
     });
   }
@@ -47,17 +51,17 @@ final class ValidatorArrow<E, Whole, Part> {
   }
 
   static ValidatorArrow<E, A, A> id<E, A>() {
-    return ValidatorArrow(Validator.of);
+    return ValidatorArrow.fromRun(Validator.of);
   }
 
   ValidatorArrow<E, Whole, (Part, Part2)> zip<Part2>(ValidatorArrow<E, Whole, Part2> other) {
-    return ValidatorArrow((whole) {
+    return ValidatorArrow.fromRun((whole) {
       return run(whole).zipWith(other.run(whole));
     });
   }
 
   ValidatorArrow<E, Whole, Either<Part, Part2>> altLeftBiased<Part2>(ValidatorArrow<E, Whole, Part2> other) {
-    return ValidatorArrow((whole) {
+    return ValidatorArrow.fromRun((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
       return part.altLeftBiased(part2);
@@ -65,7 +69,7 @@ final class ValidatorArrow<E, Whole, Part> {
   }
 
   ValidatorArrow<E, Whole, Either<Part, Part2>> altConcat<Part2>(ValidatorArrow<E, Whole, Part2> other) {
-    return ValidatorArrow((whole) {
+    return ValidatorArrow.fromRun((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
       return part.altConcat(part2);

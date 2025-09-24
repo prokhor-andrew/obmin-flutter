@@ -9,24 +9,28 @@ import 'package:obmin/types/func.dart';
 final class EitherArrow<E, Whole, Part> {
   final Func<Whole, Either<E, Part>> run;
 
-  const EitherArrow(this.run);
+  const EitherArrow._(this.run);
+
+  static EitherArrow<E, Whole, Part> fromRun<E, Whole, Part>(Func<Whole, Either<E, Part>> run) {
+    return EitherArrow._(run);
+  }
 
   static EitherArrow<E, Whole, ()> unit<E, Whole>() {
-    return EitherArrow(constfunc(Either.right(())));
+    return EitherArrow.fromRun(constfunc(Either.right(())));
   }
 
   static EitherArrow<E, A, A> id<E, A>() {
-    return EitherArrow(Either.right);
+    return EitherArrow.fromRun(Either.right);
   }
 
   EitherArrow<E, Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
-    return EitherArrow((whole) {
+    return EitherArrow.fromRun((whole) {
       return run(whole).rmap(f);
     });
   }
 
   EitherArrow<E2, Whole, Part> lmap<E2>(Func<E, E2> f) {
-    return EitherArrow((whole) {
+    return EitherArrow.fromRun((whole) {
       return run(whole).lmap(f);
     });
   }
@@ -40,13 +44,13 @@ final class EitherArrow<E, Whole, Part> {
   }
 
   EitherArrow<E, Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return EitherArrow((whole2) {
+    return EitherArrow.fromRun((whole2) {
       return run(f(whole2));
     });
   }
 
   EitherArrow<E, Whole, Sub> then<Sub>(EitherArrow<E, Part, Sub> other) {
-    return EitherArrow((whole) {
+    return EitherArrow.fromRun((whole) {
       return run(whole).bind(other.run);
     });
   }
@@ -56,13 +60,13 @@ final class EitherArrow<E, Whole, Part> {
   }
 
   EitherArrow<E, Whole, (Part, Part2)> zip<Part2>(EitherArrow<E, Whole, Part2> other) {
-    return EitherArrow((whole) {
+    return EitherArrow.fromRun((whole) {
       return run(whole).zip(other.run(whole));
     });
   }
 
   EitherArrow<E2, Whole, Part> recover<E2>(EitherArrow<E2, E, Part> other) {
-    return EitherArrow((whole) {
+    return EitherArrow.fromRun((whole) {
       return run(whole).rescue(other.run);
     });
   }
@@ -72,7 +76,7 @@ final class EitherArrow<E, Whole, Part> {
   }
 
   EitherArrow<E2, Whole, Part> orElseFunc<E2>(Func<E, EitherArrow<E2, Whole, Part>> f) {
-    return EitherArrow((whole) {
+    return EitherArrow.fromRun((whole) {
       return run(whole).match(
         (e) => f(e).run(whole),
         Either.right,
