@@ -15,6 +15,8 @@ import 'package:obmin/types/writer.dart';
 final class PolyOptic<Whole, TWhole, Part, TPart> {
   final Func<Func<Part, TPart>, Func<Whole, TWhole>> run;
 
+  Func<Whole, TWhole> set(TPart value) => run(constfunc(value));
+
   const PolyOptic._(this.run);
 
   static PolyOptic<Whole, TWhole, Part, TPart> fromRun<Whole, TWhole, Part, TPart>(Func<Func<Part, TPart>, Func<Whole, TWhole>> run) {
