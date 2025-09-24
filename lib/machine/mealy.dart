@@ -22,11 +22,11 @@ final class Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> && other.state == state && other.machines == machines;
+    return other is Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> && other.state == state && other.machines.keys == machines.keys;
   }
 
   @override
-  int get hashCode => state.hashCode ^ machines.hashCode;
+  int get hashCode => state.hashCode ^ machines.keys.hashCode;
 
   static Mealy<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect> create<State, IntTrigger, IntEffect, ExtTrigger, ExtEffect>({
     required State state,
