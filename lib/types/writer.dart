@@ -6,21 +6,25 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/func.dart';
 
 final class Writer<A, B> {
-  final IList<A> list;
-  final B value;
+  final IList<A> _list;
+  final B _value;
 
-  const Writer(this.list, this.value);
+  IList<A> list() => _list;
+
+  B value() => _value;
+
+  const Writer(this._list, this._value);
 
   static Writer<A, B> of<A, B>(B value) => Writer(const IList.empty(), value);
 
   static Writer<A, ()> unit<A>() => Writer.of(());
 
   Writer<A, T2> rmap<T2>(Func<B, T2> f) {
-    return Writer(list, f(value));
+    return Writer(_list, f(_value));
   }
 
   Writer<C2, B> lmap<C2>(Func<A, C2> f) {
-    return Writer(list.map(f).toIList(), value);
+    return Writer(_list.map(f).toIList(), _value);
   }
 
   Writer<A2, B2> bimap<A2, B2>(Func<A, A2> lf, Func<B, B2> rf) {
@@ -28,13 +32,13 @@ final class Writer<A, B> {
   }
 
   Writer<A, T2> bind<T2>(Func<B, Writer<A, T2>> f) {
-    final newWriter = f(value);
-    return Writer(list.addAll(newWriter.list), newWriter.value);
+    final newWriter = f(_value);
+    return Writer(_list.addAll(newWriter._list), newWriter._value);
   }
 
   Writer<A, (B, T2)> zip<T2>(Writer<A, T2> other) {
-    final newList = list.addAll(other.list);
-    return Writer(newList, (value, other.value));
+    final newList = _list.addAll(other._list);
+    return Writer(newList, (_value, other._value));
   }
 
   static Writer<E, IList<Part>> zipAll<E, Part>(IList<Writer<E, Part>> list) {
@@ -45,8 +49,24 @@ final class Writer<A, B> {
   }
 
   (IList<A>, B) asTuple() {
-    return (list, value);
+    return (_list, _value);
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+
+    if (other is! Writer<A, B>) {
+      return false;
+    }
+
+    return _list == other._list && _value == other._value;
+  }
+
+  @override
+  int get hashCode => _list.hashCode ^ _value.hashCode;
 }
 
 extension WriterMonadExtension<E, T> on Writer<E, Writer<E, T>> {

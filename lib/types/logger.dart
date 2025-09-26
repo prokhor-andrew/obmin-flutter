@@ -6,27 +6,31 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/func.dart';
 
 final class Logger<A> {
-  final String log;
-  final A value;
+  final String _log;
+  final A _value;
 
-  const Logger(this.log, this.value);
+  const Logger(this._log, this._value);
+
+  String log() => _log;
+
+  A value() => _value;
 
   static Logger<A> of<A>(A value) => Logger("", value);
 
   static Logger<()> unit() => Logger.of(());
 
   Logger<A2> rmap<A2>(Func<A, A2> f) {
-    return Logger(log, f(value));
+    return Logger(_log, f(_value));
   }
 
   Logger<A2> bind<A2>(Func<A, Logger<A2>> f) {
-    final newLogger = f(value);
-    return Logger(log + newLogger.log, newLogger.value);
+    final newLogger = f(_value);
+    return Logger(_log + newLogger._log, newLogger._value);
   }
 
   Logger<(A, A2)> zip<A2>(Logger<A2> other) {
-    final newLog = log + other.log;
-    return Logger(newLog, (value, other.value));
+    final newLog = _log + other._log;
+    return Logger(newLog, (_value, other._value));
   }
 
   static Logger<IList<A>> zipAll<A>(IList<Logger<A>> list) {
@@ -37,8 +41,24 @@ final class Logger<A> {
   }
 
   (String, A) asTuple() {
-    return (log, value);
+    return (_log, _value);
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+
+    if (other is! Logger<A>) {
+      return false;
+    }
+
+    return _log == other._log && _value == other._value;
+  }
+
+  @override
+  int get hashCode => _log.hashCode ^ _value.hashCode;
 }
 
 extension LoggerMonadExtension<T> on Logger<Logger<T>> {

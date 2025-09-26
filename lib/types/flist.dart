@@ -57,6 +57,9 @@ final class FList<A> {
 
     return _head == other._head && _tail == other._tail;
   }
+
+  @override
+  int get hashCode => _head.hashCode ^ _tail.hashCode;
 }
 
 extension FListExtension<A> on FList<FList<A>> {
