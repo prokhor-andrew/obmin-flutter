@@ -4,8 +4,10 @@
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
+import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/list.dart';
+import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
 import 'package:obmin/types/these.dart';
 import 'package:obmin/types/tuple.dart';
@@ -115,6 +117,22 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
   }
 
   static PolyOptic<Validator<E, Part>, Validator<E, TPart>, Part, TPart> validator<E, Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.rmap(update);
+      };
+    });
+  }
+
+  static PolyOptic<FList<Part>, FList<TPart>, Part, TPart> flist<Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.rmap(update);
+      };
+    });
+  }
+
+  static PolyOptic<Logger<Part>, Logger<TPart>, Part, TPart> logger<Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.rmap(update);
