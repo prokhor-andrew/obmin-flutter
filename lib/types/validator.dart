@@ -54,7 +54,7 @@ final class Validator<E, A> {
     return match(Validator.errors, (value) => Validator.of(function(value)));
   }
 
-  Validator<E, (A, T2)> zipWith<T2>(Validator<E, T2> other) {
+  Validator<E, (A, T2)> zip<T2>(Validator<E, T2> other) {
     return match((errors) {
       return other.match(
         (errors2) => Validator.errors(errors.addAll(errors2)),
@@ -130,7 +130,7 @@ final class Validator<E, A> {
   static Validator<E, IList<Part>> zipAll<E, Part>(IList<Validator<E, Part>> list) {
     return list.fold(Validator.of(const IList.empty()), (current, element) {
       final listInOption = element.rmap((value) => [value].lock);
-      return current.zipWith(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 

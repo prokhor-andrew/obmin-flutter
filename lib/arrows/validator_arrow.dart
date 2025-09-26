@@ -56,7 +56,7 @@ final class ValidatorArrow<E, Whole, Part> {
 
   ValidatorArrow<E, Whole, (Part, Part2)> zip<Part2>(ValidatorArrow<E, Whole, Part2> other) {
     return ValidatorArrow.fromRun((whole) {
-      return run(whole).zipWith(other.run(whole));
+      return run(whole).zip(other.run(whole));
     });
   }
 
