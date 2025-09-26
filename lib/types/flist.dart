@@ -36,6 +36,13 @@ final class FList<A> {
     return bind((a) => other.rmap((a2) => (a, a2)));
   }
 
+  static FList<IList<A>> zipAll<A>(IList<FList<A>> list) {
+    return list.fold(FList.of(const IList.empty()), (current, element) {
+      final loggerList = element.rmap((value) => [value].lock);
+      return current.zip(loggerList).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
   FList<A2> bind<A2>(Func<A, FList<A2>> f) {
     final part1 = f(_head);
     final part2 = _tail.bind((val) {
