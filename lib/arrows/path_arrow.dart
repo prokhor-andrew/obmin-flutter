@@ -6,14 +6,102 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/func.dart';
+import 'package:obmin/types/logger.dart';
+import 'package:obmin/types/option.dart';
+import 'package:obmin/types/validator.dart';
+import 'package:obmin/types/writer.dart';
 
 final class PathArrow<State, Whole, Part> {
   final Func<(State, Whole), IMap<FList<String>, (State, Part)>> run;
 
   const PathArrow._(this.run);
 
-  static PathArrow<State, Whole, Part> fromRun<State, Whole, Part>(Func<(State, Whole), IMap<FList<String>, (State, Part)>> run) {
+  static PathArrow<State, Whole, Part> fromRun<State, Whole, Part>(
+    Func<(State, Whole), IMap<FList<String>, (State, Part)>> run,
+  ) {
     return PathArrow._(run);
+  }
+
+  static PathArrow<State, Either<E, Part>, Part> either<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, either) = tuple;
+
+      return either.match(
+        constfunc(const IMap.empty()),
+        (value) {
+          return {FList.of("right"): (state, value)}.lock;
+        },
+      );
+    });
+  }
+
+  static PathArrow<State, Writer<E, Part>, Part> writer<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, writer) = tuple;
+
+      return {FList.of("value"): (state, writer.value())}.lock;
+    });
+  }
+
+  static PathArrow<State, FList<Part>, Part> flist<State, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, flist) = tuple;
+
+      IMap<FList<String>, (State, Part)> result = {FList.of("0"): (state, flist.head())}.lock;
+
+      flist.tail().indexed.forEach((tuple) {
+        final (index, value) = tuple;
+        result = result.add(FList.of("${index + 1}"), (state, value));
+      });
+
+      return result;
+    });
+  }
+
+  static PathArrow<State, Validator<E, Part>, Part> validator<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, validator) = tuple;
+
+      return validator.match(constfunc(const IMap.empty()), (value) {
+        return {FList.of("value"): (state, value)}.lock;
+      });
+    });
+  }
+
+  static PathArrow<State, Logger<Part>, Part> logger<State, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, logger) = tuple;
+
+      return {FList.of("value"): (state, logger.value())}.lock;
+    });
+  }
+
+  static PathArrow<State, Option<Part>, Part> option<State, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, option) = tuple;
+
+      return option.match(
+        IMap.empty,
+        (value) {
+          return {FList.of("some"): (state, value)}.lock;
+        },
+      );
+    });
+  }
+
+  static PathArrow<State, IList<Part>, Part> list<State, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, list) = tuple;
+
+      IMap<FList<String>, (State, Part)> result = const IMap.empty();
+
+      list.indexed.forEach((tuple) {
+        final (index, value) = tuple;
+        result = result.add(FList.of("$index"), (state, value));
+      });
+
+      return result;
+    });
   }
 
   PathArrow<State, Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
