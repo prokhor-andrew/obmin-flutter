@@ -91,8 +91,8 @@ final class ListArrow<Whole, Part> {
 
   static ListArrow<Whole, IList<Part>> zipAllPointIndex<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
     return list.fold(ListArrow.id(), (current, element) {
-      final listInOption = element.rmap((value) => [value].lock);
-      return current.zipCrossJoin(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final arrow = element.rmap((value) => [value].lock);
+      return current.zipCrossJoin(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 

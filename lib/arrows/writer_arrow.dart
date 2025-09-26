@@ -67,8 +67,8 @@ final class WriterArrow<E, Whole, Part> {
 
   static WriterArrow<E, Whole, IList<Part>> zipAll<E, Whole, Part>(IList<WriterArrow<E, Whole, Part>> list) {
     return list.fold(WriterArrow.id(), (current, element) {
-      final listInOption = element.rmap((value) => [value].lock);
-      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final arrow = element.rmap((value) => [value].lock);
+      return current.zip(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 }

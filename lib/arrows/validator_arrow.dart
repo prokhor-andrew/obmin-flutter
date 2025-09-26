@@ -78,8 +78,8 @@ final class ValidatorArrow<E, Whole, Part> {
 
   static ValidatorArrow<E, Whole, IList<Part>> zipAll<E, Whole, Part>(IList<ValidatorArrow<E, Whole, Part>> list) {
     return list.fold(ValidatorArrow.id(), (current, element) {
-      final listInOption = element.rmap((value) => [value].lock);
-      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final arrow = element.rmap((value) => [value].lock);
+      return current.zip(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 

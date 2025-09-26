@@ -72,8 +72,8 @@ final class OptionArrow<Whole, Part> {
 
   static OptionArrow<Whole, IList<Part>> zipAll<Whole, Part>(IList<OptionArrow<Whole, Part>> list) {
     return list.fold(OptionArrow.id(), (current, element) {
-      final listInOption = element.rmap((value) => [value].lock);
-      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final arrow = element.rmap((value) => [value].lock);
+      return current.zip(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 

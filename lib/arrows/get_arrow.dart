@@ -62,8 +62,8 @@ final class GetArrow<Whole, Part> {
 
   static GetArrow<Whole, IList<Part>> zipAll<Whole, Part>(IList<GetArrow<Whole, Part>> list) {
     return list.fold(GetArrow.id(), (current, element) {
-      final listInOption = element.rmap((value) => [value].lock);
-      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final arrow = element.rmap((value) => [value].lock);
+      return current.zip(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
