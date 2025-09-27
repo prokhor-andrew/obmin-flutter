@@ -9,4 +9,18 @@ extension IListOpticExtension<S, A> on Optic<S, IList<A>> {
   Optic<S, A> each() {
     return then(Optic.list<A, A>());
   }
+
+  Optic<S, A> at(int index) {
+    return then(Optic.fromRun((update) {
+      return (whole) {
+        if (index < 0 || index >= whole.length) {
+          return whole;
+        } else {
+          final element = whole[index];
+          final updated = update(element);
+          return whole.replace(index, updated);
+        }
+      };
+    }));
+  }
 }
