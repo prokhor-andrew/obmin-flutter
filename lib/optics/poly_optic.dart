@@ -93,7 +93,7 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
-  static PolyOptic<Writer<Part, E>, Writer<TPart, E>, Part, TPart> writerErrors<E, Part, TPart>() {
+  static PolyOptic<Writer<Part, E>, Writer<TPart, E>, Part, TPart> writerList<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.lmap(update);
