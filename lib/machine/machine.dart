@@ -207,7 +207,7 @@ final class Machine<Input, Output> {
     );
   }
 
-  Machine<Never, Res> fromFuture<Res>(
+  static Machine<Never, Res> fromFuture<Res>(
     Future<Res> Function() future,
   ) {
     return Machine.fromStream<Res>(
