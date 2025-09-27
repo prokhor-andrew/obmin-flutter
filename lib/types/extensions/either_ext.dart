@@ -13,6 +13,7 @@ extension EitherOpticExtension<S, A, B> on Optic<S, Either<A, B>> {
   Optic<S, B> right() {
     return then(Optic.either<A, B, B>());
   }
+
   Optic<S, A> launched() {
     return then(Optic.eitherLeft<B, A, A>());
   }
