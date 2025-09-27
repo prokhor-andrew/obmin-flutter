@@ -8,6 +8,7 @@ import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/func.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
+import 'package:obmin/types/these.dart';
 import 'package:obmin/types/validator.dart';
 import 'package:obmin/types/writer.dart';
 
@@ -35,11 +36,39 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
+  static PathArrow<State, Either<Part, E>, Part> eitherLeft<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, either) = tuple;
+
+      return either.match(
+        (value) {
+          return {FList.of("left"): (state, value)}.lock;
+        },
+        constfunc(const IMap.empty()),
+      );
+    });
+  }
+
   static PathArrow<State, Writer<E, Part>, Part> writer<State, E, Part>() {
     return PathArrow.fromRun((tuple) {
       final (state, writer) = tuple;
 
       return {FList.of("value"): (state, writer.value())}.lock;
+    });
+  }
+
+  static PathArrow<State, Writer<Part, E>, Part> writerList<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, writer) = tuple;
+
+      IMap<FList<String>, (State, Part)> map = const IMap.empty();
+
+      writer.list().indexed.forEach((tuple) {
+        final (index, value) = tuple;
+        map = map.add(FList.of("$index"), (state, value));
+      });
+
+      return map;
     });
   }
 
@@ -65,6 +94,23 @@ final class PathArrow<State, Whole, Part> {
       return validator.match(constfunc(const IMap.empty()), (value) {
         return {FList.of("value"): (state, value)}.lock;
       });
+    });
+  }
+
+  static PathArrow<State, Validator<Part, E>, Part> validatorErrors<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, validator) = tuple;
+
+      return validator.match((errors) {
+        IMap<FList<String>, (State, Part)> map = const IMap.empty();
+
+        errors.indexed.forEach((tuple) {
+          final (index, value) = tuple;
+          map = map.add(FList.of("$index"), (state, value));
+        });
+
+        return map;
+      }, constfunc(const IMap.empty()));
     });
   }
 
@@ -101,6 +147,70 @@ final class PathArrow<State, Whole, Part> {
       });
 
       return result;
+    });
+  }
+
+  static PathArrow<State, IMap<String, Part>, Part> map<State, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, map) = tuple;
+
+      return map.map((key, value) => MapEntry(FList.of(key), (state, value)));
+    });
+  }
+
+  static PathArrow<State, (E, Part), Part> tuple<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, tuple2) = tuple;
+
+      return {
+        FList.of("right"): (state, tuple2.$2),
+      }.lock;
+    });
+  }
+
+  static PathArrow<State, (Part, E), Part> tupleLeft<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, tuple2) = tuple;
+
+      return {
+        FList.of("left"): (state, tuple2.$1),
+      }.lock;
+    });
+  }
+
+  static PathArrow<State, These<E, Part>, Part> these<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, these) = tuple;
+
+      return these.match(
+        (left) {
+          return const IMap.empty();
+        },
+        (right) {
+          return {FList.of("right"): (state, right)}.lock;
+        },
+        (_, right) {
+          return {FList.of("right"): (state, right)}.lock;
+        },
+      );
+    });
+  }
+
+  static PathArrow<State, These<Part, E>, Part> theseLeft<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, these) = tuple;
+
+      return these.match(
+        (left) {
+          return {FList.of("left"): (state, left)}.lock;
+        },
+        (right) {
+          return const IMap.empty();
+        },
+        (left, _) {
+          return {FList.of("left"): (state, left)}.lock;
+        },
+      );
     });
   }
 
