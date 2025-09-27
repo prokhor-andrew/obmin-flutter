@@ -15,11 +15,11 @@ final class Validator<E, A> {
 
   static Validator<E, A> fromEither<E, A>(Either<IList<E>, A> either) => Validator._(either);
 
-  static Validator<E, A> of<A, E>(A value) => Validator._(Either.right(value));
+  static Validator<E, A> of<E, A>(A value) => Validator._(Either.right(value));
 
-  static Validator<E, A> error<A, E>(E error) => Validator._(Either.left([error].lock));
+  static Validator<E, A> error<E, A>(E error) => Validator._(Either.left([error].lock));
 
-  static Validator<E, A> errors<A, E>(IList<E> errors) => Validator._(Either.left(errors));
+  static Validator<E, A> errors<E, A>(IList<E> errors) => Validator._(Either.left(errors));
 
   static Validator<E, ()> unit<E>() => Validator.of(());
 
