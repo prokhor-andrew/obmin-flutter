@@ -56,7 +56,12 @@ final class Optic<Whole, Part> {
     Func<Whole, Option<Part>> focus,
     Func<Part, Whole> reconstruct,
   ) {
-    return Optic.fromPolyOptic(PolyOptic.prism<Whole, Whole, Part, Part>((whole) => focus(whole).asEither().lmap(constfunc(whole)), reconstruct));
+    return Optic.fromPolyOptic(
+      PolyOptic.prism<Whole, Whole, Part, Part>(
+        (whole) => focus(whole).asEither().lmap(constfunc(whole)),
+        reconstruct,
+      ),
+    );
   }
 
   static Optic<IList<Part>, Part> list<Part>() {
