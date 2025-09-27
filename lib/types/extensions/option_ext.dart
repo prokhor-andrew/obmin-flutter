@@ -8,7 +8,7 @@ import 'package:obmin/types/option.dart';
 
 extension OptionOpticExtension<S, A> on Optic<S, Option<A>> {
   Optic<S, A> some() {
-    return then(Optic.option<A, A>());
+    return then(Optic.option<A>());
   }
 }
 

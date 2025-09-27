@@ -8,11 +8,11 @@ import 'package:obmin/types/these.dart';
 
 extension TheseOpticExtension<S, A, B> on Optic<S, These<A, B>> {
   Optic<S, B> right() {
-    return then(Optic.these<A, B, B>());
+    return then(Optic.these<A, B>());
   }
 
   Optic<S, A> left() {
-    return then(Optic.theseLeft<B, A, A>());
+    return then(Optic.theseLeft<B, A>());
   }
 }
 

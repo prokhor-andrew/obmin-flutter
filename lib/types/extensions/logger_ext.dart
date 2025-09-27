@@ -8,7 +8,7 @@ import 'package:obmin/types/logger.dart';
 
 extension LoggerOpticExtension<S, A> on Optic<S, Logger<A>> {
   Optic<S, A> value() {
-    return then(Optic.logger<A, A>());
+    return then(Optic.logger<A>());
   }
 }
 

@@ -9,7 +9,7 @@ import 'package:obmin/types/flist.dart';
 
 extension FListOpticExtension<S, A> on Optic<S, FList<A>> {
   Optic<S, A> each() {
-    return then(Optic.flist<A, A>());
+    return then(Optic.flist<A>());
   }
 
   Optic<S, A> head() {

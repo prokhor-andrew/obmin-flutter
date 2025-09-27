@@ -7,11 +7,11 @@ import 'package:obmin/optics/optic.dart';
 
 extension TupleOpticExtension<S, A, B> on Optic<S, (A, B)> {
   Optic<S, A> left() {
-    return then(Optic.tupleLeft<B, A, A>());
+    return then(Optic.tupleLeft<B, A>());
   }
 
   Optic<S, B> right() {
-    return then(Optic.tuple<A, B, B>());
+    return then(Optic.tuple<A, B>());
   }
 }
 

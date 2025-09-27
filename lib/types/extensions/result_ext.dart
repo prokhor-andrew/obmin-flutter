@@ -8,11 +8,11 @@ import 'package:obmin/types/result.dart';
 
 extension ResultOpticExtension<S, A, B> on Optic<S, Result<A, B>> {
   Optic<S, A> failure() {
-    return then(Optic.resultFailure<B, A, A>());
+    return then(Optic.resultFailure<B, A>());
   }
 
   Optic<S, B> success() {
-    return then(Optic.resultSuccess<A, B, B>());
+    return then(Optic.resultSuccess<A, B>());
   }
 }
 

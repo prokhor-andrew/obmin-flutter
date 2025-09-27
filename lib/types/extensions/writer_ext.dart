@@ -9,15 +9,11 @@ import 'package:obmin/types/writer.dart';
 
 extension WriterOpticExtension<S, A, B> on Optic<S, Writer<A, B>> {
   Optic<S, IList<A>> list() {
-    return then(Optic.fromRun((update) {
-      return (whole) {
-        return Writer(update(whole.list()), whole.value());
-      };
-    }));
+    return then(Optic.writerList<B, A>());
   }
 
   Optic<S, B> value() {
-    return then(Optic.writer<A, B, B>());
+    return then(Optic.writer<A, B>());
   }
 }
 

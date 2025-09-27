@@ -8,11 +8,11 @@ import 'package:obmin/types/call.dart';
 
 extension CallOpticExtension<S, A, B> on Optic<S, Call<A, B>> {
   Optic<S, A> launched() {
-    return then(Optic.callLaunched<B, A, A>());
+    return then(Optic.callLaunched<B, A>());
   }
 
   Optic<S, B> returned() {
-    return then(Optic.callReturned<A, B, B>());
+    return then(Optic.callReturned<A, B>());
   }
 }
 

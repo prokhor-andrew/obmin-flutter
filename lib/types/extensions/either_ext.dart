@@ -8,11 +8,11 @@ import 'package:obmin/types/either.dart';
 
 extension EitherOpticExtension<S, A, B> on Optic<S, Either<A, B>> {
   Optic<S, A> left() {
-    return then(Optic.eitherLeft<B, A, A>());
+    return then(Optic.eitherLeft<B, A>());
   }
 
   Optic<S, B> right() {
-    return then(Optic.either<A, B, B>());
+    return then(Optic.either<A, B>());
   }
 }
 

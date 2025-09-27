@@ -9,7 +9,7 @@ import 'package:obmin/types/flist.dart';
 
 extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
   Optic<S, A> each() {
-    return then(Optic.map<Key, A, A>());
+    return then(Optic.map<Key, A>());
   }
 
   Optic<S, A> at(Key key) {
