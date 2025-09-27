@@ -95,10 +95,10 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
-  static PolyOptic<Writer<Part, E>, Writer<TPart, E>, Part, TPart> writerList<E, Part, TPart>() {
+  static PolyOptic<Writer<Part, E>, Writer<TPart, E>, IList<Part>, IList<TPart>> writerList<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
-      return (functor) {
-        return functor.lmap(update);
+      return (writer) {
+        return Writer(update(writer.list()), writer.value());
       };
     });
   }
@@ -191,10 +191,14 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
-  static PolyOptic<Validator<Part, E>, Validator<TPart, E>, Part, TPart> validatorErrors<E, Part, TPart>() {
+  static PolyOptic<Validator<Part, E>, Validator<TPart, E>, IList<Part>, IList<TPart>> validatorErrors<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
-      return (functor) {
-        return functor.lmap(update);
+      return (validator) {
+        return validator.match((errors) {
+          return Validator.errors(update(errors));
+        }, (value) {
+          return Validator.of(value);
+        });
       };
     });
   }
