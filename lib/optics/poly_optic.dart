@@ -6,6 +6,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/func.dart';
+import 'package:obmin/types/imap.dart';
 import 'package:obmin/types/list.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
@@ -92,10 +93,26 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
+  static PolyOptic<Writer<Part, E>, Writer<TPart, E>, Part, TPart> writerErrors<E, Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.lmap(update);
+      };
+    });
+  }
+
   static PolyOptic<Either<E, Part>, Either<E, TPart>, Part, TPart> either<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.rmap(update);
+      };
+    });
+  }
+
+  static PolyOptic<Either<Part, E>, Either<TPart, E>, Part, TPart> eitherLeft<E, Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.lmap(update);
       };
     });
   }
@@ -108,6 +125,14 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
+  static PolyOptic<These<Part, E>, These<TPart, E>, Part, TPart> theseLeft<E, Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.lmap(update);
+      };
+    });
+  }
+
   static PolyOptic<(E, Part), (E, TPart), Part, TPart> tuple<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
@@ -116,10 +141,26 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
+  static PolyOptic<(Part, E), (TPart, E), Part, TPart> tupleLeft<E, Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.lmap(update);
+      };
+    });
+  }
+
   static PolyOptic<Validator<E, Part>, Validator<E, TPart>, Part, TPart> validator<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.rmap(update);
+      };
+    });
+  }
+
+  static PolyOptic<Validator<Part, E>, Validator<TPart, E>, Part, TPart> validatorErrors<E, Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.lmap(update);
       };
     });
   }
@@ -133,6 +174,14 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
   }
 
   static PolyOptic<Logger<Part>, Logger<TPart>, Part, TPart> logger<Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.rmap(update);
+      };
+    });
+  }
+
+  static PolyOptic<IMap<Key, Part>, IMap<Key, TPart>, Part, TPart> map<Key, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.rmap(update);
