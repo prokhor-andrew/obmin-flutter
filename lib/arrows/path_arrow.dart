@@ -3,10 +3,10 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/func.dart';
 import 'package:obmin/types/call.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/flist.dart';
-import 'package:obmin/func.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
 import 'package:obmin/types/result.dart';
@@ -111,18 +111,11 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
-  static PathArrow<State, Writer<Part, E>, Part> writerList<State, E, Part>() {
+  static PathArrow<State, Writer<Part, E>, IList<Part>> writerList<State, E, Part>() {
     return PathArrow.fromRun((tuple) {
       final (state, writer) = tuple;
 
-      IMap<FList<String>, (State, Part)> map = const IMap.empty();
-
-      writer.list().indexed.forEach((tuple) {
-        final (index, value) = tuple;
-        map = map.add(FList.of("$index"), (state, value));
-      });
-
-      return map;
+      return {FList.of("list"): (state, writer.list())}.lock;
     });
   }
 
@@ -151,19 +144,12 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
-  static PathArrow<State, Validator<Part, E>, Part> validatorErrors<State, E, Part>() {
+  static PathArrow<State, Validator<Part, E>, IList<Part>> validatorErrors<State, E, Part>() {
     return PathArrow.fromRun((tuple) {
       final (state, validator) = tuple;
 
       return validator.match((errors) {
-        IMap<FList<String>, (State, Part)> map = const IMap.empty();
-
-        errors.indexed.forEach((tuple) {
-          final (index, value) = tuple;
-          map = map.add(FList.of("$index"), (state, value));
-        });
-
-        return map;
+        return {FList.of("errors"): (state, errors)}.lock;
       }, constfunc(const IMap.empty()));
     });
   }
