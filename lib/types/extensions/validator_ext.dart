@@ -3,7 +3,10 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/arrows/path_arrow.dart';
+import 'package:obmin/func.dart';
 import 'package:obmin/optics/optic.dart';
+import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/validator.dart';
 
 extension ValidatorOpticExtension<S, A, B> on Optic<S, Validator<A, B>> {
@@ -21,5 +24,21 @@ extension ValidatorOpticExtension<S, A, B> on Optic<S, Validator<A, B>> {
         });
       };
     }));
+  }
+}
+
+extension WriterPathArrowExtension<State, Whole, A, B> on PathArrow<State, Whole, Validator<A, B>> {
+  PathArrow<State, Whole, IList<A>> errors() {
+    return then(PathArrow.fromRun((tuple) {
+      final (state, validator) = tuple;
+
+      return validator.match((errors) {
+        return {FList.of("errors"): (state, errors)}.lock;
+      }, constfunc(const IMap.empty()));
+    }));
+  }
+
+  PathArrow<State, Whole, B> value() {
+    return then(PathArrow.validator<State, A, B>());
   }
 }

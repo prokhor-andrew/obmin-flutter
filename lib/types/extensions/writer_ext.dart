@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/optics/optic.dart';
+import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/writer.dart';
 
 extension WriterOpticExtension<S, A, B> on Optic<S, Writer<A, B>> {
@@ -17,5 +19,19 @@ extension WriterOpticExtension<S, A, B> on Optic<S, Writer<A, B>> {
 
   Optic<S, B> value() {
     return then(Optic.writer<A, B, B>());
+  }
+}
+
+extension WriterPathArrowExtension<State, Whole, A, B> on PathArrow<State, Whole, Writer<A, B>> {
+  PathArrow<State, Whole, IList<A>> list() {
+    return then(PathArrow.fromRun((tuple) {
+      final (state, writer) = tuple;
+
+      return {FList.of("list"): (state, writer.list())}.lock;
+    }));
+  }
+
+  PathArrow<State, Whole, B> value() {
+    return then(PathArrow.writer<State, A, B>());
   }
 }

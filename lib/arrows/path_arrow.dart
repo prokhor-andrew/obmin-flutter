@@ -204,11 +204,11 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
-  static PathArrow<State, IMap<String, Part>, Part> map<State, Part>() {
+  static PathArrow<State, IMap<Key, Part>, Part> map<Key, State, Part>() {
     return PathArrow.fromRun((tuple) {
       final (state, map) = tuple;
 
-      return map.map((key, value) => MapEntry(FList.of(key), (state, value)));
+      return map.map((key, value) => MapEntry(FList.of(key.toString()), (state, value)));
     });
   }
 
