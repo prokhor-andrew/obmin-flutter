@@ -3,8 +3,13 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/func.dart';
+import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
+import 'package:obmin/types/these.dart';
+import 'package:obmin/types/validator.dart';
+import 'package:obmin/types/writer.dart';
 
 typedef Call<Req, Res> = Either<Req, Res>;
 typedef Result<Err, Val> = Either<Err, Val>;
@@ -166,18 +171,62 @@ final class Either<A, B> {
       return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
+
+  These<A, B> asThese() {
+    return match(These.left, These.right);
+  }
 }
 
 extension EitherValueWhenBothExtension<T> on Either<T, T> {
   T value() => match<T>(idfunc, idfunc);
+
+  FList<T> asFList() {
+    return FList(value());
+  }
+
+  IList<T> asIList() {
+    return [value()].lock;
+  }
+
+  Logger<T> asLogger() {
+    return Logger.of(value());
+  }
+
+  Writer<E, T> asWriter<E>() {
+    return Writer.of(value());
+  }
 }
 
 extension EitherNeverLeftExtension<T> on Either<Never, T> {
   T value() => match<T>(absurd, idfunc);
+
+  FList<T> asFList() {
+    return FList(value());
+  }
+
+  IList<T> asIList() {
+    return [value()].lock;
+  }
 }
 
 extension EitherNeverRightExtension<T> on Either<T, Never> {
   T value() => match<T>(idfunc, absurd);
+}
+
+extension EitherUnitLeftExtension<T> on Either<(), T> {
+  Option<T> asOption() {
+    return match(constfunc(Option.none()), Option.some);
+  }
+
+  IList<T> asList() {
+    return match(constfunc(const IList.empty()), (value) => [value].lock);
+  }
+}
+
+extension EitherListLeftExtension<E, T> on Either<IList<E>, T> {
+  Validator<E, T> asValidator() {
+    return match(Validator.errors, Validator.of);
+  }
 }
 
 extension EitherMonadExtension<E, T> on Either<E, Either<E, T>> {
