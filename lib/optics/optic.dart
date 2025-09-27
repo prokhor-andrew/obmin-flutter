@@ -72,16 +72,16 @@ final class Optic<Whole, Part> {
     return Optic.fromPolyOptic(PolyOptic.option<Part, Part>());
   }
 
-  static Optic<Writer<E, Part>, Part> writer<E, Part>() {
-    return Optic.fromPolyOptic(PolyOptic.writer<E, Part, Part>());
+  static Optic<Writer<E, Part>, Part> writerValue<E, Part>() {
+    return Optic.fromPolyOptic(PolyOptic.writerValue<E, Part, Part>());
   }
 
   static Optic<Writer<Part, E>, IList<Part>> writerList<E, Part>() {
     return Optic.fromPolyOptic(PolyOptic.writerList<E, Part, Part>());
   }
 
-  static Optic<Either<E, Part>, Part> either<E, Part>() {
-    return Optic.fromPolyOptic(PolyOptic.either<E, Part, Part>());
+  static Optic<Either<E, Part>, Part> eitherRight<E, Part>() {
+    return Optic.fromPolyOptic(PolyOptic.eitherRight<E, Part, Part>());
   }
 
   static Optic<Either<Part, E>, Part> eitherLeft<E, Part>() {
@@ -104,24 +104,24 @@ final class Optic<Whole, Part> {
     return Optic.fromPolyOptic(PolyOptic.resultFailure<E, Part, Part>());
   }
 
-  static Optic<These<E, Part>, Part> these<E, Part>() {
-    return Optic.fromPolyOptic(PolyOptic.these<E, Part, Part>());
+  static Optic<These<E, Part>, Part> theseRight<E, Part>() {
+    return Optic.fromPolyOptic(PolyOptic.theseRight<E, Part, Part>());
   }
 
   static Optic<These<Part, E>, Part> theseLeft<E, Part>() {
     return Optic.fromPolyOptic(PolyOptic.theseLeft<E, Part, Part>());
   }
 
-  static Optic<(E, Part), Part> tuple<E, Part>() {
-    return Optic.fromPolyOptic(PolyOptic.tuple<E, Part, Part>());
+  static Optic<(E, Part), Part> tupleRight<E, Part>() {
+    return Optic.fromPolyOptic(PolyOptic.tupleRight<E, Part, Part>());
   }
 
   static Optic<(Part, E), Part> tupleLeft<E, Part>() {
     return Optic.fromPolyOptic(PolyOptic.tupleLeft<E, Part, Part>());
   }
 
-  static Optic<Validator<E, Part>, Part> validator<E, Part>() {
-    return Optic.fromPolyOptic(PolyOptic.validator<E, Part, Part>());
+  static Optic<Validator<E, Part>, Part> validatorValue<E, Part>() {
+    return Optic.fromPolyOptic(PolyOptic.validatorValue<E, Part, Part>());
   }
 
   static Optic<Validator<Part, E>, IList<Part>> validatorErrors<E, Part>() {

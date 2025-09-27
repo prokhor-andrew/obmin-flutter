@@ -11,7 +11,7 @@ extension TupleOpticExtension<S, A, B> on Optic<S, (A, B)> {
   }
 
   Optic<S, B> right() {
-    return then(Optic.tuple<A, B>());
+    return then(Optic.tupleRight<A, B>());
   }
 }
 
@@ -21,6 +21,6 @@ extension TuplePathArrowExtension<State, Whole, A, B> on PathArrow<State, Whole,
   }
 
   PathArrow<State, Whole, B> right() {
-    return then(PathArrow.tuple<State, A, B>());
+    return then(PathArrow.tupleRight<State, A, B>());
   }
 }

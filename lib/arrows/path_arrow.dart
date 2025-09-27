@@ -25,7 +25,7 @@ final class PathArrow<State, Whole, Part> {
     return PathArrow._(run);
   }
 
-  static PathArrow<State, Either<E, Part>, Part> either<State, E, Part>() {
+  static PathArrow<State, Either<E, Part>, Part> eitherRight<State, E, Part>() {
     return PathArrow.fromRun((tuple) {
       final (state, either) = tuple;
 
@@ -103,7 +103,7 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
-  static PathArrow<State, Writer<E, Part>, Part> writer<State, E, Part>() {
+  static PathArrow<State, Writer<E, Part>, Part> writerValue<State, E, Part>() {
     return PathArrow.fromRun((tuple) {
       final (state, writer) = tuple;
 
@@ -134,7 +134,7 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
-  static PathArrow<State, Validator<E, Part>, Part> validator<State, E, Part>() {
+  static PathArrow<State, Validator<E, Part>, Part> validatorValue<State, E, Part>() {
     return PathArrow.fromRun((tuple) {
       final (state, validator) = tuple;
 
@@ -198,7 +198,7 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
-  static PathArrow<State, (E, Part), Part> tuple<State, E, Part>() {
+  static PathArrow<State, (E, Part), Part> tupleRight<State, E, Part>() {
     return PathArrow.fromRun((tuple) {
       final (state, tuple2) = tuple;
 
@@ -218,7 +218,7 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
-  static PathArrow<State, These<E, Part>, Part> these<State, E, Part>() {
+  static PathArrow<State, These<E, Part>, Part> theseRight<State, E, Part>() {
     return PathArrow.fromRun((tuple) {
       final (state, these) = tuple;
 

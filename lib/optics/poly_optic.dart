@@ -87,7 +87,7 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
-  static PolyOptic<Writer<E, Part>, Writer<E, TPart>, Part, TPart> writer<E, Part, TPart>() {
+  static PolyOptic<Writer<E, Part>, Writer<E, TPart>, Part, TPart> writerValue<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.rmap(update);
@@ -103,7 +103,7 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
-  static PolyOptic<Either<E, Part>, Either<E, TPart>, Part, TPart> either<E, Part, TPart>() {
+  static PolyOptic<Either<E, Part>, Either<E, TPart>, Part, TPart> eitherRight<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.rmap(update);
@@ -151,7 +151,7 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
-  static PolyOptic<These<E, Part>, These<E, TPart>, Part, TPart> these<E, Part, TPart>() {
+  static PolyOptic<These<E, Part>, These<E, TPart>, Part, TPart> theseRight<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.rmap(update);
@@ -167,7 +167,7 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
-  static PolyOptic<(E, Part), (E, TPart), Part, TPart> tuple<E, Part, TPart>() {
+  static PolyOptic<(E, Part), (E, TPart), Part, TPart> tupleRight<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.rmap(update);
@@ -183,7 +183,7 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
-  static PolyOptic<Validator<E, Part>, Validator<E, TPart>, Part, TPart> validator<E, Part, TPart>() {
+  static PolyOptic<Validator<E, Part>, Validator<E, TPart>, Part, TPart> validatorValue<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.rmap(update);

@@ -13,7 +13,7 @@ extension WriterOpticExtension<S, A, B> on Optic<S, Writer<A, B>> {
   }
 
   Optic<S, B> value() {
-    return then(Optic.writer<A, B>());
+    return then(Optic.writerValue<A, B>());
   }
 }
 
@@ -23,6 +23,6 @@ extension WriterPathArrowExtension<State, Whole, A, B> on PathArrow<State, Whole
   }
 
   PathArrow<State, Whole, B> value() {
-    return then(PathArrow.writer<State, A, B>());
+    return then(PathArrow.writerValue<State, A, B>());
   }
 }
