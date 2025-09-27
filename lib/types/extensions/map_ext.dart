@@ -9,4 +9,17 @@ extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
   Optic<S, A> each() {
     return then(Optic.map<Key, A, A>());
   }
+
+  Optic<S, A> at(Key key) {
+    return then(Optic.fromRun((update) {
+      return (whole) {
+        if (!whole.containsKey(key)) {
+          return whole;
+        }
+        final element = whole.get(key) as A;
+        final updated = update(element);
+        return whole.add(key, updated);
+      };
+    }));
+  }
 }
