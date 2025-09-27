@@ -99,8 +99,8 @@ final class Option<T> {
 
   static Option<IList<Part>> zipAll<Part>(IList<Option<Part>> list) {
     return list.fold(Option.some(const IList.empty()), (current, element) {
-      final listInOption = element.rmap((value) => [value].lock);
-      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final option = element.rmap((value) => [value].lock);
+      return current.zip(option).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 

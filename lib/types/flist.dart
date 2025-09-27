@@ -57,15 +57,15 @@ final class FList<A> {
 
   static FList<IList<A>> zipAllCrossJoin<A>(IList<FList<A>> list) {
     return list.fold(FList.of(const IList.empty()), (current, element) {
-      final loggerList = element.rmap((value) => [value].lock);
-      return current.zipCrossJoin(loggerList).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final flist = element.rmap((value) => [value].lock);
+      return current.zipCrossJoin(flist).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
   static FList<IList<A>> zipAllPointIndex<A>(IList<FList<A>> list) {
     return list.fold(FList.of(const IList.empty()), (current, element) {
-      final loggerList = element.rmap((value) => [value].lock);
-      return current.zipPointIndex(loggerList).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final flist = element.rmap((value) => [value].lock);
+      return current.zipPointIndex(flist).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 

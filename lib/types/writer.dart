@@ -43,8 +43,8 @@ final class Writer<A, B> {
 
   static Writer<E, IList<Part>> zipAll<E, Part>(IList<Writer<E, Part>> list) {
     return list.fold(Writer.of(const IList.empty()), (current, element) {
-      final listInOption = element.rmap((value) => [value].lock);
-      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final writer = element.rmap((value) => [value].lock);
+      return current.zip(writer).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 

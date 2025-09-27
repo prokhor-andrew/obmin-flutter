@@ -129,8 +129,8 @@ final class Validator<E, A> {
 
   static Validator<E, IList<Part>> zipAll<E, Part>(IList<Validator<E, Part>> list) {
     return list.fold(Validator.of(const IList.empty()), (current, element) {
-      final listInOption = element.rmap((value) => [value].lock);
-      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final validator = element.rmap((value) => [value].lock);
+      return current.zip(validator).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 

@@ -35,8 +35,8 @@ final class Logger<A> {
 
   static Logger<IList<A>> zipAll<A>(IList<Logger<A>> list) {
     return list.fold(Logger.of(const IList.empty()), (current, element) {
-      final loggerList = element.rmap((value) => [value].lock);
-      return current.zip(loggerList).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final logger = element.rmap((value) => [value].lock);
+      return current.zip(logger).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
