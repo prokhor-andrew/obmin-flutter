@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:obmin/types/either.dart';
-import 'package:obmin/types/func.dart';
+import 'package:obmin/func.dart';
 
 final class These<A, B> {
   final Either<Either<A, B>, (A, B)> _either;

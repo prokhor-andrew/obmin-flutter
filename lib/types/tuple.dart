@@ -2,7 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-import 'package:obmin/types/func.dart';
+import 'package:obmin/func.dart';
 
 extension TupleExtensions<A, B> on (A, B) {
   (A2, B) lmap<A2>(Func<A, A2> f) {

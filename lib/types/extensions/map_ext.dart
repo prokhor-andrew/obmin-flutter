@@ -3,11 +3,10 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/optics/optic.dart';
 
-import '../func.dart';
-
-extension IMapExtensions<Key, A> on IMap<Key, A> {
-  IMap<Key, A2> rmap<A2>(Func<A, A2> f) {
-    return map((key, value) => MapEntry(key, f(value)));
+extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
+  Optic<S, A> each() {
+    return then(Optic.map<Key, A, A>());
   }
 }

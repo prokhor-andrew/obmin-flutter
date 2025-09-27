@@ -5,7 +5,7 @@
 import 'package:obmin/core/core.dart';
 import 'package:obmin/core/core_widget.dart';
 import 'package:obmin/core/core_x/core_x_widget.dart';
-import 'package:obmin/types/func.dart';
+import 'package:obmin/func.dart';
 
 CoreWidget<State, State, Func<State, State>> CoreYWidget<State>({
   required Core<State, State, Func<State, State>> core,

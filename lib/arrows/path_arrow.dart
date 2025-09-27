@@ -5,7 +5,7 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/flist.dart';
-import 'package:obmin/types/func.dart';
+import 'package:obmin/func.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
 import 'package:obmin/types/these.dart';

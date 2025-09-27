@@ -6,7 +6,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/core/core.dart';
 import 'package:obmin/core/core_x/core_x.dart';
 import 'package:obmin/machine/machine.dart';
-import 'package:obmin/types/func.dart';
+import 'package:obmin/func.dart';
 
 Core<State, State, Func<State, State>> CoreY<State>({
   required State Function() state,

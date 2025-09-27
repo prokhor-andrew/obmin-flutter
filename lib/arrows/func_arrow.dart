@@ -6,7 +6,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/arrows/either_arrow.dart';
 import 'package:obmin/arrows/list_arrow.dart';
 import 'package:obmin/arrows/option_arrow.dart';
-import 'package:obmin/types/func.dart';
+import 'package:obmin/func.dart';
 import 'package:obmin/types/option.dart';
 
 final class FuncArrow<Whole, Part> {

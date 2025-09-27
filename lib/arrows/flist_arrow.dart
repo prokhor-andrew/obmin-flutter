@@ -4,7 +4,7 @@
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/flist.dart';
-import 'package:obmin/types/func.dart';
+import 'package:obmin/func.dart';
 
 final class FListArrow<Whole, Part> {
   final Func<Whole, FList<Part>> run;

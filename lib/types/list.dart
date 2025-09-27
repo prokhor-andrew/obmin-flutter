@@ -7,7 +7,7 @@ import 'dart:math';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
 
-import 'func.dart';
+import '../func.dart';
 
 extension IListExtensions<A> on IList<A> {
   IList<A2> rmap<A2>(Func<A, A2> f) {

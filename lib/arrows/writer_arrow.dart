@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/types/func.dart';
+import 'package:obmin/func.dart';
 import 'package:obmin/types/writer.dart';
 
 final class WriterArrow<E, Whole, Part> {

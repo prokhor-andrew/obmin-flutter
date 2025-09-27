@@ -9,7 +9,7 @@ import 'package:obmin/channel/channel_lib.dart';
 import 'package:obmin/machine/mealy.dart';
 import 'package:obmin/machine/plan.dart';
 import 'package:obmin/types/either.dart';
-import 'package:obmin/types/func.dart';
+import 'package:obmin/func.dart';
 import 'package:obmin/types/option.dart';
 
 final class Machine<Input, Output> {

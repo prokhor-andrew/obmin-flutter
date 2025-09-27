@@ -4,7 +4,7 @@
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
-import 'package:obmin/types/func.dart';
+import 'package:obmin/func.dart';
 import 'package:obmin/types/validator.dart';
 
 final class ValidatorArrow<E, Whole, Part> {
