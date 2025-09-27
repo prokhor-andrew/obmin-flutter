@@ -137,8 +137,8 @@ final class Validator<E, A> {
   static Validator<E, (int, Part)> altAllConcat<E, Part>(IList<Validator<E, Part>> list) {
     return list.indexed.fold(Validator.errors(const IList.empty()), (current, element) {
       final (index, option) = element;
-      final indexedOption = option.rmap((value) => (index, value));
-      return current.altConcat(indexedOption).rmap((either) {
+      final validator = option.rmap((value) => (index, value));
+      return current.altConcat(validator).rmap((either) {
         return either.value();
       });
     });
@@ -147,8 +147,8 @@ final class Validator<E, A> {
   static Validator<E, (int, Part)> altAllLeftBiased<E, Part>(IList<Validator<E, Part>> list) {
     return list.indexed.fold(Validator.errors(const IList.empty()), (current, element) {
       final (index, option) = element;
-      final indexedOption = option.rmap((value) => (index, value));
-      return current.altLeftBiased(indexedOption).rmap((either) {
+      final validator = option.rmap((value) => (index, value));
+      return current.altLeftBiased(validator).rmap((either) {
         return either.value();
       });
     });
