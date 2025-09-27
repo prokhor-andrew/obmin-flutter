@@ -3,16 +3,15 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/types/flist.dart';
 import 'package:obmin/func.dart';
+import 'package:obmin/types/call.dart';
+import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
+import 'package:obmin/types/result.dart';
 import 'package:obmin/types/these.dart';
 import 'package:obmin/types/validator.dart';
 import 'package:obmin/types/writer.dart';
-
-typedef Call<Req, Res> = Either<Req, Res>;
-typedef Result<Err, Val> = Either<Err, Val>;
 
 final class Either<A, B> {
   final bool _isRight;
@@ -32,14 +31,6 @@ final class Either<A, B> {
   static Either<A, B> left<A, B>(A value) => Either._left(value);
 
   static Either<A, B> right<A, B>(B value) => Either._right(value);
-
-  static Either<A, B> launched<A, B>(A req) => Either.left(req);
-
-  static Either<A, B> returned<A, B>(B res) => Either.right(res);
-
-  static Either<A, B> failure<A, B>(A err) => Either.left(err);
-
-  static Either<A, B> success<A, B>(B val) => Either.right(val);
 
   static Either<A, ()> unit<A>() => Either.right(());
 
@@ -111,25 +102,9 @@ final class Either<A, B> {
 
   Option<B> rightOrNone() => swapped().leftOrNone();
 
-  Option<A> launchedOrNone() => leftOrNone();
-
-  Option<B> returnedOrNone() => rightOrNone();
-
-  Option<A> failureOrNone() => leftOrNone();
-
-  Option<B> successOrNone() => rightOrNone();
-
   bool isLeft() => leftOrNone().rmap(constfunc(true)).valueOr(false);
 
   bool isRight() => !isLeft();
-
-  bool isLaunched() => isLeft();
-
-  bool isReturned() => isRight();
-
-  bool isFailure() => isLeft();
-
-  bool isSuccess() => isRight();
 
   void run(void Function(A value) ifLeft, void Function(B value) ifRight) {
     match<void Function()>(
@@ -149,31 +124,23 @@ final class Either<A, B> {
     swapped().runIfLeft(function);
   }
 
-  void runIfLaunched(void Function(A value) f) {
-    runIfLeft(f);
-  }
-
-  void runIfReturned(void Function(B value) f) {
-    runIfRight(f);
-  }
-
-  void runIfFailure(void Function(A value) f) {
-    runIfLeft(f);
-  }
-
-  void runIfSuccess(void Function(B value) f) {
-    runIfRight(f);
-  }
-
   static Either<E, IList<Part>> zipAll<E, Part>(IList<Either<E, Part>> list) {
     return list.fold(Either.right(const IList.empty()), (current, element) {
-      final listInOption = element.rmap((value) => [value].lock);
-      return current.zip(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      final either = element.rmap((value) => [value].lock);
+      return current.zip(either).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
   These<A, B> asThese() {
     return match(These.left, These.right);
+  }
+
+  Result<A, B> asResult() {
+    return match(Result.failure, Result.success);
+  }
+
+  Call<A, B> asCall() {
+    return match(Call.launched, Call.returned);
   }
 }
 

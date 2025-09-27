@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/types/call.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/flist.dart';
 import 'package:obmin/func.dart';
@@ -10,6 +11,7 @@ import 'package:obmin/types/imap.dart';
 import 'package:obmin/types/list.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
+import 'package:obmin/types/result.dart';
 import 'package:obmin/types/these.dart';
 import 'package:obmin/types/tuple.dart';
 import 'package:obmin/types/validator.dart';
@@ -110,6 +112,38 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
   }
 
   static PolyOptic<Either<Part, E>, Either<TPart, E>, Part, TPart> eitherLeft<E, Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.lmap(update);
+      };
+    });
+  }
+
+  static PolyOptic<Call<E, Part>, Call<E, TPart>, Part, TPart> callReturned<E, Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.rmap(update);
+      };
+    });
+  }
+
+  static PolyOptic<Call<Part, E>, Call<TPart, E>, Part, TPart> callLaunched<E, Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.lmap(update);
+      };
+    });
+  }
+
+  static PolyOptic<Result<E, Part>, Result<E, TPart>, Part, TPart> resultSuccess<E, Part, TPart>() {
+    return PolyOptic.fromRun((update) {
+      return (functor) {
+        return functor.rmap(update);
+      };
+    });
+  }
+
+  static PolyOptic<Result<Part, E>, Result<TPart, E>, Part, TPart> resultFailure<E, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.lmap(update);
