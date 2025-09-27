@@ -6,27 +6,26 @@ import 'package:obmin/optics/optic.dart';
 import 'package:obmin/types/either.dart';
 
 extension EitherOpticExtension<S, A, B> on Optic<S, Either<A, B>> {
-  Optic<S, B> right() {
-    return then(Optic.either<A, B, B>());
-  }
-
   Optic<S, A> left() {
     return then(Optic.eitherLeft<B, A, A>());
   }
 
-  Optic<S, B> launched() {
+  Optic<S, B> right() {
     return then(Optic.either<A, B, B>());
   }
-
-  Optic<S, A> returned() {
+  Optic<S, A> launched() {
     return then(Optic.eitherLeft<B, A, A>());
   }
 
-  Optic<S, B> failure() {
+  Optic<S, B> returned() {
     return then(Optic.either<A, B, B>());
   }
 
-  Optic<S, A> success() {
+  Optic<S, A> failure() {
     return then(Optic.eitherLeft<B, A, A>());
+  }
+
+  Optic<S, B> success() {
+    return then(Optic.either<A, B, B>());
   }
 }
