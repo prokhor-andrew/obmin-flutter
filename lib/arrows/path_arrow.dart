@@ -3,11 +3,13 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/types/call.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/flist.dart';
 import 'package:obmin/func.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
+import 'package:obmin/types/result.dart';
 import 'package:obmin/types/these.dart';
 import 'package:obmin/types/validator.dart';
 import 'package:obmin/types/writer.dart';
@@ -43,6 +45,58 @@ final class PathArrow<State, Whole, Part> {
       return either.match(
         (value) {
           return {FList.of("left"): (state, value)}.lock;
+        },
+        constfunc(const IMap.empty()),
+      );
+    });
+  }
+
+  static PathArrow<State, Call<E, Part>, Part> callReturned<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, either) = tuple;
+
+      return either.match(
+        constfunc(const IMap.empty()),
+        (value) {
+          return {FList.of("returned"): (state, value)}.lock;
+        },
+      );
+    });
+  }
+
+  static PathArrow<State, Call<Part, E>, Part> callLaunched<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, either) = tuple;
+
+      return either.match(
+        (value) {
+          return {FList.of("launched"): (state, value)}.lock;
+        },
+        constfunc(const IMap.empty()),
+      );
+    });
+  }
+
+  static PathArrow<State, Result<E, Part>, Part> resultSuccess<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, either) = tuple;
+
+      return either.match(
+        constfunc(const IMap.empty()),
+        (value) {
+          return {FList.of("success"): (state, value)}.lock;
+        },
+      );
+    });
+  }
+
+  static PathArrow<State, Result<Part, E>, Part> resultFailure<State, E, Part>() {
+    return PathArrow.fromRun((tuple) {
+      final (state, either) = tuple;
+
+      return either.match(
+        (value) {
+          return {FList.of("failure"): (state, value)}.lock;
         },
         constfunc(const IMap.empty()),
       );
