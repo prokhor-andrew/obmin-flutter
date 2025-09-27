@@ -5,6 +5,8 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/func.dart';
+import 'package:obmin/types/these.dart';
+import 'package:obmin/types/validator.dart';
 
 final class Option<T> {
   final Either<(), T> _either;
@@ -110,6 +112,20 @@ final class Option<T> {
         return either.value();
       });
     });
+  }
+
+  Validator<(), T> asValidator() {
+    return match(() {
+      return Validator.errors<(), T>(const IList.empty());
+    }, Validator.of);
+  }
+
+  IList<T> asList() {
+    return match(() => const IList.empty(), (value) => [value].lock);
+  }
+
+  These<(), T> asThese() {
+    return match(() => These.left(()), These.right);
   }
 }
 
