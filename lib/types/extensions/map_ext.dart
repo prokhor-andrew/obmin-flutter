@@ -5,7 +5,6 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/optics/optic.dart';
-import 'package:obmin/types/flist.dart';
 
 extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
   Optic<S, A> each() {
@@ -40,7 +39,9 @@ extension IListPathArrowExtension<Key, State, Whole, A> on PathArrow<State, Whol
 
       final element = map.get(key) as A;
 
-      return {FList.of("${key.toString()}"): (state, element)}.lock;
+      return {
+        ["${key.toString()}"].lock: (state, element)
+      }.lock;
     }));
   }
 }

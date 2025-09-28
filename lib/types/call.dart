@@ -5,7 +5,6 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/func.dart';
 import 'package:obmin/types/either.dart';
-import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
 import 'package:obmin/types/these.dart';
@@ -101,10 +100,6 @@ final class Call<A, B> {
 extension CallValueWhenBothExtension<T> on Call<T, T> {
   T value() => match<T>(idfunc, idfunc);
 
-  FList<T> asFList() {
-    return FList(value());
-  }
-
   IList<T> asIList() {
     return [value()].lock;
   }
@@ -120,10 +115,6 @@ extension CallValueWhenBothExtension<T> on Call<T, T> {
 
 extension CallNeverLaunchedExtension<T> on Call<Never, T> {
   T value() => match<T>(absurd, idfunc);
-
-  FList<T> asFList() {
-    return FList(value());
-  }
 
   IList<T> asIList() {
     return [value()].lock;

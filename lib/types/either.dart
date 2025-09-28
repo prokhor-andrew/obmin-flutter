@@ -5,7 +5,6 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/func.dart';
 import 'package:obmin/types/call.dart';
-import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
 import 'package:obmin/types/result.dart';
@@ -147,10 +146,6 @@ final class Either<A, B> {
 extension EitherValueWhenBothExtension<T> on Either<T, T> {
   T value() => match<T>(idfunc, idfunc);
 
-  FList<T> asFList() {
-    return FList(value());
-  }
-
   IList<T> asIList() {
     return [value()].lock;
   }
@@ -166,10 +161,6 @@ extension EitherValueWhenBothExtension<T> on Either<T, T> {
 
 extension EitherNeverLeftExtension<T> on Either<Never, T> {
   T value() => match<T>(absurd, idfunc);
-
-  FList<T> asFList() {
-    return FList(value());
-  }
 
   IList<T> asIList() {
     return [value()].lock;

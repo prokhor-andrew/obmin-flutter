@@ -6,7 +6,6 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/func.dart';
 import 'package:obmin/types/call.dart';
 import 'package:obmin/types/either.dart';
-import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
 import 'package:obmin/types/result.dart';
@@ -15,12 +14,12 @@ import 'package:obmin/types/validator.dart';
 import 'package:obmin/types/writer.dart';
 
 final class PathArrow<State, Whole, Part> {
-  final Func<(State, Whole), IMap<FList<String>, (State, Part)>> run;
+  final Func<(State, Whole), IMap<IList<String>, (State, Part)>> run;
 
   const PathArrow._(this.run);
 
   static PathArrow<State, Whole, Part> fromRun<State, Whole, Part>(
-    Func<(State, Whole), IMap<FList<String>, (State, Part)>> run,
+    Func<(State, Whole), IMap<IList<String>, (State, Part)>> run,
   ) {
     return PathArrow._(run);
   }
@@ -32,7 +31,9 @@ final class PathArrow<State, Whole, Part> {
       return either.match(
         constfunc(const IMap.empty()),
         (value) {
-          return {FList.of("right"): (state, value)}.lock;
+          return {
+            ["right"].lock: (state, value)
+          }.lock;
         },
       );
     });
@@ -44,7 +45,9 @@ final class PathArrow<State, Whole, Part> {
 
       return either.match(
         (value) {
-          return {FList.of("left"): (state, value)}.lock;
+          return {
+            ["left"].lock: (state, value)
+          }.lock;
         },
         constfunc(const IMap.empty()),
       );
@@ -58,7 +61,9 @@ final class PathArrow<State, Whole, Part> {
       return either.match(
         constfunc(const IMap.empty()),
         (value) {
-          return {FList.of("returned"): (state, value)}.lock;
+          return {
+            ["returned"].lock: (state, value)
+          }.lock;
         },
       );
     });
@@ -70,7 +75,9 @@ final class PathArrow<State, Whole, Part> {
 
       return either.match(
         (value) {
-          return {FList.of("launched"): (state, value)}.lock;
+          return {
+            ["launched"].lock: (state, value)
+          }.lock;
         },
         constfunc(const IMap.empty()),
       );
@@ -84,7 +91,9 @@ final class PathArrow<State, Whole, Part> {
       return either.match(
         constfunc(const IMap.empty()),
         (value) {
-          return {FList.of("success"): (state, value)}.lock;
+          return {
+            ["success"].lock: (state, value)
+          }.lock;
         },
       );
     });
@@ -96,7 +105,9 @@ final class PathArrow<State, Whole, Part> {
 
       return either.match(
         (value) {
-          return {FList.of("failure"): (state, value)}.lock;
+          return {
+            ["failure"].lock: (state, value)
+          }.lock;
         },
         constfunc(const IMap.empty()),
       );
@@ -107,7 +118,9 @@ final class PathArrow<State, Whole, Part> {
     return PathArrow.fromRun((tuple) {
       final (state, writer) = tuple;
 
-      return {FList.of("value"): (state, writer.value())}.lock;
+      return {
+        ["value"].lock: (state, writer.value())
+      }.lock;
     });
   }
 
@@ -115,22 +128,9 @@ final class PathArrow<State, Whole, Part> {
     return PathArrow.fromRun((tuple) {
       final (state, writer) = tuple;
 
-      return {FList.of("list"): (state, writer.list())}.lock;
-    });
-  }
-
-  static PathArrow<State, FList<Part>, Part> flist<State, Part>() {
-    return PathArrow.fromRun((tuple) {
-      final (state, flist) = tuple;
-
-      IMap<FList<String>, (State, Part)> result = {FList.of("0"): (state, flist.head())}.lock;
-
-      flist.tail().indexed.forEach((tuple) {
-        final (index, value) = tuple;
-        result = result.add(FList.of("${index + 1}"), (state, value));
-      });
-
-      return result;
+      return {
+        ["list"].lock: (state, writer.list())
+      }.lock;
     });
   }
 
@@ -139,7 +139,9 @@ final class PathArrow<State, Whole, Part> {
       final (state, validator) = tuple;
 
       return validator.match(constfunc(const IMap.empty()), (value) {
-        return {FList.of("value"): (state, value)}.lock;
+        return {
+          ["value"].lock: (state, value)
+        }.lock;
       });
     });
   }
@@ -149,7 +151,9 @@ final class PathArrow<State, Whole, Part> {
       final (state, validator) = tuple;
 
       return validator.match((errors) {
-        return {FList.of("errors"): (state, errors)}.lock;
+        return {
+          ["errors"].lock: (state, errors)
+        }.lock;
       }, constfunc(const IMap.empty()));
     });
   }
@@ -158,7 +162,9 @@ final class PathArrow<State, Whole, Part> {
     return PathArrow.fromRun((tuple) {
       final (state, logger) = tuple;
 
-      return {FList.of("value"): (state, logger.value())}.lock;
+      return {
+        ["value"].lock: (state, logger.value())
+      }.lock;
     });
   }
 
@@ -169,7 +175,9 @@ final class PathArrow<State, Whole, Part> {
       return option.match(
         IMap.empty,
         (value) {
-          return {FList.of("some"): (state, value)}.lock;
+          return {
+            ["some"].lock: (state, value)
+          }.lock;
         },
       );
     });
@@ -179,11 +187,11 @@ final class PathArrow<State, Whole, Part> {
     return PathArrow.fromRun((tuple) {
       final (state, list) = tuple;
 
-      IMap<FList<String>, (State, Part)> result = const IMap.empty();
+      IMap<IList<String>, (State, Part)> result = const IMap.empty();
 
       list.indexed.forEach((tuple) {
         final (index, value) = tuple;
-        result = result.add(FList.of("$index"), (state, value));
+        result = result.add(["$index"].lock, (state, value));
       });
 
       return result;
@@ -194,7 +202,7 @@ final class PathArrow<State, Whole, Part> {
     return PathArrow.fromRun((tuple) {
       final (state, map) = tuple;
 
-      return map.map((key, value) => MapEntry(FList.of(key.toString()), (state, value)));
+      return map.map((key, value) => MapEntry([key.toString()].lock, (state, value)));
     });
   }
 
@@ -203,7 +211,7 @@ final class PathArrow<State, Whole, Part> {
       final (state, tuple2) = tuple;
 
       return {
-        FList.of("right"): (state, tuple2.$2),
+        ["right"].lock: (state, tuple2.$2),
       }.lock;
     });
   }
@@ -213,7 +221,7 @@ final class PathArrow<State, Whole, Part> {
       final (state, tuple2) = tuple;
 
       return {
-        FList.of("left"): (state, tuple2.$1),
+        ["left"].lock: (state, tuple2.$1),
       }.lock;
     });
   }
@@ -227,10 +235,14 @@ final class PathArrow<State, Whole, Part> {
           return const IMap.empty();
         },
         (right) {
-          return {FList.of("right"): (state, right)}.lock;
+          return {
+            ["right"].lock: (state, right)
+          }.lock;
         },
         (_, right) {
-          return {FList.of("right"): (state, right)}.lock;
+          return {
+            ["right"].lock: (state, right)
+          }.lock;
         },
       );
     });
@@ -242,13 +254,17 @@ final class PathArrow<State, Whole, Part> {
 
       return these.match(
         (left) {
-          return {FList.of("left"): (state, left)}.lock;
+          return {
+            ["left"].lock: (state, left)
+          }.lock;
         },
         (right) {
           return const IMap.empty();
         },
         (left, _) {
-          return {FList.of("left"): (state, left)}.lock;
+          return {
+            ["left"].lock: (state, left)
+          }.lock;
         },
       );
     });
@@ -278,9 +294,15 @@ final class PathArrow<State, Whole, Part> {
     return cmap(lf).rmap(rf);
   }
 
+  static PathArrow<State, A, A> id<State, A>() {
+    return PathArrow.fromRun((tuple) {
+      return {const IList<String>.empty(): tuple}.lock;
+    });
+  }
+
   PathArrow<State, Whole, Sub> then<Sub>(PathArrow<State, Part, Sub> other) {
     return PathArrow.fromRun((tuple) {
-      IMap<FList<String>, (State, Sub)> result = const IMap.empty();
+      IMap<IList<String>, (State, Sub)> result = const IMap.empty();
 
       final outerMap = run(tuple);
       for (final entry in outerMap.entries) {
@@ -303,7 +325,7 @@ final class PathArrow<State, Whole, Part> {
 
   PathArrow<State, Whole, (Part, Part2)> zip<Part2>(PathArrow<State, Whole, Part2> other) {
     return PathArrow.fromRun((tuple) {
-      IMap<FList<String>, (State, (Part, Part2))> out = const IMap.empty();
+      IMap<IList<String>, (State, (Part, Part2))> out = const IMap.empty();
       for (final w1 in run(tuple).entries) {
         final (log1, (s1, p1)) = (w1.key, w1.value);
         for (final w2 in other.run((s1, tuple.$2)).entries) {

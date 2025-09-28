@@ -7,7 +7,6 @@ import 'package:obmin/func.dart';
 import 'package:obmin/optics/poly_optic.dart';
 import 'package:obmin/types/call.dart';
 import 'package:obmin/types/either.dart';
-import 'package:obmin/types/flist.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
 import 'package:obmin/types/result.dart';
@@ -128,7 +127,7 @@ final class Optic<Whole, Part> {
     return Optic.fromPolyOptic(PolyOptic.validatorErrors<E, Part, Part>());
   }
 
-  static Optic<FList<Part>, Part> flist<Part>() {
+  static Optic<IList<Part>, Part> flist<Part>() {
     return Optic.fromPolyOptic(PolyOptic.flist<Part, Part>());
   }
 

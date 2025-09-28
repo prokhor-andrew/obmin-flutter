@@ -3,10 +3,9 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/func.dart';
 import 'package:obmin/types/call.dart';
 import 'package:obmin/types/either.dart';
-import 'package:obmin/types/flist.dart';
-import 'package:obmin/func.dart';
 import 'package:obmin/types/imap.dart';
 import 'package:obmin/types/list.dart';
 import 'package:obmin/types/logger.dart';
@@ -203,7 +202,7 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
-  static PolyOptic<FList<Part>, FList<TPart>, Part, TPart> flist<Part, TPart>() {
+  static PolyOptic<IList<Part>, IList<TPart>, Part, TPart> flist<Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.rmap(update);

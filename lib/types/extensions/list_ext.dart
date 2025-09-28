@@ -5,7 +5,6 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/optics/optic.dart';
-import 'package:obmin/types/flist.dart';
 
 extension IListOpticExtension<S, A> on Optic<S, IList<A>> {
   Optic<S, A> each() {
@@ -39,7 +38,9 @@ extension IListPathArrowExtension<State, Whole, A> on PathArrow<State, Whole, IL
         return const IMap.empty();
       }
 
-      return {FList.of("$index"): (state, list[index])}.lock;
+      return {
+        ["$index"].lock: (state, list[index])
+      }.lock;
     }));
   }
 }
