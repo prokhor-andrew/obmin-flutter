@@ -8,7 +8,7 @@ import 'package:obmin/optics/optic.dart';
 
 extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
   Optic<S, A> each() {
-    return then(Optic.map<Key, A>());
+    return then(Optic.dict<Key, A>());
   }
 
   Optic<S, A> at(Key key) {
@@ -25,9 +25,9 @@ extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
   }
 }
 
-extension IListPathArrowExtension<Key, State, Whole, A> on PathArrow<State, Whole, IMap<Key, A>> {
+extension IListPathArrowExtension<State, Key, Whole, A> on PathArrow<State, Whole, IMap<Key, A>> {
   PathArrow<State, Whole, A> each() {
-    return then(PathArrow.map<Key, State, A>());
+    return then(PathArrow.dict<State, Key, A>());
   }
 
   PathArrow<State, Whole, A> at(Key key) {

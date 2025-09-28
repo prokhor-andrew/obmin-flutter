@@ -199,7 +199,7 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
-  static PathArrow<State, IMap<Key, Part>, Part> map<Key, State, Part>() {
+  static PathArrow<State, IMap<Key, Part>, Part> dict<State, Key, Part>() {
     return PathArrow.fromRun((tuple) {
       final (state, map) = tuple;
 
@@ -371,7 +371,7 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
-  static PathArrow<E, Whole, (int, Part)> altAllLeftBiased<E, Whole, Part>(IList<PathArrow<E, Whole, Part>> list) {
+  static PathArrow<State, Whole, (int, Part)> altAllLeftBiased<State, Whole, Part>(IList<PathArrow<State, Whole, Part>> list) {
     return list.indexed.fold(PathArrow.zero(), (current, element) {
       final (index, option) = element;
       final arr = option.rmap((value) => (index, value));
@@ -381,7 +381,7 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
-  static PathArrow<E, Whole, (int, Part)> altAllMerge<E, Whole, Part>(IList<PathArrow<E, Whole, Part>> list) {
+  static PathArrow<State, Whole, (int, Part)> altAllMerge<State, Whole, Part>(IList<PathArrow<State, Whole, Part>> list) {
     return list.indexed.fold(PathArrow.zero(), (current, element) {
       final (index, option) = element;
       final arr = option.rmap((value) => (index, value));

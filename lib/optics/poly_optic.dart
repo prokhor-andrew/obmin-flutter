@@ -6,7 +6,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/func.dart';
 import 'package:obmin/types/call.dart';
 import 'package:obmin/types/either.dart';
-import 'package:obmin/types/imap.dart';
+import 'package:obmin/types/dict.dart';
 import 'package:obmin/types/list.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
@@ -202,14 +202,6 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
-  static PolyOptic<IList<Part>, IList<TPart>, Part, TPart> flist<Part, TPart>() {
-    return PolyOptic.fromRun((update) {
-      return (functor) {
-        return functor.rmap(update);
-      };
-    });
-  }
-
   static PolyOptic<Logger<Part>, Logger<TPart>, Part, TPart> logger<Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
@@ -218,7 +210,7 @@ final class PolyOptic<Whole, TWhole, Part, TPart> {
     });
   }
 
-  static PolyOptic<IMap<Key, Part>, IMap<Key, TPart>, Part, TPart> map<Key, Part, TPart>() {
+  static PolyOptic<IMap<Key, Part>, IMap<Key, TPart>, Part, TPart> dict<Key, Part, TPart>() {
     return PolyOptic.fromRun((update) {
       return (functor) {
         return functor.rmap(update);

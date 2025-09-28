@@ -127,16 +127,12 @@ final class Optic<Whole, Part> {
     return Optic.fromPolyOptic(PolyOptic.validatorErrors<E, Part, Part>());
   }
 
-  static Optic<IList<Part>, Part> flist<Part>() {
-    return Optic.fromPolyOptic(PolyOptic.flist<Part, Part>());
-  }
-
   static Optic<Logger<Part>, Part> logger<Part>() {
     return Optic.fromPolyOptic(PolyOptic.logger<Part, Part>());
   }
 
-  static Optic<IMap<Key, Part>, Part> map<Key, Part>() {
-    return Optic.fromPolyOptic(PolyOptic.map<Key, Part, Part>());
+  static Optic<IMap<Key, Part>, Part> dict<Key, Part>() {
+    return Optic.fromPolyOptic(PolyOptic.dict<Key, Part, Part>());
   }
 
   Optic<Whole, Sub> then<Sub, TSub>(Optic<Part, Sub> other) {

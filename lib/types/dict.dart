@@ -6,7 +6,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 import '../func.dart';
 
-extension IMapExtensions<Key, A> on IMap<Key, A> {
+extension DictExtensions<Key, A> on IMap<Key, A> {
   IMap<Key, A2> rmap<A2>(Func<A, A2> f) {
     return map((key, value) => MapEntry(key, f(value)));
   }
