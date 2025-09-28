@@ -137,7 +137,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
   for (final caseE in cases) {
     final caseName = caseE.displayName;
 
-    buffer.writeln("extension ${caseName}ObminPathArrowExtension<State, Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<State, Whole, $caseName$generics> "
+    buffer.writeln("extension ${caseName}ObminPathArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<Whole, $caseName$generics> "
         "{");
 
     for (final field in caseE.fields) {
@@ -147,7 +147,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln('  PathArrow<State, Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((tuple) => { ["$fieldName"].lock : (tuple.\$1, tuple.\$2.$fieldName) }.lock));');
+        buffer.writeln('  PathArrow<Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((val) => { ["$fieldName"].lock : val.$fieldName }.lock));');
       }
     }
 
@@ -227,7 +227,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
     generics = "<$params>";
   }
 
-  buffer.writeln("extension ${className}ObminOpticPathArrowExtension<State, Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<State, Whole, "
+  buffer.writeln("extension ${className}ObminPathArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<Whole, "
       "$className$generics> {");
 
   for (final caseE in cases) {
@@ -236,8 +236,9 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
     buffer.writeln("");
 
     buffer.writeln(
-        "PathArrow<State, Whole, $caseName$generics> ${_lowercaseFirstCharacter(caseName)}() => then(PathArrow.fromRun((tuple) => tuple.\$2.${_lowercaseFirstCharacter(caseName)}OrNone().match(() => const IMap.empty(), "
-        "(value) => { [\"${caseName}\"].lock : (tuple.\$1, value) }.lock)));");
+        "PathArrow<Whole, $caseName$generics> ${_lowercaseFirstCharacter(caseName)}() => then(PathArrow.fromRun((val) => val.${_lowercaseFirstCharacter(caseName)}OrNone().match(() => const IMap"
+            ".empty(), "
+        "(value) => { [\"${caseName}\"].lock : value }.lock)));");
   }
 
   buffer.writeln('}');
