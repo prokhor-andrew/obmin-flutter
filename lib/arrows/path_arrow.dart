@@ -344,6 +344,13 @@ final class PathArrow<State, Whole, Part> {
     });
   }
 
+  static PathArrow<State, Whole, IList<Part>> zipAll<State, Whole, Part>(IList<PathArrow<State, Whole, Part>> list) {
+    return list.fold(PathArrow.id(), (current, element) {
+      final arrow = element.rmap((value) => [value].lock);
+      return current.zip(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
   static PathArrow<State, Whole, Never> zero<State, Whole>() {
     return PathArrow.fromRun(constfunc(const IMap.empty()));
   }
