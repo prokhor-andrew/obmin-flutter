@@ -358,7 +358,7 @@ final class Machine<Input, Output> {
     required Future<Helper> Function() onCreateHelper,
     required Future<void> Function(Helper helper) onDestroyHelper,
     required State initial,
-    required Func<Helper, PathArrow<State, Machine<Never, Func<State, State>>>> arrow,
+    required PathArrow<(Helper, State), Machine<Never, Func<State, State>>> arrow,
     bool isDistinctUntilChangedOn = true,
     bool shouldWaitOnEffects = true,
     ChannelBufferStrategy<State>? inputBufferStrategy,
@@ -366,8 +366,7 @@ final class Machine<Input, Output> {
     ChannelBufferStrategy<Either<Func<State, State>, State>>? internalBufferStrategy,
   }) {
     IMap<String, Machine<Never, Func<State, State>>> _mapping(Helper helper, State state) {
-      final arr = arrow(helper);
-      final map = arr.run(initial);
+      final map = arrow.run((helper, state));
       return map.map((key, value) => MapEntry(key.join("/"), value));
     }
 
