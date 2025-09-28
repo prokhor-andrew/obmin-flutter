@@ -5,6 +5,7 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/func.dart';
 import 'package:obmin/types/call.dart';
+import 'package:obmin/types/dict.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
@@ -341,6 +342,16 @@ final class PathArrow<State, Whole, Part> {
         }
       }
       return out;
+    });
+  }
+
+  PathArrow<State, Whole, Part2> step<Part2>(BiFunc<State, Part, Part2> f) {
+    return evolve((state, part) => (state, f(state, part)));
+  }
+
+  PathArrow<State, Whole, Part2> evolve<Part2>(BiFunc<State, Part, (State, Part2)> f) {
+    return PathArrow.fromRun((tuple) {
+      return run(tuple).rmap((tuple) => f(tuple.$1, tuple.$2));
     });
   }
 
