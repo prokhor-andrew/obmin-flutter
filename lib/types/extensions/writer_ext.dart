@@ -17,12 +17,12 @@ extension WriterOpticExtension<S, A, B> on Optic<S, Writer<A, B>> {
   }
 }
 
-extension WriterPathArrowExtension<State, Whole, A, B> on PathArrow<State, Whole, Writer<A, B>> {
-  PathArrow<State, Whole, IList<A>> list() {
-    return then(PathArrow.writerList<State, B, A>());
+extension WriterPathArrowExtension<Whole, A, B> on PathArrow<Whole, Writer<A, B>> {
+  PathArrow<Whole, IList<A>> list() {
+    return then(PathArrow.writerList<B, A>());
   }
 
-  PathArrow<State, Whole, B> value() {
-    return then(PathArrow.writerValue<State, A, B>());
+  PathArrow<Whole, B> value() {
+    return then(PathArrow.writerValue<A, B>());
   }
 }

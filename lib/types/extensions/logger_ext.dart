@@ -12,8 +12,8 @@ extension LoggerOpticExtension<S, A> on Optic<S, Logger<A>> {
   }
 }
 
-extension LoggerPathArrowExtension<State, Whole, A> on PathArrow<State, Whole, Logger<A>> {
-  PathArrow<State, Whole, A> value() {
-    return then(PathArrow.logger<State, A>());
+extension LoggerPathArrowExtension<Whole, A> on PathArrow<Whole, Logger<A>> {
+  PathArrow<Whole, A> value() {
+    return then(PathArrow.logger<A>());
   }
 }

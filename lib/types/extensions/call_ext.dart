@@ -16,12 +16,12 @@ extension CallOpticExtension<S, A, B> on Optic<S, Call<A, B>> {
   }
 }
 
-extension CallPathArrowExtension<State, Whole, A, B> on PathArrow<State, Whole, Call<A, B>> {
-  PathArrow<State, Whole, A> launched() {
-    return then(PathArrow.callLaunched<State, B, A>());
+extension CallPathArrowExtension<Whole, A, B> on PathArrow<Whole, Call<A, B>> {
+  PathArrow<Whole, A> launched() {
+    return then(PathArrow.callLaunched<B, A>());
   }
 
-  PathArrow<State, Whole, B> returned() {
-    return then(PathArrow.callReturned<State, A, B>());
+  PathArrow<Whole, B> returned() {
+    return then(PathArrow.callReturned<A, B>());
   }
 }

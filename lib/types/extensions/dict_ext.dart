@@ -25,14 +25,14 @@ extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
   }
 }
 
-extension IListPathArrowExtension<State, Key, Whole, A> on PathArrow<State, Whole, IMap<Key, A>> {
-  PathArrow<State, Whole, A> each() {
-    return then(PathArrow.dict<State, Key, A>());
+extension IListPathArrowExtension<Key, Whole, A> on PathArrow<Whole, IMap<Key, A>> {
+  PathArrow<Whole, A> each() {
+    return then(PathArrow.dict<Key, A>());
   }
 
-  PathArrow<State, Whole, A> at(Key key) {
+  PathArrow<Whole, A> at(Key key) {
     return then(PathArrow.fromRun((tuple) {
-      final (state, map) = tuple;
+      final (map) = tuple;
       if (!map.containsKey(key)) {
         return const IMap.empty();
       }
@@ -40,7 +40,7 @@ extension IListPathArrowExtension<State, Key, Whole, A> on PathArrow<State, Whol
       final element = map.get(key) as A;
 
       return {
-        ["${key.toString()}"].lock: (state, element)
+        ["${key.toString()}"].lock: element
       }.lock;
     }));
   }

@@ -16,12 +16,12 @@ extension EitherOpticExtension<S, A, B> on Optic<S, Either<A, B>> {
   }
 }
 
-extension EitherPathArrowExtension<State, Whole, A, B> on PathArrow<State, Whole, Either<A, B>> {
-  PathArrow<State, Whole, A> left() {
-    return then(PathArrow.eitherLeft<State, B, A>());
+extension EitherPathArrowExtension<Whole, A, B> on PathArrow<Whole, Either<A, B>> {
+  PathArrow<Whole, A> left() {
+    return then(PathArrow.eitherLeft<B, A>());
   }
 
-  PathArrow<State, Whole, B> right() {
-    return then(PathArrow.eitherRight<State, A, B>());
+  PathArrow<Whole, B> right() {
+    return then(PathArrow.eitherRight<A, B>());
   }
 }

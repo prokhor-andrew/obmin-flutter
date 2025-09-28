@@ -16,12 +16,12 @@ extension ResultOpticExtension<S, A, B> on Optic<S, Result<A, B>> {
   }
 }
 
-extension ResultPathArrowExtension<State, Whole, A, B> on PathArrow<State, Whole, Result<A, B>> {
-  PathArrow<State, Whole, A> failure() {
-    return then(PathArrow.resultFailure<State, B, A>());
+extension ResultPathArrowExtension<Whole, A, B> on PathArrow<Whole, Result<A, B>> {
+  PathArrow<Whole, A> failure() {
+    return then(PathArrow.resultFailure<B, A>());
   }
 
-  PathArrow<State, Whole, B> success() {
-    return then(PathArrow.resultSuccess<State, A, B>());
+  PathArrow<Whole, B> success() {
+    return then(PathArrow.resultSuccess<A, B>());
   }
 }

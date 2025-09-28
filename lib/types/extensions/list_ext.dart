@@ -26,20 +26,20 @@ extension IListOpticExtension<S, A> on Optic<S, IList<A>> {
   }
 }
 
-extension IListPathArrowExtension<State, Whole, A> on PathArrow<State, Whole, IList<A>> {
-  PathArrow<State, Whole, A> each() {
-    return then(PathArrow.list<State, A>());
+extension IListPathArrowExtension<Whole, A> on PathArrow<Whole, IList<A>> {
+  PathArrow<Whole, A> each() {
+    return then(PathArrow.list<A>());
   }
 
-  PathArrow<State, Whole, A> at(int index) {
+  PathArrow<Whole, A> at(int index) {
     return then(PathArrow.fromRun((tuple) {
-      final (state, list) = tuple;
+      final (list) = tuple;
       if (index < 0 || index >= list.length) {
         return const IMap.empty();
       }
 
       return {
-        ["$index"].lock: (state, list[index])
+        ["$index"].lock: (list[index])
       }.lock;
     }));
   }

@@ -12,8 +12,8 @@ extension OptionOpticExtension<S, A> on Optic<S, Option<A>> {
   }
 }
 
-extension OptionPathArrowExtension<State, Whole, A> on PathArrow<State, Whole, Option<A>> {
-  PathArrow<State, Whole, A> some() {
-    return then(PathArrow.option<State, A>());
+extension OptionPathArrowExtension<Whole, A> on PathArrow<Whole, Option<A>> {
+  PathArrow<Whole, A> some() {
+    return then(PathArrow.option<A>());
   }
 }
