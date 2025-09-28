@@ -10,6 +10,7 @@ import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
 import 'package:obmin/types/result.dart';
 import 'package:obmin/types/these.dart';
+import 'package:obmin/types/tuple.dart';
 import 'package:obmin/types/validator.dart';
 import 'package:obmin/types/writer.dart';
 
@@ -321,6 +322,12 @@ final class PathArrow<State, Whole, Part> {
 
   PathArrow<State, Whole2, Part> after<Whole2>(PathArrow<State, Whole2, Whole> other) {
     return other.then(this);
+  }
+
+  static PathArrow<State, Whole, ()> unit<State, Whole>() {
+    return PathArrow.fromRun((tuple) {
+      return {const IList<String>.empty(): tuple.rmap(constfunc(()))}.lock;
+    });
   }
 
   PathArrow<State, Whole, (Part, Part2)> zip<Part2>(PathArrow<State, Whole, Part2> other) {
