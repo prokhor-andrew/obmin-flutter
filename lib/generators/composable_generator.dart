@@ -147,7 +147,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln('  PathArrow<State, Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((tuple) => { FList.of("$fieldName") : (tuple.\$1, tuple.\$2.$fieldName) }.lock));');
+        buffer.writeln('  PathArrow<State, Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((tuple) => { ["$fieldName"].lock : (tuple.\$1, tuple.\$2.$fieldName) }.lock));');
       }
     }
 
@@ -237,7 +237,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
 
     buffer.writeln(
         "PathArrow<State, Whole, $caseName$generics> ${_lowercaseFirstCharacter(caseName)}() => then(PathArrow.fromRun((tuple) => tuple.\$2.${_lowercaseFirstCharacter(caseName)}OrNone().match(() => const IMap.empty(), "
-        "(value) => { FList.of(\"${caseName}\") : (tuple.\$1, value) }.lock)));");
+        "(value) => { [\"${caseName}\"].lock : (tuple.\$1, value) }.lock)));");
   }
 
   buffer.writeln('}');
@@ -312,7 +312,7 @@ void _generateForPathArrow(StringBuffer buffer, ClassElement element) {
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln('  PathArrow<State, Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((tuple) => { FList.of("$fieldName") : (tuple.\$1, tuple.\$2.$fieldName) }.lock));');
+      buffer.writeln('  PathArrow<State, Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((tuple) => { ["$fieldName"].lock : (tuple.\$1, tuple.\$2.$fieldName) }.lock));');
     }
   }
 
