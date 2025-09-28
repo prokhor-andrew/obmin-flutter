@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/channel/channel_lib.dart';
 import 'package:obmin/machine/mealy.dart';
 import 'package:obmin/machine/plan.dart';
@@ -357,20 +358,26 @@ final class Machine<Input, Output> {
     required Future<Helper> Function() onCreateHelper,
     required Future<void> Function(Helper helper) onDestroyHelper,
     required State initial,
-    required IMap<String, Machine<Never, Func<State, State>>> Function(Helper helper, State state) map,
+    required Func<Helper, PathArrow<State, Machine<Never, Func<State, State>>>> arrow,
     bool isDistinctUntilChangedOn = true,
     bool shouldWaitOnEffects = true,
     ChannelBufferStrategy<State>? inputBufferStrategy,
     ChannelBufferStrategy<Func<State, State>>? outputBufferStrategy,
     ChannelBufferStrategy<Either<Func<State, State>, State>>? internalBufferStrategy,
   }) {
+    IMap<String, Machine<Never, Func<State, State>>> _mapping(Helper helper, State state) {
+      final arr = arrow(helper);
+      final map = arr.run(initial);
+      return map.map((key, value) => MapEntry(key.join("/"), value));
+    }
+
     final machine = Machine.fromPool<State, Func<State, State>, Helper>(
       onCreateHelper: onCreateHelper,
       onDestroyHelper: onDestroyHelper,
       initial: (helper) {
-        return map(helper, initial);
+        return _mapping(helper, initial);
       },
-      map: map,
+      map: _mapping,
       shouldWaitOnEffects: shouldWaitOnEffects,
       inputBufferStrategy: inputBufferStrategy,
       outputBufferStrategy: outputBufferStrategy,
