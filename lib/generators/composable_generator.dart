@@ -302,7 +302,7 @@ void _generateForPathArrow(StringBuffer buffer, ClassElement element) {
     generics = "<$params>";
   }
 
-  buffer.writeln("extension ${className}ObminPathArrowExtension<State, Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<State, Whole, "
+  buffer.writeln("extension ${className}PathArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<Whole, "
       "$className$generics> "
       "{");
 
@@ -313,7 +313,7 @@ void _generateForPathArrow(StringBuffer buffer, ClassElement element) {
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln('  PathArrow<State, Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((tuple) => { ["$fieldName"].lock : (tuple.\$1, tuple.\$2.$fieldName) }.lock));');
+      buffer.writeln('  PathArrow<Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((val) => { ["$fieldName"].lock : val.$fieldName }.lock));');
     }
   }
 
