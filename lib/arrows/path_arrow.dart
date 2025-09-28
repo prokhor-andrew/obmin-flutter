@@ -285,7 +285,7 @@ final class PathArrow<Whole, Part> {
     });
   }
 
-  PathArrow<Whole, (Part, Part2)> zip<Part2>(PathArrow<Whole, Part2> other) {
+  PathArrow<Whole, (Part, Part2)> zipCrossJoin<Part2>(PathArrow<Whole, Part2> other) {
     return PathArrow.fromRun((whole) {
       IMap<IList<String>, (Part, Part2)> out = const IMap.empty();
       for (final w1 in run(whole).entries) {
@@ -299,10 +299,31 @@ final class PathArrow<Whole, Part> {
     });
   }
 
-  static PathArrow<Whole, IList<Part>> zipAll<Whole, Part>(IList<PathArrow<Whole, Part>> list) {
+  PathArrow<Whole, (Part, Part2)> zipLeftBias<Part2>(PathArrow<Whole, Part2> other) {
+    return PathArrow.fromRun((whole) {
+      IMap<IList<String>, (Part, Part2)> out = const IMap.empty();
+      for (final w1 in run(whole).entries) {
+        final (log1, p1) = (w1.key, w1.value);
+        for (final w2 in other.run(whole).entries) {
+          final (log2, p2) = (w2.key, w2.value);
+          out = out.add(log1.isNotEmpty ? log1 : log2, (p1, p2));
+        }
+      }
+      return out;
+    });
+  }
+
+  static PathArrow<Whole, IList<Part>> zipAllCrossJoin<Whole, Part>(IList<PathArrow<Whole, Part>> list) {
     return list.fold(PathArrow.id(), (current, element) {
       final arrow = element.rmap((value) => [value].lock);
-      return current.zip(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+      return current.zipCrossJoin(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  static PathArrow<Whole, IList<Part>> zipAllLeftBias<Whole, Part>(IList<PathArrow<Whole, Part>> list) {
+    return list.fold(PathArrow.id(), (current, element) {
+      final arrow = element.rmap((value) => [value].lock);
+      return current.zipLeftBias(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
