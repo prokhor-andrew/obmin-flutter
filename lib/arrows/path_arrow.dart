@@ -24,6 +24,15 @@ final class PathArrow<Whole, Part> {
     return PathArrow._(run);
   }
 
+  static PathArrow<Whole, Part> fromFunc<Whole, Part>(Func<Whole, Part> f) {
+    return fromRun((whole) {
+      final part = f(whole);
+      return {
+        const IList<String>.empty(): part,
+      }.lock;
+    });
+  }
+
   static PathArrow<Either<E, Part>, Part> eitherRight<E, Part>() {
     return PathArrow.fromRun((either) {
       return either.match(
