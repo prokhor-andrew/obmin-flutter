@@ -13,19 +13,19 @@ final class Option<T> {
 
   const Option._(this._either);
 
-  static Option<A> some<A>(A value) => Option._(Either.right(value));
+  static Option<A> some<A>(A value) => Option._(Either.right<(), A>(value));
 
-  static Option<A> none<A>() => Option._(Either.left(()));
+  static Option<A> none<A>() => Option._(Either.left<(), A>(()));
 
-  static Option<()> unit() => Option.some(());
+  static Option<()> unit() => Option.some<()>(());
 
-  static Option<Never> zero() => Option.none();
+  static Option<Never> zero() => Option.none<Never>();
 
   V match<V>(
     V Function() ifNone,
     Func<T, V> ifSome,
   ) {
-    return _either.match((_) => ifNone(), ifSome);
+    return _either.match<V>((_) => ifNone(), ifSome);
   }
 
   Either<(), T> asEither() {
@@ -37,40 +37,40 @@ final class Option<T> {
     if (identical(this, other)) return true;
     if (other is! Option<T>) return false;
 
-    return match(
-      () => other.match(() => true, constfunc(false)),
-      (val) => other.match(() => false, (val2) => val == val2),
+    return match<bool>(
+      () => other.match<bool>(() => true, constfunc<T, bool>(false)),
+      (val) => other.match<bool>(() => false, (val2) => val == val2),
     );
   }
 
   @override
-  int get hashCode => match(() => 0, (val) => val.hashCode);
+  int get hashCode => match<int>(() => 0, (val) => val.hashCode);
 
   Option<(T, R)> zip<R>(Option<R> other) {
-    return match(
-      Option.none,
-      (val1) => other.match(Option.none, (val2) => Option.some((val1, val2))),
+    return match<Option<(T, R)>>(
+      Option.none<(T, R)>,
+      (val1) => other.match<Option<(T, R)>>(Option.none<(T, R)>, (val2) => Option.some<(T, R)>((val1, val2))),
     );
   }
 
   Option<R> bind<R>(Func<T, Option<R>> function) {
-    return match(Option.none, function);
+    return match<Option<R>>(Option.none<R>, function);
   }
 
   Option<R> rmap<R>(Func<T, R> f) {
-    return bind((value) {
-      return Option.some(f(value));
+    return bind<R>((value) {
+      return Option.some<R>(f(value));
     });
   }
 
   T valueOr(T replacement) {
     return match<T>(
       () => replacement,
-      idfunc,
+      idfunc<T>,
     );
   }
 
-  bool isSome() => rmap(constfunc(true)).valueOr(false);
+  bool isSome() => rmap<bool>(constfunc<T, bool>(true)).valueOr(false);
 
   bool isNone() => !isSome();
 
@@ -91,55 +91,55 @@ final class Option<T> {
   }
 
   Option<Either<T, T2>> alt<T2>(Option<T2> other) {
-    return match(
-      () => other.rmap(Either.right),
-      (value) => Option.some(Either.left(value)),
+    return match<Option<Either<T, T2>>>(
+      () => other.rmap<Either<T, T2>>(Either.right<T, T2>),
+      (value) => Option.some<Either<T, T2>>(Either.left<T, T2>(value)),
     );
   }
 
   static Option<IList<Part>> zipAll<Part>(IList<Option<Part>> list) {
-    return list.fold(Option.some(const IList.empty()), (current, element) {
-      final option = element.rmap((value) => [value].lock);
-      return current.zip(option).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    return list.fold<Option<IList<Part>>>(Option.some<IList<Part>>(IList<Part>.empty()), (current, element) {
+      final option = element.rmap<IList<Part>>((value) => [value].lock);
+      return current.zip<IList<Part>>(option).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
   static Option<(int, Part)> altAll<Part>(IList<Option<Part>> list) {
-    return list.indexed.fold(Option.none(), (current, element) {
+    return list.indexed.fold<Option<(int, Part)>>(Option.none<(int, Part)>(), (current, element) {
       final (index, option) = element;
-      final indexedOption = option.rmap((value) => (index, value));
-      return current.alt(indexedOption).rmap((either) {
+      final indexedOption = option.rmap<(int, Part)>((value) => (index, value));
+      return current.alt<(int, Part)>(indexedOption).rmap<(int, Part)>((either) {
         return either.value();
       });
     });
   }
 
   Validator<(), T> asValidator() {
-    return match(() {
-      return Validator.errors<(), T>(const IList.empty());
-    }, Validator.of);
+    return match<Validator<(), T>>(() {
+      return Validator.errors<(), T>(const IList<()>.empty());
+    }, Validator.of<(), T>);
   }
 
   IList<T> asList() {
-    return match(() => const IList.empty(), (value) => [value].lock);
+    return match<IList<T>>(() => IList<T>.empty(), (value) => [value].lock);
   }
 
   These<(), T> asThese() {
-    return match(() => These.left(()), These.right);
+    return match<These<(), T>>(() => These.left<(), T>(()), These.right<(), T>);
   }
 }
 
 extension EitherToOptionalExtension<T> on Either<(), T> {
   Option<T> asOption() {
     return match<Option<T>>(
-      constfunc(Option.none()),
-      Option.some,
+      constfunc<(), Option<T>>(Option.none<T>()),
+      Option.some<T>,
     );
   }
 }
 
 extension OptionMonadExtension<T> on Option<Option<T>> {
   Option<T> joined() {
-    return bind(idfunc);
+    return bind<T>(idfunc<Option<T>>);
   }
 }
