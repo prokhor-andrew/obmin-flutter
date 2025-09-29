@@ -92,7 +92,7 @@ final class EitherArrow<E, Whole, Part> {
   }
 
   static EitherArrow<E, Whole, IList<Part>> zipAll<E, Whole, Part>(IList<EitherArrow<E, Whole, Part>> list) {
-    return list.fold(EitherArrow.fromRun<E, Whole, IList<Part>>((_) => Either.right<E, IList<Part>>(IList<Part>.empty())), (current, element) {
+    return list.fold<EitherArrow<E, Whole, IList<Part>>>(EitherArrow.fromRun<E, Whole, IList<Part>>((_) => Either.right<E, IList<Part>>(IList<Part>.empty())), (current, element) {
       final arrow = element.rmap<IList<Part>>((value) => [value].lock);
       return current.zip<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
