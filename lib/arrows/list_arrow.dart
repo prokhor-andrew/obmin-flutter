@@ -90,21 +90,21 @@ final class ListArrow<Whole, Part> {
   }
 
   static ListArrow<Whole, IList<Part>> zipAllCrossJoin<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
-    return list.fold<ListArrow<Whole, IList<Part>>>(ListArrow.fromRun((_) => [IList<Part>.empty()].lock), (current, element) {
+    return list.fold<ListArrow<Whole, IList<Part>>>(ListArrow.fromRun<Whole, IList<Part>>((_) => [IList<Part>.empty()].lock), (current, element) {
       final arrow = element.rmap<IList<Part>>((value) => [value].lock);
       return current.zipCrossJoin<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
   static ListArrow<Whole, IList<Part>> zipAllPointIndex<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
-    return list.fold<ListArrow<Whole, IList<Part>>>(ListArrow.fromRun((_) => [IList<Part>.empty()].lock), (current, element) {
+    return list.fold<ListArrow<Whole, IList<Part>>>(ListArrow.fromRun<Whole, IList<Part>>((_) => [IList<Part>.empty()].lock), (current, element) {
       final arrow = element.rmap<IList<Part>>((value) => [value].lock);
       return current.zipCrossJoin<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
   static ListArrow<Whole, (int, Part)> altAllLeftBiased<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
-    return list.indexed.fold<ListArrow<Whole, (int, Part)>>(ListArrow.fromRun((_) => <(int, Part)>[].lock), (current, element) {
+    return list.indexed.fold<ListArrow<Whole, (int, Part)>>(ListArrow.fromRun<Whole, (int, Part)>((_) => <(int, Part)>[].lock), (current, element) {
       final (index, option) = element;
       final arrow = option.rmap<(int, Part)>((value) => (index, value));
       return current.altLeftBiased<(int, Part)>(arrow).rmap<(int, Part)>((either) {
@@ -114,7 +114,7 @@ final class ListArrow<Whole, Part> {
   }
 
   static ListArrow<Whole, (int, Part)> altAllConcat<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
-    return list.indexed.fold(ListArrow.fromRun((_) => <(int, Part)>[].lock), (current, element) {
+    return list.indexed.fold(ListArrow.fromRun<Whole, (int, Part)>((_) => <(int, Part)>[].lock), (current, element) {
       final (index, option) = element;
       final arrow = option.rmap<(int, Part)>((value) => (index, value));
       return current.altConcat<(int, Part)>(arrow).rmap<(int, Part)>((either) {
