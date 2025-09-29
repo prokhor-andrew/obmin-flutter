@@ -11,11 +11,11 @@ import '../func.dart';
 
 extension IListExtensions<A> on IList<A> {
   IList<A2> rmap<A2>(Func<A, A2> f) {
-    return map(f).toIList();
+    return map<A2>(f).toIList();
   }
 
   IList<(A, A2)> zipCrossJoin<A2>(IList<A2> other) {
-    IList<(A, A2)> result = const IList.empty();
+    IList<(A, A2)> result = const IList<(A, A2)>.empty();
 
     for (final a in this) {
       for (final a2 in other) {
@@ -27,7 +27,7 @@ extension IListExtensions<A> on IList<A> {
   }
 
   IList<(A, A2)> zipPointIndex<A2>(IList<A2> other) {
-    IList<(A, A2)> result = const IList.empty();
+    IList<(A, A2)> result = const IList<(A, A2)>.empty();
 
     final maxLength = min(length, other.length);
 
@@ -42,24 +42,24 @@ extension IListExtensions<A> on IList<A> {
   }
 
   IList<A2> bind<A2>(Func<A, IList<A2>> f) {
-    return expand(f).toIList();
+    return expand<A2>(f).toIList();
   }
 
   IList<Either<A, A2>> altConcat<A2>(IList<A2> other) {
-    return rmap(Either.left<A, A2>).addAll(other.rmap(Either.right<A, A2>));
+    return rmap<Either<A, A2>>(Either.left<A, A2>).addAll(other.rmap(Either.right<A, A2>));
   }
 
   IList<Either<A, A2>> altLeftBiased<A2>(IList<A2> other) {
     if (isNotEmpty) {
-      return rmap(Either.left);
+      return rmap(Either.left<A, A2>);
     } else {
-      return other.rmap(Either.right);
+      return other.rmap(Either.right<A, A2>);
     }
   }
 }
 
 extension ListMonadExtension<T> on IList<IList<T>> {
   IList<T> joined() {
-    return bind(idfunc);
+    return bind<T>(idfunc<IList<T>>);
   }
 }
