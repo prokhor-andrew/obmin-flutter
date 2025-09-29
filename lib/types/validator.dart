@@ -15,21 +15,21 @@ final class Validator<E, A> {
 
   static Validator<E, A> fromEither<E, A>(Either<IList<E>, A> either) => Validator._(either);
 
-  static Validator<E, A> of<E, A>(A value) => Validator._(Either.right(value));
+  static Validator<E, A> of<E, A>(A value) => Validator._(Either.right<IList<E>, A>(value));
 
-  static Validator<E, A> error<E, A>(E error) => Validator._(Either.left([error].lock));
+  static Validator<E, A> error<E, A>(E error) => Validator._(Either.left<IList<E>, A>([error].lock));
 
-  static Validator<E, A> errors<E, A>(IList<E> errors) => Validator._(Either.left(errors));
+  static Validator<E, A> errors<E, A>(IList<E> errors) => Validator._(Either.left<IList<E>, A>(errors));
 
-  static Validator<E, ()> unit<E>() => Validator.of(());
+  static Validator<E, ()> unit<E>() => Validator.of<E, ()>(());
 
-  static Validator<E, Never> zero<E>() => Validator.errors(const IList.empty());
+  static Validator<E, Never> zero<E>() => Validator.errors<E, Never>(IList<E>.empty());
 
   T match<T>(
     Func<IList<E>, T> ifErrors,
     Func<A, T> ifValue,
   ) {
-    return _either.match(ifErrors, ifValue);
+    return _either.match<T>(ifErrors, ifValue);
   }
 
   @override
@@ -37,75 +37,75 @@ final class Validator<E, A> {
     if (identical(this, other)) return true;
     if (other is! Validator<E, A>) return false;
 
-    return match(
-      (errors) => other.match((errors2) => errors == errors2, constfunc(false)),
-      (value) => other.match(constfunc(false), (value2) => value == value2),
+    return match<bool>(
+      (errors) => other.match<bool>((errors2) => errors == errors2, constfunc<A, bool>(false)),
+      (value) => other.match<bool>(constfunc<IList<E>, bool>(false), (value2) => value == value2),
     );
   }
 
   @override
-  int get hashCode => match((value) => value.hashCode, (value) => value.hashCode);
+  int get hashCode => match<int>((value) => value.hashCode, (value) => value.hashCode);
 
   Validator<T, A> lmap<T>(Func<E, T> function) {
-    return match((errors) => Validator.errors(errors.map(function).toIList()), Validator.of);
+    return match<Validator<T, A>>((errors) => Validator.errors<T, A>(errors.map<T>(function).toIList()), Validator.of<T, A>);
   }
 
   Validator<E, T> rmap<T>(Func<A, T> function) {
-    return match(Validator.errors, (value) => Validator.of(function(value)));
+    return match<Validator<E, T>>(Validator.errors<E, T>, (value) => Validator.of<E, T>(function(value)));
   }
 
   Validator<E, (A, T2)> zip<T2>(Validator<E, T2> other) {
-    return match((errors) {
-      return other.match(
-        (errors2) => Validator.errors(errors.addAll(errors2)),
-        (_) => Validator.errors(errors),
+    return match<Validator<E, (A, T2)>>((errors) {
+      return other.match<Validator<E, (A, T2)>>(
+        (errors2) => Validator.errors<E, (A, T2)>(errors.addAll(errors2)),
+        (_) => Validator.errors<E, (A, T2)>(errors),
       );
     }, (value) {
-      return other.match(Validator.errors, (value2) {
-        return Validator.of((value, value2));
+      return other.match<Validator<E, (A, T2)>>(Validator.errors<E, (A, T2)>, (value2) {
+        return Validator.of<E, (A, T2)>((value, value2));
       });
     });
   }
 
   Validator<E, Either<A, T2>> altConcat<T2>(Validator<E, T2> other) {
-    return match(
+    return match<Validator<E, Either<A, T2>>>(
       (errors) {
-        return other.match(
+        return other.match<Validator<E, Either<A, T2>>>(
           (errors2) {
-            return Validator.errors(errors.addAll(errors2));
+            return Validator.errors<E, Either<A, T2>>(errors.addAll(errors2));
           },
-          (value2) => Validator.of(Either.right(value2)),
+          (value2) => Validator.of<E, Either<A, T2>>(Either.right<A, T2>(value2)),
         );
       },
-      (value) => Validator.of(Either.left(value)),
+      (value) => Validator.of<E, Either<A, T2>>(Either.left<A, T2>(value)),
     );
   }
 
   Validator<E, Either<A, T2>> altLeftBiased<T2>(Validator<E, T2> other) {
-    return match(
+    return match<Validator<E, Either<A, T2>>>(
       (errors) {
-        return other.match(
+        return other.match<Validator<E, Either<A, T2>>>(
           (errors2) {
-            return Validator.errors(errors);
+            return Validator.errors<E, Either<A, T2>>(errors);
           },
-          (value2) => Validator.of(Either.right(value2)),
+          (value2) => Validator.of<E, Either<A, T2>>(Either.right<A, T2>(value2)),
         );
       },
-      (value) => Validator.of(Either.left(value)),
+      (value) => Validator.of<E, Either<A, T2>>(Either.left<A, T2>(value)),
     );
   }
 
   Option<IList<E>> errorsOrNone() => match<Option<IList<E>>>(
-        Option.some,
-        constfunc(Option.none()),
+        Option.some<IList<E>>,
+        constfunc<A, Option<IList<E>>>(Option.none<IList<E>>()),
       );
 
   Option<A> valueOrNone() => match<Option<A>>(
-        constfunc(Option.none()),
-        Option.some,
+        constfunc<IList<E>, Option<A>>(Option.none<A>()),
+        Option.some<A>,
       );
 
-  bool isErrors() => errorsOrNone().rmap(constfunc(true)).valueOr(false);
+  bool isErrors() => errorsOrNone().rmap<bool>(constfunc<IList<E>, bool>(true)).valueOr(false);
 
   bool isValue() => !isErrors();
 
@@ -128,27 +128,27 @@ final class Validator<E, A> {
   }
 
   static Validator<E, IList<Part>> zipAll<E, Part>(IList<Validator<E, Part>> list) {
-    return list.fold(Validator.of(const IList.empty()), (current, element) {
-      final validator = element.rmap((value) => [value].lock);
-      return current.zip(validator).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    return list.fold<Validator<E, IList<Part>>>(Validator.of<E, IList<Part>>(IList<Part>.empty()), (current, element) {
+      final validator = element.rmap<IList<Part>>((value) => [value].lock);
+      return current.zip<IList<Part>>(validator).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
   static Validator<E, (int, Part)> altAllConcat<E, Part>(IList<Validator<E, Part>> list) {
-    return list.indexed.fold(Validator.errors(const IList.empty()), (current, element) {
+    return list.indexed.fold<Validator<E, (int, Part)>>(Validator.errors<E, (int, Part)>(IList<E>.empty()), (current, element) {
       final (index, option) = element;
-      final validator = option.rmap((value) => (index, value));
-      return current.altConcat(validator).rmap((either) {
+      final validator = option.rmap<(int, Part)>((value) => (index, value));
+      return current.altConcat<(int, Part)>(validator).rmap<(int, Part)>((either) {
         return either.value();
       });
     });
   }
 
   static Validator<E, (int, Part)> altAllLeftBiased<E, Part>(IList<Validator<E, Part>> list) {
-    return list.indexed.fold(Validator.errors(const IList.empty()), (current, element) {
+    return list.indexed.fold<Validator<E, (int, Part)>>(Validator.errors<E, (int, Part)>(IList<E>.empty()), (current, element) {
       final (index, option) = element;
-      final validator = option.rmap((value) => (index, value));
-      return current.altLeftBiased(validator).rmap((either) {
+      final validator = option.rmap<(int, Part)>((value) => (index, value));
+      return current.altLeftBiased<(int, Part)>(validator).rmap<(int, Part)>((either) {
         return either.value();
       });
     });
