@@ -17,7 +17,7 @@ final class Logger<A> {
 
   static Logger<A> of<A>(A value) => Logger("", value);
 
-  static Logger<()> unit() => Logger.of(());
+  static Logger<()> unit() => Logger.of<()>(());
 
   Logger<A2> rmap<A2>(Func<A, A2> f) {
     return Logger(_log, f(_value));
@@ -34,9 +34,9 @@ final class Logger<A> {
   }
 
   static Logger<IList<A>> zipAll<A>(IList<Logger<A>> list) {
-    return list.fold(Logger.of(const IList.empty()), (current, element) {
-      final logger = element.rmap((value) => [value].lock);
-      return current.zip(logger).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    return list.fold<Logger<IList<A>>>(Logger.of<IList<A>>(IList<A>.empty()), (current, element) {
+      final logger = element.rmap<IList<A>>((value) => [value].lock);
+      return current.zip<IList<A>>(logger).rmap<IList<A>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
@@ -63,6 +63,6 @@ final class Logger<A> {
 
 extension LoggerMonadExtension<T> on Logger<Logger<T>> {
   Logger<T> joined() {
-    return bind(idfunc);
+    return bind<T>(idfunc<Logger<T>>);
   }
 }
