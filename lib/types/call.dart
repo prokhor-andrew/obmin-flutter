@@ -16,9 +16,9 @@ final class Call<A, B> {
 
   const Call._(this._either);
 
-  static Call<A, B> launched<A, B>(A err) => Call._(Either.left(err));
+  static Call<A, B> launched<A, B>(A req) => Call._(Either.left(req));
 
-  static Call<A, B> returned<A, B>(B val) => Call._(Either.right(val));
+  static Call<A, B> returned<A, B>(B res) => Call._(Either.right(res));
 
   static Call<A, ()> unit<A>() => Call.returned(());
 
