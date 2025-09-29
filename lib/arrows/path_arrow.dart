@@ -266,7 +266,7 @@ final class PathArrow<Whole, Part> {
 
   PathArrow<Whole, Sub> then<Sub>(PathArrow<Part, Sub> other) {
     return PathArrow.fromRun((tuple) {
-      IMap<IList<String>, Sub> result = const IMap.empty();
+      IMap<IList<String>, Sub> result = IMap<IList<String>, Sub>.empty();
 
       final outerMap = run(tuple);
       for (final entry in outerMap.entries) {
