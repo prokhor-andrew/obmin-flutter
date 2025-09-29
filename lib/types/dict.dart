@@ -8,6 +8,6 @@ import '../func.dart';
 
 extension DictExtensions<Key, A> on IMap<Key, A> {
   IMap<Key, A2> rmap<A2>(Func<A, A2> f) {
-    return map((key, value) => MapEntry(key, f(value)));
+    return map<Key, A2>((key, value) => MapEntry(key, f(value)));
   }
 }
