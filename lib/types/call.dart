@@ -16,14 +16,14 @@ final class Call<A, B> {
 
   const Call._(this._either);
 
-  static Call<A, B> launched<A, B>(A req) => Call._(Either.left(req));
+  static Call<A, B> launched<A, B>(A req) => Call._(Either.left<A, B>(req));
 
-  static Call<A, B> returned<A, B>(B res) => Call._(Either.right(res));
+  static Call<A, B> returned<A, B>(B res) => Call._(Either.right<A, B>(res));
 
-  static Call<A, ()> unit<A>() => Call.returned(());
+  static Call<A, ()> unit<A>() => Call.returned<A, ()>(());
 
   T match<T>(Func<A, T> ifLaunched, Func<B, T> ifReturned) {
-    return _either.match(ifLaunched, ifReturned);
+    return _either.match<T>(ifLaunched, ifReturned);
   }
 
   @override
@@ -38,27 +38,27 @@ final class Call<A, B> {
   int get hashCode => _either.hashCode;
 
   Call<T, B> rescue<T>(Func<A, Call<T, B>> f) {
-    return _either.rescue((val) => f(val)._either).asCall();
+    return _either.rescue<T>((val) => f(val)._either).asCall();
   }
 
   Call<T, B> lmap<T>(Func<A, T> f) {
-    return _either.lmap(f).asCall();
+    return _either.lmap<T>(f).asCall();
   }
 
   Call<A, T> bind<T>(Func<B, Call<A, T>> f) {
-    return _either.bind((val) => f(val)._either).asCall();
+    return _either.bind<T>((val) => f(val)._either).asCall();
   }
 
   Call<A, T> rmap<T>(Func<B, T> f) {
-    return _either.rmap(f).asCall();
+    return _either.rmap<T>(f).asCall();
   }
 
   Call<A2, B2> bimap<A2, B2>(Func<A, A2> lf, Func<B, B2> rf) {
-    return _either.bimap(lf, rf).asCall();
+    return _either.bimap<A2, B2>(lf, rf).asCall();
   }
 
   Call<A, (B, T2)> zip<T2>(Call<A, T2> other) {
-    return _either.zip(other._either).asCall();
+    return _either.zip<T2>(other._either).asCall();
   }
 
   Option<A> launchedOrNone() => _either.leftOrNone();
@@ -82,14 +82,14 @@ final class Call<A, B> {
   }
 
   static Call<E, IList<Part>> zipAll<E, Part>(IList<Call<E, Part>> list) {
-    return list.fold(Call.returned(const IList.empty()), (current, element) {
-      final call = element.rmap((value) => [value].lock);
-      return current.zip(call).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    return list.fold<Call<E, IList<Part>>>(Call.returned<E, IList<Part>>(IList<Part>.empty()), (current, element) {
+      final call = element.rmap<IList<Part>>((value) => [value].lock);
+      return current.zip<IList<Part>>(call).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
   These<A, B> asThese() {
-    return match(These.left, These.right);
+    return match(These.left<A, B>, These.right<A, B>);
   }
 
   Either<A, B> asEither() {
@@ -98,23 +98,23 @@ final class Call<A, B> {
 }
 
 extension CallValueWhenBothExtension<T> on Call<T, T> {
-  T value() => match<T>(idfunc, idfunc);
+  T value() => match<T>(idfunc<T>, idfunc<T>);
 
   IList<T> asIList() {
     return [value()].lock;
   }
 
   Logger<T> asLogger() {
-    return Logger.of(value());
+    return Logger.of<T>(value());
   }
 
   Writer<E, T> asWriter<E>() {
-    return Writer.of(value());
+    return Writer.of<E, T>(value());
   }
 }
 
 extension CallNeverLaunchedExtension<T> on Call<Never, T> {
-  T value() => match<T>(absurd, idfunc);
+  T value() => match<T>(absurd<T>, idfunc<T>);
 
   IList<T> asIList() {
     return [value()].lock;
@@ -122,27 +122,27 @@ extension CallNeverLaunchedExtension<T> on Call<Never, T> {
 }
 
 extension CallNeverReturnedExtension<T> on Call<T, Never> {
-  T value() => match<T>(idfunc, absurd);
+  T value() => match<T>(idfunc<T>, absurd<T>);
 }
 
 extension CallUnitLaunchedExtension<T> on Call<(), T> {
   Option<T> asOption() {
-    return match(constfunc(Option.none()), Option.some);
+    return match<Option<T>>(constfunc<(), Option<T>>(Option.none<T>()), Option.some<T>);
   }
 
   IList<T> asList() {
-    return match(constfunc(const IList.empty()), (value) => [value].lock);
+    return match<IList<T>>(constfunc<(), IList<T>>(IList<T>.empty()), (value) => [value].lock);
   }
 }
 
 extension CallListLaunchedExtension<E, T> on Call<IList<E>, T> {
   Validator<E, T> asValidator() {
-    return match(Validator.errors, Validator.of);
+    return match<Validator<E, T>>(Validator.errors<E, T>, Validator.of<E, T>);
   }
 }
 
 extension CallMonadExtension<E, T> on Call<E, Call<E, T>> {
   Call<E, T> joined() {
-    return bind(idfunc);
+    return bind<T>(idfunc<Call<E, T>>);
   }
 }
