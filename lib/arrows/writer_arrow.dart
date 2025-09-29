@@ -4,6 +4,7 @@
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/func.dart';
+import 'package:obmin/types/either.dart';
 import 'package:obmin/types/writer.dart';
 
 final class WriterArrow<E, Whole, Part> {
@@ -69,6 +70,25 @@ final class WriterArrow<E, Whole, Part> {
     return list.fold(WriterArrow.id(), (current, element) {
       final arrow = element.rmap((value) => [value].lock);
       return current.zip(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  WriterArrow<E, (A, Whole), (A, Part)> strong<A>() {
+    return WriterArrow.fromRun((tuple) {
+      final (a, whole) = tuple;
+      final functor = run(whole);
+      return functor.rmap((part) => (a, part));
+    });
+  }
+
+  WriterArrow<E, Either<A, Whole>, Either<A, Part>> choice<A>() {
+    return WriterArrow.fromRun((either) {
+      return either.match((a) {
+        return id<E, Either<A, Part>>().run(Either.left(a));
+      }, (whole) {
+        final functor = run(whole);
+        return functor.rmap((part) => Either.right(part));
+      });
     });
   }
 }

@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/types/either.dart';
 import 'package:obmin/func.dart';
+import 'package:obmin/types/either.dart';
 
 final class EitherArrow<E, Whole, Part> {
   final Func<Whole, Either<E, Part>> run;
@@ -88,6 +88,25 @@ final class EitherArrow<E, Whole, Part> {
     return list.fold(EitherArrow.id(), (current, element) {
       final arrow = element.rmap((value) => [value].lock);
       return current.zip(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  EitherArrow<E, (A, Whole), (A, Part)> strong<A>() {
+    return EitherArrow.fromRun((tuple) {
+      final (a, whole) = tuple;
+      final functor = run(whole);
+      return functor.rmap((part) => (a, part));
+    });
+  }
+
+  EitherArrow<E, Either<A, Whole>, Either<A, Part>> choice<A>() {
+    return EitherArrow.fromRun((either) {
+      return either.match((a) {
+        return id<E, Either<A, Part>>().run(Either.left(a));
+      }, (whole) {
+        final functor = run(whole);
+        return functor.rmap((part) => Either.right(part));
+      });
     });
   }
 }

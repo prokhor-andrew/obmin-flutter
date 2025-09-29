@@ -4,6 +4,7 @@
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/func.dart';
+import 'package:obmin/types/either.dart';
 import 'package:obmin/types/logger.dart';
 
 final class LoggerArrow<Whole, Part> {
@@ -59,6 +60,25 @@ final class LoggerArrow<Whole, Part> {
     return list.fold(LoggerArrow.id(), (current, element) {
       final arrow = element.rmap((value) => [value].lock);
       return current.zip(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  LoggerArrow<(A, Whole), (A, Part)> strong<A>() {
+    return LoggerArrow.fromRun((tuple) {
+      final (a, whole) = tuple;
+      final functor = run(whole);
+      return functor.rmap((part) => (a, part));
+    });
+  }
+
+  LoggerArrow<Either<A, Whole>, Either<A, Part>> choice<A>() {
+    return LoggerArrow.fromRun((either) {
+      return either.match((a) {
+        return id<Either<A, Part>>().run(Either.left(a));
+      }, (whole) {
+        final functor = run(whole);
+        return functor.rmap((part) => Either.right(part));
+      });
     });
   }
 }

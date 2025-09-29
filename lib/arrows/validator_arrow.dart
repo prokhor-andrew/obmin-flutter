@@ -102,4 +102,23 @@ final class ValidatorArrow<E, Whole, Part> {
       });
     });
   }
+
+  ValidatorArrow<E, (A, Whole), (A, Part)> strong<A>() {
+    return ValidatorArrow.fromRun((tuple) {
+      final (a, whole) = tuple;
+      final functor = run(whole);
+      return functor.rmap((part) => (a, part));
+    });
+  }
+
+  ValidatorArrow<E, Either<A, Whole>, Either<A, Part>> choice<A>() {
+    return ValidatorArrow.fromRun((either) {
+      return either.match((a) {
+        return id<E, Either<A, Part>>().run(Either.left(a));
+      }, (whole) {
+        final functor = run(whole);
+        return functor.rmap((part) => Either.right(part));
+      });
+    });
+  }
 }

@@ -98,4 +98,23 @@ final class OptionArrow<Whole, Part> {
       return run(whole).match(() => Either.left(()), Either.right);
     });
   }
+
+  OptionArrow<(A, Whole), (A, Part)> strong<A>() {
+    return OptionArrow.fromRun((tuple) {
+      final (a, whole) = tuple;
+      final functor = run(whole);
+      return functor.rmap((part) => (a, part));
+    });
+  }
+
+  OptionArrow<Either<A, Whole>, Either<A, Part>> choice<A>() {
+    return OptionArrow.fromRun((either) {
+      return either.match((a) {
+        return id<Either<A, Part>>().run(Either.left(a));
+      }, (whole) {
+        final functor = run(whole);
+        return functor.rmap((part) => Either.right(part));
+      });
+    });
+  }
 }

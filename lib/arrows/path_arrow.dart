@@ -387,18 +387,18 @@ final class PathArrow<Whole, Part> {
   PathArrow<(A, Whole), (A, Part)> strong<A>() {
     return PathArrow.fromRun((tuple) {
       final (a, whole) = tuple;
-      final map = run(whole);
-      return map.rmap((part) => (a, part));
+      final functor = run(whole);
+      return functor.rmap((part) => (a, part));
     });
   }
 
   PathArrow<Either<A, Whole>, Either<A, Part>> choice<A>() {
     return PathArrow.fromRun((either) {
       return either.match((a) {
-        return {const IList<String>.empty(): Either.left<A, Part>(a)}.lock;
+        return id<Either<A, Part>>().run(Either.left(a));
       }, (whole) {
-        final map = run(whole);
-        return map.rmap((part) => Either.right(part));
+        final functor = run(whole);
+        return functor.rmap((part) => Either.right(part));
       });
     });
   }
