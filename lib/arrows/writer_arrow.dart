@@ -16,6 +16,13 @@ final class WriterArrow<E, Whole, Part> {
     return WriterArrow._(run);
   }
 
+  static WriterArrow<E, Whole, Part> fromFunc<E, Whole, Part>(Func<Whole, Part> f) {
+    return fromRun((whole) {
+      final part = f(whole);
+      return WriterArrow.id<E, Part>().run(part);
+    });
+  }
+
   static WriterArrow<E, Whole, ()> unit<E, Whole>() {
     return WriterArrow.fromRun(constfunc(Writer(const IList.empty(), ())));
   }

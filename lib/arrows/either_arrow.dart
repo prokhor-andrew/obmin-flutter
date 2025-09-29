@@ -15,6 +15,13 @@ final class EitherArrow<E, Whole, Part> {
     return EitherArrow._(run);
   }
 
+  static EitherArrow<E, Whole, Part> fromFunc<E, Whole, Part>(Func<Whole, Part> f) {
+    return fromRun((whole) {
+      final part = f(whole);
+      return EitherArrow.id<E, Part>().run(part);
+    });
+  }
+
   static EitherArrow<E, Whole, ()> unit<E, Whole>() {
     return EitherArrow.fromRun(constfunc(Either.right(())));
   }

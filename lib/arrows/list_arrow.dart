@@ -16,6 +16,13 @@ final class ListArrow<Whole, Part> {
     return ListArrow._(run);
   }
 
+  static ListArrow<Whole, Part> fromFunc<Whole, Part>(Func<Whole, Part> f) {
+    return fromRun((whole) {
+      final part = f(whole);
+      return ListArrow.id<Part>().run(part);
+    });
+  }
+
   static ListArrow<Whole, ()> unit<Whole>() {
     return ListArrow.fromRun(constfunc([()].lock));
   }

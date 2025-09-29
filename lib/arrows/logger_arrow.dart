@@ -16,6 +16,13 @@ final class LoggerArrow<Whole, Part> {
     return LoggerArrow._(run);
   }
 
+  static LoggerArrow<Whole, Part> fromFunc<Whole, Part>(Func<Whole, Part> f) {
+    return fromRun((whole) {
+      final part = f(whole);
+      return LoggerArrow.id<Part>().run(part);
+    });
+  }
+
   static LoggerArrow<Whole, ()> unit<Whole>() {
     return LoggerArrow.fromRun(constfunc(Logger.of(())));
   }

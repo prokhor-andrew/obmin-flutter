@@ -18,6 +18,13 @@ final class OptionArrow<Whole, Part> {
     return OptionArrow._(run);
   }
 
+  static OptionArrow<Whole, Part> fromFunc<Whole, Part>(Func<Whole, Part> f) {
+    return fromRun((whole) {
+      final part = f(whole);
+      return OptionArrow.id<Part>().run(part);
+    });
+  }
+
   static OptionArrow<A, A> id<A>() {
     return OptionArrow.fromRun(Option.some);
   }

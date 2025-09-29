@@ -16,6 +16,13 @@ final class ValidatorArrow<E, Whole, Part> {
     return ValidatorArrow._(run);
   }
 
+  static ValidatorArrow<E, Whole, Part> fromFunc<E, Whole, Part>(Func<Whole, Part> f) {
+    return fromRun((whole) {
+      final part = f(whole);
+      return ValidatorArrow.id<E, Part>().run(part);
+    });
+  }
+
   static ValidatorArrow<E, Whole, ()> unit<E, Whole>() {
     return ValidatorArrow.fromRun(constfunc(Validator.of(())));
   }

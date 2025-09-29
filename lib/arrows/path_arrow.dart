@@ -28,9 +28,7 @@ final class PathArrow<Whole, Part> {
   static PathArrow<Whole, Part> fromFunc<Whole, Part>(Func<Whole, Part> f) {
     return fromRun((whole) {
       final part = f(whole);
-      return {
-        const IList<String>.empty(): part,
-      }.lock;
+      return PathArrow.id<Part>().run(part);
     });
   }
 
