@@ -274,7 +274,7 @@ final class PathArrow<Whole, Part> {
         final outerValue = entry.value;
 
         final innerMap = other.run(outerValue);
-        final transformedMap = innerMap.map((key, value) => MapEntry(outerKey.addAll(key), value));
+        final IMap<IList<String>, Sub> transformedMap = innerMap.map((key, value) => MapEntry(outerKey.addAll(key), value));
 
         result = result.addAll(transformedMap);
       }
