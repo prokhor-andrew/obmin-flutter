@@ -10,19 +10,19 @@ final class These<A, B> {
 
   const These._(this._either);
 
-  static These<A, B> left<A, B>(A value) => These._(Either.left(Either.left(value)));
+  static These<A, B> left<A, B>(A value) => These._(Either.left<Either<A, B>, (A, B)>(Either.left<A, B>(value)));
 
-  static These<A, B> right<A, B>(B value) => These._(Either.left(Either.right(value)));
+  static These<A, B> right<A, B>(B value) => These._(Either.left<Either<A, B>, (A, B)>(Either.right<A, B>(value)));
 
-  static These<A, B> both<A, B>(A value1, B value2) => These._(Either.right((value1, value2)));
+  static These<A, B> both<A, B>(A value1, B value2) => These._(Either.right<Either<A, B>, (A, B)>((value1, value2)));
 
   T match<T>(
     Func<A, T> ifLeft,
     Func<B, T> ifRight,
     BiFunc<A, B, T> ifBoth,
   ) {
-    return _either.match((either) {
-      return either.match(ifLeft, ifRight);
+    return _either.match<T>((either) {
+      return either.match<T>(ifLeft, ifRight);
     }, (both) {
       final (a, b) = both;
       return ifBoth(a, b);
@@ -34,49 +34,49 @@ final class These<A, B> {
     if (identical(this, other)) return true;
     if (other is! These<A, B>) return false;
 
-    return match(
-      (a) => other.match(
+    return match<bool>(
+      (a) => other.match<bool>(
         (a2) => a == a2,
-        constfunc(false),
+        constfunc<B, bool>(false),
         (_, __) => false,
       ),
-      (b) => other.match(
-        constfunc(false),
+      (b) => other.match<bool>(
+        constfunc<A, bool>(false),
         (b2) => b == b2,
         (_, __) => false,
       ),
-      (a, b) => other.match(
-        constfunc(false),
-        constfunc(false),
+      (a, b) => other.match<bool>(
+        constfunc<A, bool>(false),
+        constfunc<B, bool>(false),
         (a2, b2) => a == a2 && b == b2,
       ),
     );
   }
 
   @override
-  int get hashCode => match(
+  int get hashCode => match<int>(
         (a) => a.hashCode,
         (b) => b.hashCode,
         (a, b) => a.hashCode ^ b.hashCode,
       );
 
   These<B, A> swapped() {
-    return match(These.right, These.left, (a, b) => These.both(b, a));
+    return match<These<B, A>>(These.right<B, A>, These.left<B, A>, (a, b) => These.both<B, A>(b, a));
   }
 
   These<A, B2> rmap<B2>(Func<B, B2> f) {
-    return match(
-      These.left,
-      (b) => These.right(f(b)),
-      (a, b) => These.both(a, f(b)),
+    return match<These<A, B2>>(
+      These.left<A, B2>,
+      (b) => These.right<A, B2>(f(b)),
+      (a, b) => These.both<A, B2>(a, f(b)),
     );
   }
 
   These<A2, B> lmap<A2>(Func<A, A2> f) {
-    return swapped().rmap(f).swapped();
+    return swapped().rmap<A2>(f).swapped();
   }
 
   These<A2, B2> bimap<A2, B2>(Func<A, A2> lf, Func<B, B2> rf) {
-    return lmap(lf).rmap(rf);
+    return lmap<A2>(lf).rmap<B2>(rf);
   }
 }
