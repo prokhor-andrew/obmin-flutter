@@ -17,127 +17,127 @@ final class ListArrow<Whole, Part> {
   }
 
   static ListArrow<Whole, Part> fromFunc<Whole, Part>(Func<Whole, Part> f) {
-    return fromRun((whole) {
+    return fromRun<Whole, Part>((whole) {
       final part = f(whole);
       return ListArrow.id<Part>().run(part);
     });
   }
 
   static ListArrow<Whole, ()> unit<Whole>() {
-    return ListArrow.fromRun(constfunc([()].lock));
+    return ListArrow.fromRun<Whole, ()>(constfunc([()].lock));
   }
 
   static ListArrow<Whole, Never> zero<Whole>() {
-    return ListArrow.fromRun(constfunc(const IList.empty()));
+    return ListArrow.fromRun<Whole, Never>(constfunc(const IList<Never>.empty()));
   }
 
   static ListArrow<A, A> id<A>() {
-    return ListArrow.fromRun((value) => [value].lock);
+    return ListArrow.fromRun<A, A>((value) => [value].lock);
   }
 
   ListArrow<Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
-    return ListArrow.fromRun((whole) {
-      return run(whole).rmap(f);
+    return ListArrow.fromRun<Whole, Part2>((whole) {
+      return run(whole).rmap<Part2>(f);
     });
   }
 
   ListArrow<Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return ListArrow.fromRun((whole2) {
+    return ListArrow.fromRun<Whole2, Part>((whole2) {
       return run(f(whole2));
     });
   }
 
   ListArrow<Whole2, Part2> promap<Whole2, Part2>(Func<Whole2, Whole> lf, Func<Part, Part2> rf) {
-    return cmap(lf).rmap(rf);
+    return cmap<Whole2>(lf).rmap<Part2>(rf);
   }
 
   ListArrow<Whole, Sub> then<Sub>(ListArrow<Part, Sub> other) {
-    return ListArrow.fromRun((whole) {
-      return run(whole).bind(other.run);
+    return ListArrow.fromRun<Whole, Sub>((whole) {
+      return run(whole).bind<Sub>(other.run);
     });
   }
 
   ListArrow<Whole2, Part> after<Whole2>(ListArrow<Whole2, Whole> other) {
-    return other.then(this);
+    return other.then<Part>(this);
   }
 
   ListArrow<Whole, (Part, Part2)> zipCrossJoin<Part2>(ListArrow<Whole, Part2> other) {
-    return ListArrow.fromRun((whole) {
-      return run(whole).zipCrossJoin(other.run(whole));
+    return ListArrow.fromRun<Whole, (Part, Part2)>((whole) {
+      return run(whole).zipCrossJoin<Part2>(other.run(whole));
     });
   }
 
   ListArrow<Whole, (Part, Part2)> zipPointIndex<Part2>(ListArrow<Whole, Part2> other) {
-    return ListArrow.fromRun((whole) {
-      return run(whole).zipPointIndex(other.run(whole));
+    return ListArrow.fromRun<Whole, (Part, Part2)>((whole) {
+      return run(whole).zipPointIndex<Part2>(other.run(whole));
     });
   }
 
   ListArrow<Whole, Either<Part, Part2>> altConcat<Part2>(ListArrow<Whole, Part2> other) {
-    return ListArrow.fromRun((whole) {
+    return ListArrow.fromRun<Whole, Either<Part, Part2>>((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
-      return part.altConcat(part2);
+      return part.altConcat<Part2>(part2);
     });
   }
 
   ListArrow<Whole, Either<Part, Part2>> altLeftBiased<Part2>(ListArrow<Whole, Part2> other) {
-    return ListArrow.fromRun((whole) {
+    return ListArrow.fromRun<Whole, Either<Part, Part2>>((whole) {
       final part = run(whole);
       final part2 = other.run(whole);
-      return part.altLeftBiased(part2);
+      return part.altLeftBiased<Part2>(part2);
     });
   }
 
   static ListArrow<Whole, IList<Part>> zipAllCrossJoin<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
-    return list.fold(ListArrow.id(), (current, element) {
-      final listInOption = element.rmap((value) => [value].lock);
-      return current.zipCrossJoin(listInOption).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    return list.fold<ListArrow<Whole, IList<Part>>>(ListArrow.fromRun((_) => [IList<Part>.empty()].lock), (current, element) {
+      final arrow = element.rmap<IList<Part>>((value) => [value].lock);
+      return current.zipCrossJoin<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
   static ListArrow<Whole, IList<Part>> zipAllPointIndex<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
-    return list.fold(ListArrow.id(), (current, element) {
-      final arrow = element.rmap((value) => [value].lock);
-      return current.zipCrossJoin(arrow).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    return list.fold<ListArrow<Whole, IList<Part>>>(ListArrow.fromRun((_) => [IList<Part>.empty()].lock), (current, element) {
+      final arrow = element.rmap<IList<Part>>((value) => [value].lock);
+      return current.zipCrossJoin<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
   static ListArrow<Whole, (int, Part)> altAllLeftBiased<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
-    return list.indexed.fold(ListArrow.id(), (current, element) {
+    return list.indexed.fold<ListArrow<Whole, (int, Part)>>(ListArrow.fromRun((_) => <(int, Part)>[].lock), (current, element) {
       final (index, option) = element;
-      final indexedOption = option.rmap((value) => (index, value));
-      return current.altLeftBiased(indexedOption).rmap((either) {
+      final arrow = option.rmap<(int, Part)>((value) => (index, value));
+      return current.altLeftBiased<(int, Part)>(arrow).rmap<(int, Part)>((either) {
         return either.value();
       });
     });
   }
 
   static ListArrow<Whole, (int, Part)> altAllConcat<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
-    return list.indexed.fold(ListArrow.id(), (current, element) {
+    return list.indexed.fold(ListArrow.fromRun((_) => <(int, Part)>[].lock), (current, element) {
       final (index, option) = element;
-      final indexedOption = option.rmap((value) => (index, value));
-      return current.altConcat(indexedOption).rmap((either) {
+      final arrow = option.rmap<(int, Part)>((value) => (index, value));
+      return current.altConcat<(int, Part)>(arrow).rmap<(int, Part)>((either) {
         return either.value();
       });
     });
   }
 
   ListArrow<(A, Whole), (A, Part)> strong<A>() {
-    return ListArrow.fromRun((tuple) {
+    return ListArrow.fromRun<(A, Whole), (A, Part)>((tuple) {
       final (a, whole) = tuple;
       final functor = run(whole);
-      return functor.rmap((part) => (a, part));
+      return functor.rmap<(A, Part)>((part) => (a, part));
     });
   }
 
   ListArrow<Either<A, Whole>, Either<A, Part>> choice<A>() {
-    return ListArrow.fromRun((either) {
-      return either.match((a) {
-        return id<Either<A, Part>>().run(Either.left(a));
+    return ListArrow.fromRun<Either<A, Whole>, Either<A, Part>>((either) {
+      return either.match<IList<Either<A, Part>>>((a) {
+        return ListArrow.id<Either<A, Part>>().run(Either.left<A, Part>(a));
       }, (whole) {
         final functor = run(whole);
-        return functor.rmap((part) => Either.right(part));
+        return functor.rmap<Either<A, Part>>((part) => Either.right<A, Part>(part));
       });
     });
   }
