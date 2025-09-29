@@ -5,6 +5,7 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/func.dart';
 import 'package:obmin/types/call.dart';
+import 'package:obmin/types/dict.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
@@ -379,6 +380,25 @@ final class PathArrow<Whole, Part> {
       final arr = option.rmap((value) => (index, value));
       return current.altMerge(arr).rmap((either) {
         return either.value();
+      });
+    });
+  }
+
+  PathArrow<(A, Whole), (A, Part)> strong<A>() {
+    return PathArrow.fromRun((tuple) {
+      final (a, whole) = tuple;
+      final map = run(whole);
+      return map.rmap((part) => (a, part));
+    });
+  }
+
+  PathArrow<Either<A, Whole>, Either<A, Part>> choice<A>() {
+    return PathArrow.fromRun((either) {
+      return either.match((a) {
+        return {const IList<String>.empty(): Either.left<A, Part>(a)}.lock;
+      }, (whole) {
+        final map = run(whole);
+        return map.rmap((part) => Either.right(part));
       });
     });
   }
