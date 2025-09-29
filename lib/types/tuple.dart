@@ -14,7 +14,7 @@ extension TupleExtensions<A, B> on (A, B) {
   }
 
   (A2, B2) bimap<A2, B2>(Func<A, A2> lf, Func<B, B2> rf) {
-    return lmap(lf).rmap(rf);
+    return lmap<A2>(lf).rmap<B2>(rf);
   }
 
   (B, A) swapped() {
