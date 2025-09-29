@@ -18,7 +18,7 @@ final class OptionArrow<Whole, Part> {
     return OptionArrow._(run);
   }
 
-  static OptionArrow<A, A> id<E, A>() {
+  static OptionArrow<A, A> id<A>() {
     return OptionArrow.fromRun(Option.some);
   }
 
