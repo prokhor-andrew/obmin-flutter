@@ -16,14 +16,14 @@ final class Result<A, B> {
 
   const Result._(this._either);
 
-  static Result<A, B> failure<A, B>(A err) => Result._(Either.left(err));
+  static Result<A, B> failure<A, B>(A err) => Result._(Either.left<A, B>(err));
 
-  static Result<A, B> success<A, B>(B val) => Result._(Either.right(val));
+  static Result<A, B> success<A, B>(B val) => Result._(Either.right<A, B>(val));
 
-  static Result<A, ()> unit<A>() => Result.success(());
+  static Result<A, ()> unit<A>() => Result.success<A, ()>(());
 
   T match<T>(Func<A, T> ifFailure, Func<B, T> ifSuccess) {
-    return _either.match(ifFailure, ifSuccess);
+    return _either.match<T>(ifFailure, ifSuccess);
   }
 
   @override
@@ -38,27 +38,27 @@ final class Result<A, B> {
   int get hashCode => _either.hashCode;
 
   Result<T, B> rescue<T>(Func<A, Result<T, B>> f) {
-    return _either.rescue((val) => f(val)._either).asResult();
+    return _either.rescue<T>((val) => f(val)._either).asResult();
   }
 
   Result<T, B> lmap<T>(Func<A, T> f) {
-    return _either.lmap(f).asResult();
+    return _either.lmap<T>(f).asResult();
   }
 
   Result<A, T> bind<T>(Func<B, Result<A, T>> f) {
-    return _either.bind((val) => f(val)._either).asResult();
+    return _either.bind<T>((val) => f(val)._either).asResult();
   }
 
   Result<A, T> rmap<T>(Func<B, T> f) {
-    return _either.rmap(f).asResult();
+    return _either.rmap<T>(f).asResult();
   }
 
   Result<A2, B2> bimap<A2, B2>(Func<A, A2> lf, Func<B, B2> rf) {
-    return _either.bimap(lf, rf).asResult();
+    return _either.bimap<A2, B2>(lf, rf).asResult();
   }
 
   Result<A, (B, T2)> zip<T2>(Result<A, T2> other) {
-    return _either.zip(other._either).asResult();
+    return _either.zip<T2>(other._either).asResult();
   }
 
   Option<A> failureOrNone() => _either.leftOrNone();
@@ -82,14 +82,14 @@ final class Result<A, B> {
   }
 
   static Result<E, IList<Part>> zipAll<E, Part>(IList<Result<E, Part>> list) {
-    return list.fold(Result.success(const IList.empty()), (current, element) {
-      final result = element.rmap((value) => [value].lock);
-      return current.zip(result).rmap((tuple) => tuple.$1.addAll(tuple.$2));
+    return list.fold<Result<E, IList<Part>>>(Result.success<E, IList<Part>>(IList<Part>.empty()), (current, element) {
+      final result = element.rmap<IList<Part>>((value) => [value].lock);
+      return current.zip<IList<Part>>(result).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
   These<A, B> asThese() {
-    return match(These.left, These.right);
+    return match<These<A, B>>(These.left<A, B>, These.right<A, B>);
   }
 
   Either<A, B> asEither() {
@@ -98,23 +98,23 @@ final class Result<A, B> {
 }
 
 extension ResultValueWhenBothExtension<T> on Result<T, T> {
-  T value() => match<T>(idfunc, idfunc);
+  T value() => match<T>(idfunc<T>, idfunc<T>);
 
   IList<T> asIList() {
     return [value()].lock;
   }
 
   Logger<T> asLogger() {
-    return Logger.of(value());
+    return Logger.of<T>(value());
   }
 
   Writer<E, T> asWriter<E>() {
-    return Writer.of(value());
+    return Writer.of<E, T>(value());
   }
 }
 
 extension ResultNeverFailureExtension<T> on Result<Never, T> {
-  T value() => match<T>(absurd, idfunc);
+  T value() => match<T>(absurd<T>, idfunc<T>);
 
   IList<T> asIList() {
     return [value()].lock;
@@ -122,27 +122,27 @@ extension ResultNeverFailureExtension<T> on Result<Never, T> {
 }
 
 extension ResultNeverSuccessExtension<T> on Result<T, Never> {
-  T value() => match<T>(idfunc, absurd);
+  T value() => match<T>(idfunc<T>, absurd<T>);
 }
 
 extension ResultUnitFailureExtension<T> on Result<(), T> {
   Option<T> asOption() {
-    return match(constfunc(Option.none()), Option.some);
+    return match<Option<T>>(constfunc<(), Option<T>>(Option.none<T>()), Option.some<T>);
   }
 
   IList<T> asList() {
-    return match(constfunc(const IList.empty()), (value) => [value].lock);
+    return match<IList<T>>(constfunc<(), IList<T>>(IList<T>.empty()), (value) => [value].lock);
   }
 }
 
 extension ResultListFailureExtension<E, T> on Result<IList<E>, T> {
   Validator<E, T> asValidator() {
-    return match(Validator.errors, Validator.of);
+    return match<Validator<E, T>>(Validator.errors<E, T>, Validator.of<E, T>);
   }
 }
 
 extension ResultMonadExtension<E, T> on Result<E, Result<E, T>> {
   Result<E, T> joined() {
-    return bind(idfunc);
+    return bind<T>(idfunc<Result<E, T>>);
   }
 }
