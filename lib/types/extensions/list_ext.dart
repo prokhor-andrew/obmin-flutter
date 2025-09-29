@@ -8,11 +8,11 @@ import 'package:obmin/optics/optic.dart';
 
 extension IListOpticExtension<S, A> on Optic<S, IList<A>> {
   Optic<S, A> each() {
-    return then(Optic.list<A>());
+    return then<A>(Optic.list<A>());
   }
 
   Optic<S, A> at(int index) {
-    return then(Optic.fromRun((update) {
+    return then<A>(Optic.fromRun<IList<A>, A>((update) {
       return (whole) {
         if (index < 0 || index >= whole.length) {
           return whole;
@@ -28,14 +28,14 @@ extension IListOpticExtension<S, A> on Optic<S, IList<A>> {
 
 extension IListPathArrowExtension<Whole, A> on PathArrow<Whole, IList<A>> {
   PathArrow<Whole, A> each() {
-    return then(PathArrow.list<A>());
+    return then<A>(PathArrow.list<A>());
   }
 
   PathArrow<Whole, A> at(int index) {
-    return then(PathArrow.fromRun((tuple) {
+    return then<A>(PathArrow.fromRun<IList<A>, A>((tuple) {
       final (list) = tuple;
       if (index < 0 || index >= list.length) {
-        return const IMap.empty();
+        return IMap<IList<String>, A>.empty();
       }
 
       return {

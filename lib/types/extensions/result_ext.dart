@@ -8,20 +8,20 @@ import 'package:obmin/types/result.dart';
 
 extension ResultOpticExtension<S, A, B> on Optic<S, Result<A, B>> {
   Optic<S, A> failure() {
-    return then(Optic.resultFailure<B, A>());
+    return then<A>(Optic.resultFailure<B, A>());
   }
 
   Optic<S, B> success() {
-    return then(Optic.resultSuccess<A, B>());
+    return then<B>(Optic.resultSuccess<A, B>());
   }
 }
 
 extension ResultPathArrowExtension<Whole, A, B> on PathArrow<Whole, Result<A, B>> {
   PathArrow<Whole, A> failure() {
-    return then(PathArrow.resultFailure<B, A>());
+    return then<A>(PathArrow.resultFailure<B, A>());
   }
 
   PathArrow<Whole, B> success() {
-    return then(PathArrow.resultSuccess<A, B>());
+    return then<B>(PathArrow.resultSuccess<A, B>());
   }
 }

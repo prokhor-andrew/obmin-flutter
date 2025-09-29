@@ -8,12 +8,12 @@ import 'package:obmin/types/logger.dart';
 
 extension LoggerOpticExtension<S, A> on Optic<S, Logger<A>> {
   Optic<S, A> value() {
-    return then(Optic.logger<A>());
+    return then<A>(Optic.logger<A>());
   }
 }
 
 extension LoggerPathArrowExtension<Whole, A> on PathArrow<Whole, Logger<A>> {
   PathArrow<Whole, A> value() {
-    return then(PathArrow.logger<A>());
+    return then<A>(PathArrow.logger<A>());
   }
 }

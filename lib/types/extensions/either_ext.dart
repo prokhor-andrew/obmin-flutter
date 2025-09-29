@@ -8,20 +8,20 @@ import 'package:obmin/types/either.dart';
 
 extension EitherOpticExtension<S, A, B> on Optic<S, Either<A, B>> {
   Optic<S, A> left() {
-    return then(Optic.eitherLeft<B, A>());
+    return then<A>(Optic.eitherLeft<B, A>());
   }
 
   Optic<S, B> right() {
-    return then(Optic.eitherRight<A, B>());
+    return then<B>(Optic.eitherRight<A, B>());
   }
 }
 
 extension EitherPathArrowExtension<Whole, A, B> on PathArrow<Whole, Either<A, B>> {
   PathArrow<Whole, A> left() {
-    return then(PathArrow.eitherLeft<B, A>());
+    return then<A>(PathArrow.eitherLeft<B, A>());
   }
 
   PathArrow<Whole, B> right() {
-    return then(PathArrow.eitherRight<A, B>());
+    return then<B>(PathArrow.eitherRight<A, B>());
   }
 }

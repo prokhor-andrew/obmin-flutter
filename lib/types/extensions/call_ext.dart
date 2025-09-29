@@ -8,20 +8,20 @@ import 'package:obmin/types/call.dart';
 
 extension CallOpticExtension<S, A, B> on Optic<S, Call<A, B>> {
   Optic<S, A> launched() {
-    return then(Optic.callLaunched<B, A>());
+    return then<A>(Optic.callLaunched<B, A>());
   }
 
   Optic<S, B> returned() {
-    return then(Optic.callReturned<A, B>());
+    return then<B>(Optic.callReturned<A, B>());
   }
 }
 
 extension CallPathArrowExtension<Whole, A, B> on PathArrow<Whole, Call<A, B>> {
   PathArrow<Whole, A> launched() {
-    return then(PathArrow.callLaunched<B, A>());
+    return then<A>(PathArrow.callLaunched<B, A>());
   }
 
   PathArrow<Whole, B> returned() {
-    return then(PathArrow.callReturned<A, B>());
+    return then<B>(PathArrow.callReturned<A, B>());
   }
 }

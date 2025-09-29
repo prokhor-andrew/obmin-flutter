@@ -8,11 +8,11 @@ import 'package:obmin/optics/optic.dart';
 
 extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
   Optic<S, A> each() {
-    return then(Optic.dict<Key, A>());
+    return then<A>(Optic.dict<Key, A>());
   }
 
   Optic<S, A> at(Key key) {
-    return then(Optic.fromRun((update) {
+    return then<A>(Optic.fromRun<IMap<Key, A>, A>((update) {
       return (whole) {
         if (!whole.containsKey(key)) {
           return whole;
@@ -27,14 +27,14 @@ extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
 
 extension IListPathArrowExtension<Key, Whole, A> on PathArrow<Whole, IMap<Key, A>> {
   PathArrow<Whole, A> each() {
-    return then(PathArrow.dict<Key, A>());
+    return then<A>(PathArrow.dict<Key, A>());
   }
 
   PathArrow<Whole, A> at(Key key) {
-    return then(PathArrow.fromRun((tuple) {
+    return then<A>(PathArrow.fromRun<IMap<Key, A>, A>((tuple) {
       final (map) = tuple;
       if (!map.containsKey(key)) {
-        return const IMap.empty();
+        return IMap<IList<String>, A>.empty();
       }
 
       final element = map.get(key) as A;

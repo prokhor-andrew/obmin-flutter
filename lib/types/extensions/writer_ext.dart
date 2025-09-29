@@ -9,20 +9,20 @@ import 'package:obmin/types/writer.dart';
 
 extension WriterOpticExtension<S, A, B> on Optic<S, Writer<A, B>> {
   Optic<S, IList<A>> list() {
-    return then(Optic.writerList<B, A>());
+    return then<IList<A>>(Optic.writerList<B, A>());
   }
 
   Optic<S, B> value() {
-    return then(Optic.writerValue<A, B>());
+    return then<B>(Optic.writerValue<A, B>());
   }
 }
 
 extension WriterPathArrowExtension<Whole, A, B> on PathArrow<Whole, Writer<A, B>> {
   PathArrow<Whole, IList<A>> list() {
-    return then(PathArrow.writerList<B, A>());
+    return then<IList<A>>(PathArrow.writerList<B, A>());
   }
 
   PathArrow<Whole, B> value() {
-    return then(PathArrow.writerValue<A, B>());
+    return then<B>(PathArrow.writerValue<A, B>());
   }
 }

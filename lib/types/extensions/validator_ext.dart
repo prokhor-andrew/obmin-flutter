@@ -9,20 +9,20 @@ import 'package:obmin/types/validator.dart';
 
 extension ValidatorOpticExtension<S, A, B> on Optic<S, Validator<A, B>> {
   Optic<S, B> value() {
-    return then(Optic.validatorValue<A, B>());
+    return then<B>(Optic.validatorValue<A, B>());
   }
 
   Optic<S, IList<A>> errors() {
-    return then(Optic.validatorErrors<B, A>());
+    return then<IList<A>>(Optic.validatorErrors<B, A>());
   }
 }
 
 extension WriterPathArrowExtension<Whole, A, B> on PathArrow<Whole, Validator<A, B>> {
   PathArrow<Whole, IList<A>> errors() {
-    return then(PathArrow.validatorErrors<B, A>());
+    return then<IList<A>>(PathArrow.validatorErrors<B, A>());
   }
 
   PathArrow<Whole, B> value() {
-    return then(PathArrow.validatorValue<A, B>());
+    return then<B>(PathArrow.validatorValue<A, B>());
   }
 }

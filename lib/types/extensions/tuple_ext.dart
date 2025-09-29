@@ -7,20 +7,20 @@ import 'package:obmin/optics/optic.dart';
 
 extension TupleOpticExtension<S, A, B> on Optic<S, (A, B)> {
   Optic<S, A> left() {
-    return then(Optic.tupleLeft<B, A>());
+    return then<A>(Optic.tupleLeft<B, A>());
   }
 
   Optic<S, B> right() {
-    return then(Optic.tupleRight<A, B>());
+    return then<B>(Optic.tupleRight<A, B>());
   }
 }
 
 extension TuplePathArrowExtension<Whole, A, B> on PathArrow<Whole, (A, B)> {
   PathArrow<Whole, A> left() {
-    return then(PathArrow.tupleLeft<B, A>());
+    return then<A>(PathArrow.tupleLeft<B, A>());
   }
 
   PathArrow<Whole, B> right() {
-    return then(PathArrow.tupleRight<A, B>());
+    return then<B>(PathArrow.tupleRight<A, B>());
   }
 }

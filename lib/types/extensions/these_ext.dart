@@ -8,20 +8,20 @@ import 'package:obmin/types/these.dart';
 
 extension TheseOpticExtension<S, A, B> on Optic<S, These<A, B>> {
   Optic<S, B> right() {
-    return then(Optic.theseRight<A, B>());
+    return then<B>(Optic.theseRight<A, B>());
   }
 
   Optic<S, A> left() {
-    return then(Optic.theseLeft<B, A>());
+    return then<A>(Optic.theseLeft<B, A>());
   }
 }
 
 extension ThesePathArrowExtension<Whole, A, B> on PathArrow<Whole, These<A, B>> {
   PathArrow<Whole, A> left() {
-    return then(PathArrow.theseLeft<B, A>());
+    return then<A>(PathArrow.theseLeft<B, A>());
   }
 
   PathArrow<Whole, B> right() {
-    return then(PathArrow.theseRight<A, B>());
+    return then<B>(PathArrow.theseRight<A, B>());
   }
 }

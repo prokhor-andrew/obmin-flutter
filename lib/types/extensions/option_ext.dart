@@ -8,12 +8,12 @@ import 'package:obmin/types/option.dart';
 
 extension OptionOpticExtension<S, A> on Optic<S, Option<A>> {
   Optic<S, A> some() {
-    return then(Optic.option<A>());
+    return then<A>(Optic.option<A>());
   }
 }
 
 extension OptionPathArrowExtension<Whole, A> on PathArrow<Whole, Option<A>> {
   PathArrow<Whole, A> some() {
-    return then(PathArrow.option<A>());
+    return then<A>(PathArrow.option<A>());
   }
 }
