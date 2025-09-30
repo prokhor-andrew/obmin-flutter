@@ -20,3 +20,5 @@ Func<A, Func<B, C>> curry<A, B, C>(BiFunc<A, B, C> f) {
 BiFunc<A, B, C> uncurry<A, B, C>(Func<A, Func<B, C>> f) {
   return (a, b) => f(a)(b);
 }
+
+Func<A, C> then<A, B, C>(Func<A, B> lf, Func<B, C> rf) => (a) => rf(lf(a));
