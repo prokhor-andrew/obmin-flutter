@@ -291,7 +291,7 @@ final class PathArrow<Whole, Part> {
 
   PathArrow<Whole, (Part, Part2)> zipCrossJoin<Part2>(PathArrow<Whole, Part2> other) {
     return PathArrow.fromRun<Whole, (Part, Part2)>((whole) {
-      IMap<IList<String>, (Part, Part2)> out = const IMap<IList<String>, (Part, Part2)>.empty();
+      IMap<IList<String>, (Part, Part2)> out = IMap<IList<String>, (Part, Part2)>.empty();
       for (final w1 in run(whole).entries) {
         final (log1, p1) = (w1.key, w1.value);
         for (final w2 in other.run(whole).entries) {
@@ -305,7 +305,7 @@ final class PathArrow<Whole, Part> {
 
   PathArrow<Whole, (Part, Part2)> zipLeftBias<Part2>(PathArrow<Whole, Part2> other) {
     return PathArrow.fromRun<Whole, (Part, Part2)>((whole) {
-      IMap<IList<String>, (Part, Part2)> out = const IMap<IList<String>, (Part, Part2)>.empty();
+      IMap<IList<String>, (Part, Part2)> out = IMap<IList<String>, (Part, Part2)>.empty();
       for (final w1 in run(whole).entries) {
         final (log1, p1) = (w1.key, w1.value);
         for (final w2 in other.run(whole).entries) {

@@ -15,7 +15,7 @@ extension IListExtensions<A> on IList<A> {
   }
 
   IList<(A, A2)> zipCrossJoin<A2>(IList<A2> other) {
-    IList<(A, A2)> result = const IList<(A, A2)>.empty();
+    IList<(A, A2)> result = IList<(A, A2)>.empty();
 
     for (final a in this) {
       for (final a2 in other) {
@@ -27,7 +27,7 @@ extension IListExtensions<A> on IList<A> {
   }
 
   IList<(A, A2)> zipPointIndex<A2>(IList<A2> other) {
-    IList<(A, A2)> result = const IList<(A, A2)>.empty();
+    IList<(A, A2)> result = IList<(A, A2)>.empty();
 
     final maxLength = min(length, other.length);
 
