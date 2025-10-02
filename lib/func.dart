@@ -5,6 +5,8 @@
 typedef Func<A, B> = B Function(A);
 typedef BiFunc<A, B, C> = C Function(A, B);
 
+typedef Endo<A> = Func<A, A>;
+
 A idfunc<A>(A value) => value;
 
 A absurd<A>(Never v) => v;
