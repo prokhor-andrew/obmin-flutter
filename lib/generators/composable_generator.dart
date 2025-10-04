@@ -153,6 +153,23 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
 
     buffer.writeln('}');
 
+    // option arrow
+    buffer.writeln("extension ${caseName}ObminOptionArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on OptionArrow<Whole, $caseName$generics> "
+        "{");
+
+    for (final field in caseE.fields) {
+      if (!_isComputedProperty(field)) {
+        buffer.writeln("");
+
+        final fieldName = field.displayName;
+        final fieldType = field.type;
+
+        buffer.writeln('  OptionArrow<Whole, $fieldType> $fieldName() => then(OptionArrow.fromRun((val) => Option.some(val.$fieldName)));');
+      }
+    }
+
+    buffer.writeln('}');
+
     String constructObject(String modified) {
       String result = "$caseName(";
       if (caseE.fields.isNotEmpty) {
@@ -237,8 +254,27 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
 
     buffer.writeln(
         "PathArrow<Whole, $caseName$generics> ${_lowercaseFirstCharacter(caseName)}() => then(PathArrow.fromRun((val) => val.${_lowercaseFirstCharacter(caseName)}OrNone().match(() => const IMap"
-            ".empty(), "
+        ".empty(), "
         "(value) => { [\"${caseName}\"].lock : value }.lock)));");
+  }
+
+  buffer.writeln('}');
+
+  buffer.writeln("");
+  buffer.writeln("");
+
+  buffer.writeln("extension ${className}ObminOptionArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on OptionArrow<Whole, "
+      "$className$generics> {");
+
+  for (final caseE in cases) {
+    final caseName = caseE.displayName;
+
+    buffer.writeln("");
+
+    buffer.writeln(
+        "OptionArrow<Whole, $caseName$generics> ${_lowercaseFirstCharacter(caseName)}() => then(OptionArrow.fromRun((val) => val.${_lowercaseFirstCharacter(caseName)}OrNone().match(() => Option"
+            ".none(), "
+            "(value) => Option.some(value) )));");
   }
 
   buffer.writeln('}');
@@ -314,6 +350,23 @@ void _generateForPathArrow(StringBuffer buffer, ClassElement element) {
       final fieldType = field.type;
 
       buffer.writeln('  PathArrow<Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((val) => { ["$fieldName"].lock : val.$fieldName }.lock));');
+    }
+  }
+
+  buffer.writeln('}');
+
+  buffer.writeln("extension ${className}OptionArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on OptionArrow<Whole, "
+      "$className$generics> "
+      "{");
+
+  for (final field in element.fields) {
+    if (!_isComputedProperty(field)) {
+      buffer.writeln("");
+
+      final fieldName = field.displayName;
+      final fieldType = field.type;
+
+      buffer.writeln('  OptionArrow<Whole, $fieldType> $fieldName() => then(OptionArrow.fromRun((val) => Option.some(val.$fieldName)));');
     }
   }
 
