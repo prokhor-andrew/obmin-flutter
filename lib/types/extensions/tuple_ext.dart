@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/arrows/option_arrow.dart';
 import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/optics/optic.dart';
 
@@ -22,5 +23,15 @@ extension TuplePathArrowExtension<Whole, A, B> on PathArrow<Whole, (A, B)> {
 
   PathArrow<Whole, B> right() {
     return then<B>(PathArrow.tupleRight<A, B>());
+  }
+}
+
+extension TupleOptionArrowExtension<Whole, A, B> on OptionArrow<Whole, (A, B)> {
+  OptionArrow<Whole, A> left() {
+    return then<A>(OptionArrow.tupleLeft<B, A>());
+  }
+
+  OptionArrow<Whole, B> right() {
+    return then<B>(OptionArrow.tupleRight<A, B>());
   }
 }

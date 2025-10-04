@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/arrows/option_arrow.dart';
 import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/optics/optic.dart';
 import 'package:obmin/types/validator.dart';
@@ -24,5 +25,15 @@ extension WriterPathArrowExtension<Whole, A, B> on PathArrow<Whole, Validator<A,
 
   PathArrow<Whole, B> value() {
     return then<B>(PathArrow.validatorValue<A, B>());
+  }
+}
+
+extension ValidatorOptionArrowExtension<Whole, A, B> on OptionArrow<Whole, Validator<A, B>> {
+  OptionArrow<Whole, IList<A>> errors() {
+    return then<IList<A>>(OptionArrow.validatorErrors<B, A>());
+  }
+
+  OptionArrow<Whole, B> value() {
+    return then<B>(OptionArrow.validatorValue<A, B>());
   }
 }

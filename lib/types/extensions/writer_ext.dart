@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/arrows/option_arrow.dart';
 import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/optics/optic.dart';
 import 'package:obmin/types/writer.dart';
@@ -24,5 +25,15 @@ extension WriterPathArrowExtension<Whole, A, B> on PathArrow<Whole, Writer<A, B>
 
   PathArrow<Whole, B> value() {
     return then<B>(PathArrow.writerValue<A, B>());
+  }
+}
+
+extension WriterOptionArrowExtension<Whole, A, B> on OptionArrow<Whole, Writer<A, B>> {
+  OptionArrow<Whole, IList<A>> list() {
+    return then<IList<A>>(OptionArrow.writerList<B, A>());
+  }
+
+  OptionArrow<Whole, B> value() {
+    return then<B>(OptionArrow.writerValue<A, B>());
   }
 }

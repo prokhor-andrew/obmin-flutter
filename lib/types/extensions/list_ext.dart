@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/arrows/option_arrow.dart';
 import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/func.dart' show Func;
 import 'package:obmin/optics/optic.dart';
 import 'package:obmin/types/list.dart';
+import 'package:obmin/types/option.dart';
 
 extension IListOpticExtension<S, A> on Optic<S, IList<A>> {
   Optic<S, A> each() {
@@ -56,5 +58,17 @@ extension IListPathArrowExtension<Whole, A> on PathArrow<Whole, IList<A>> {
 
   PathArrow<Whole, A> where(Func<A, bool> predicate) {
     return rmap((list) => list.where(predicate).toIList()).then<A>(PathArrow.list<A>());
+  }
+}
+
+extension IListOptionArrowExtension<Whole, A> on OptionArrow<Whole, IList<A>> {
+  OptionArrow<Whole, A> at(int index) {
+    return then<A>(OptionArrow.fromRun<IList<A>, A>((list) {
+      if (index < 0 || index >= list.length) {
+        return Option.none<A>();
+      }
+
+      return Option.some(list[index]);
+    }));
   }
 }

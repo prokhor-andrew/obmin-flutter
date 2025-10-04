@@ -2,6 +2,7 @@
 // This file is part of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+import 'package:obmin/arrows/option_arrow.dart';
 import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/optics/optic.dart';
 import 'package:obmin/types/result.dart';
@@ -23,5 +24,15 @@ extension ResultPathArrowExtension<Whole, A, B> on PathArrow<Whole, Result<A, B>
 
   PathArrow<Whole, B> success() {
     return then<B>(PathArrow.resultSuccess<A, B>());
+  }
+}
+
+extension ResultOptionArrowExtension<Whole, A, B> on OptionArrow<Whole, Result<A, B>> {
+  OptionArrow<Whole, A> failure() {
+    return then<A>(OptionArrow.resultFailure<B, A>());
+  }
+
+  OptionArrow<Whole, B> success() {
+    return then<B>(OptionArrow.resultSuccess<A, B>());
   }
 }

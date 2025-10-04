@@ -5,9 +5,15 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/arrows/either_arrow.dart';
 import 'package:obmin/arrows/list_arrow.dart';
-import 'package:obmin/types/either.dart';
 import 'package:obmin/func.dart';
+import 'package:obmin/types/call.dart';
+import 'package:obmin/types/either.dart';
+import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
+import 'package:obmin/types/result.dart';
+import 'package:obmin/types/these.dart';
+import 'package:obmin/types/validator.dart';
+import 'package:obmin/types/writer.dart';
 
 final class OptionArrow<Whole, Part> {
   final Func<Whole, Option<Part>> run;
@@ -22,6 +28,130 @@ final class OptionArrow<Whole, Part> {
     return fromRun<Whole, Part>((whole) {
       final part = f(whole);
       return OptionArrow.id<Part>().run(part);
+    });
+  }
+
+  static OptionArrow<Either<E, Part>, Part> eitherRight<E, Part>() {
+    return OptionArrow.fromRun<Either<E, Part>, Part>((either) {
+      return either.match<Option<Part>>(
+        constfunc(Option.none()),
+        Option.some,
+      );
+    });
+  }
+
+  static OptionArrow<Either<Part, E>, Part> eitherLeft<E, Part>() {
+    return OptionArrow.fromRun<Either<Part, E>, Part>((either) {
+      return either.match<Option<Part>>(
+        Option.some,
+        constfunc(Option.none()),
+      );
+    });
+  }
+
+  static OptionArrow<Call<E, Part>, Part> callReturned<E, Part>() {
+    return OptionArrow.fromRun<Call<E, Part>, Part>((call) {
+      return call.match<Option<Part>>(
+        constfunc(Option.none()),
+        Option.some,
+      );
+    });
+  }
+
+  static OptionArrow<Call<Part, E>, Part> callLaunched<E, Part>() {
+    return OptionArrow.fromRun<Call<Part, E>, Part>((call) {
+      return call.match<Option<Part>>(
+        Option.some,
+        constfunc(Option.none()),
+      );
+    });
+  }
+
+  static OptionArrow<Result<E, Part>, Part> resultSuccess<E, Part>() {
+    return OptionArrow.fromRun<Result<E, Part>, Part>((result) {
+      return result.match<Option<Part>>(
+        constfunc(Option.none()),
+        Option.some,
+      );
+    });
+  }
+
+  static OptionArrow<Result<Part, E>, Part> resultFailure<E, Part>() {
+    return OptionArrow.fromRun<Result<Part, E>, Part>((result) {
+      return result.match<Option<Part>>(
+        Option.some,
+        constfunc(Option.none()),
+      );
+    });
+  }
+
+  static OptionArrow<Writer<E, Part>, Part> writerValue<E, Part>() {
+    return OptionArrow.fromRun<Writer<E, Part>, Part>((writer) {
+      return Option.some(writer.value());
+    });
+  }
+
+  static OptionArrow<Writer<Part, E>, IList<Part>> writerList<E, Part>() {
+    return OptionArrow.fromRun<Writer<Part, E>, IList<Part>>((writer) {
+      return Option.some(writer.list());
+    });
+  }
+
+  static OptionArrow<Validator<E, Part>, Part> validatorValue<E, Part>() {
+    return OptionArrow.fromRun<Validator<E, Part>, Part>((validator) {
+      return validator.match(constfunc(Option.none()), Option.some);
+    });
+  }
+
+  static OptionArrow<Validator<Part, E>, IList<Part>> validatorErrors<E, Part>() {
+    return OptionArrow.fromRun<Validator<Part, E>, IList<Part>>((validator) {
+      return validator.match(Option.some, constfunc(Option.none()));
+    });
+  }
+
+  static OptionArrow<Logger<Part>, Part> logger<Part>() {
+    return OptionArrow.fromRun<Logger<Part>, Part>((logger) {
+      return Option.some(logger.value());
+    });
+  }
+
+  static OptionArrow<Option<Part>, Part> option<Part>() {
+    return OptionArrow.fromRun<Option<Part>, Part>(idfunc);
+  }
+
+  static OptionArrow<(E, Part), Part> tupleRight<E, Part>() {
+    return OptionArrow.fromRun<(E, Part), Part>((tuple) {
+      return Option.some(tuple.$2);
+    });
+  }
+
+  static OptionArrow<(Part, E), Part> tupleLeft<E, Part>() {
+    return OptionArrow.fromRun<(Part, E), Part>((tuple) {
+      return Option.some(tuple.$1);
+    });
+  }
+
+  static OptionArrow<These<E, Part>, Part> theseRight<E, Part>() {
+    return OptionArrow.fromRun<These<E, Part>, Part>((these) {
+      return these.match<Option<Part>>(
+        constfunc(Option.none()),
+        Option.some,
+        (_, right) {
+          return Option.some(right);
+        },
+      );
+    });
+  }
+
+  static OptionArrow<These<Part, E>, Part> theseLeft<E, Part>() {
+    return OptionArrow.fromRun<These<Part, E>, Part>((these) {
+      return these.match<Option<Part>>(
+        Option.some,
+        constfunc(Option.none()),
+        (left, _) {
+          return Option.some(left);
+        },
+      );
     });
   }
 

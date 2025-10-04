@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:obmin/arrows/option_arrow.dart';
 import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/optics/optic.dart';
+import 'package:obmin/types/option.dart';
 
 extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
   Optic<S, A> each() {
@@ -25,7 +27,7 @@ extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
   }
 }
 
-extension IListPathArrowExtension<Key, Whole, A> on PathArrow<Whole, IMap<Key, A>> {
+extension IMapPathArrowExtension<Key, Whole, A> on PathArrow<Whole, IMap<Key, A>> {
   PathArrow<Whole, A> each() {
     return then<A>(PathArrow.dict<Key, A>());
   }
@@ -42,6 +44,20 @@ extension IListPathArrowExtension<Key, Whole, A> on PathArrow<Whole, IMap<Key, A
       return {
         ["${key.toString()}"].lock: element
       }.lock;
+    }));
+  }
+}
+
+extension IMapOptionArrowExtension<Key, Whole, A> on OptionArrow<Whole, IMap<Key, A>> {
+  OptionArrow<Whole, A> at(Key key) {
+    return then<A>(OptionArrow.fromRun<IMap<Key, A>, A>((map) {
+      if (!map.containsKey(key)) {
+        return Option.none<A>();
+      }
+
+      final element = map.get(key) as A;
+
+      return Option.some(element);
     }));
   }
 }
