@@ -33,7 +33,7 @@ extension EitherOptionArrowExtension<Whole, A, B> on OptionArrow<Whole, Either<A
     return then<A>(OptionArrow.eitherLeft<B, A>());
   }
 
-  OptionArrow<Whole, B> returned() {
+  OptionArrow<Whole, B> right() {
     return then<B>(OptionArrow.eitherRight<A, B>());
   }
 }
