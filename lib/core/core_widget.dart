@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:obmin/core/core.dart';
+import 'package:obmin/core/value_listenable/value_listenable_ext.dart';
 import 'package:obmin/machine/machine.dart';
 
 final class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
@@ -116,32 +117,8 @@ final class WidgetMachine<State, Input, Output> {
         );
       },
       build: (context, notifier) {
-        return build(context, notifier.map((value) => value as UiState));
+        return build(context, notifier.rmap((value) => value as UiState));
       },
     );
-  }
-}
-
-extension _MapValueListenable<T> on ValueListenable<T> {
-  ValueListenable<R> map<R>(R Function(T value) transform) {
-    return _MappedValueListenable(this, transform);
-  }
-}
-
-final class _MappedValueListenable<T, R> extends ChangeNotifier implements ValueListenable<R> {
-  final ValueListenable<T> _source;
-  final R Function(T) _transform;
-
-  _MappedValueListenable(this._source, this._transform) {
-    _source.addListener(notifyListeners);
-  }
-
-  @override
-  R get value => _transform(_source.value);
-
-  @override
-  void dispose() {
-    _source.removeListener(notifyListeners);
-    super.dispose();
   }
 }
