@@ -23,4 +23,15 @@ BiFunc<A, B, C> uncurry<A, B, C>(Func<A, Func<B, C>> f) {
   return (a, b) => f(a)(b);
 }
 
-Func<A, C> then<A, B, C>(Func<A, B> lf, Func<B, C> rf) => (a) => rf(lf(a));
+Func<A, C> thenf<A, B, C>(Func<A, B> lf, Func<B, C> rf) => (a) => rf(lf(a));
+
+// procedure
+
+typedef Procedure = void Function();
+
+void noop() {}
+
+Procedure thenp(Procedure l, Procedure r) => () {
+      l();
+      r();
+    };
