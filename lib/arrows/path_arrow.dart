@@ -291,7 +291,7 @@ final class PathArrow<Whole, Part> {
 
   PathArrow<Whole, (Part, Part2)> zipPointIndex<Part2>(PathArrow<Whole, Part2> other) {
     return PathArrow.fromRun((whole) {
-      IMap<IList<String>, (Part, Part2)> out = IMap<IList<String>, (Part, Part2)>.empty();
+      IMap<IList<String>, (Part, Part2)> out = const IMap<IList<String>, (Part, Part2)>.empty();
       final map1 = run(whole);
       final map2 = other.run(whole);
 
@@ -309,26 +309,12 @@ final class PathArrow<Whole, Part> {
 
   PathArrow<Whole, (Part, Part2)> zipCrossJoin<Part2>(PathArrow<Whole, Part2> other) {
     return PathArrow.fromRun<Whole, (Part, Part2)>((whole) {
-      IMap<IList<String>, (Part, Part2)> out = IMap<IList<String>, (Part, Part2)>.empty();
+      IMap<IList<String>, (Part, Part2)> out = const IMap<IList<String>, (Part, Part2)>.empty();
       for (final w1 in run(whole).entries) {
         final (log1, p1) = (w1.key, w1.value);
         for (final w2 in other.run(whole).entries) {
           final (log2, p2) = (w2.key, w2.value);
           out = out.add(log1.addAll(log2), (p1, p2));
-        }
-      }
-      return out;
-    });
-  }
-
-  PathArrow<Whole, (Part, Part2)> zipLeftBias<Part2>(PathArrow<Whole, Part2> other) {
-    return PathArrow.fromRun<Whole, (Part, Part2)>((whole) {
-      IMap<IList<String>, (Part, Part2)> out = IMap<IList<String>, (Part, Part2)>.empty();
-      for (final w1 in run(whole).entries) {
-        final (log1, p1) = (w1.key, w1.value);
-        for (final w2 in other.run(whole).entries) {
-          final (log2, p2) = (w2.key, w2.value);
-          out = out.add(log1.isNotEmpty ? log1 : log2, (p1, p2));
         }
       }
       return out;
@@ -342,10 +328,10 @@ final class PathArrow<Whole, Part> {
     });
   }
 
-  static PathArrow<Whole, IList<Part>> zipAllLeftBias<Whole, Part>(IList<PathArrow<Whole, Part>> list) {
+  static PathArrow<Whole, IList<Part>> zipAllPointIndex<Whole, Part>(IList<PathArrow<Whole, Part>> list) {
     return list.fold<PathArrow<Whole, IList<Part>>>(PathArrow.fromRun<Whole, IList<Part>>((_) => {const IList<String>.empty(): IList<Part>.empty()}.lock), (current, element) {
       final arrow = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zipLeftBias<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
+      return current.zipPointIndex<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
