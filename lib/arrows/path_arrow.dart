@@ -289,6 +289,24 @@ final class PathArrow<Whole, Part> {
     });
   }
 
+  PathArrow<Whole, (Part, Part2)> zipPointIndex<Part2>(PathArrow<Whole, Part2> other) {
+    return PathArrow.fromRun((whole) {
+      IMap<IList<String>, (Part, Part2)> out = IMap<IList<String>, (Part, Part2)>.empty();
+      final map1 = run(whole);
+      final map2 = other.run(whole);
+
+      map1.forEach((k, element1) {
+        final element2 = map2.get(k);
+        if (element2 == null) {
+          return;
+        }
+
+        out = out.add(k, (element1, element2));
+      });
+      return out;
+    });
+  }
+
   PathArrow<Whole, (Part, Part2)> zipCrossJoin<Part2>(PathArrow<Whole, Part2> other) {
     return PathArrow.fromRun<Whole, (Part, Part2)>((whole) {
       IMap<IList<String>, (Part, Part2)> out = IMap<IList<String>, (Part, Part2)>.empty();
