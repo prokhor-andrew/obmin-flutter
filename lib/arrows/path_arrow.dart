@@ -400,4 +400,10 @@ final class PathArrow<Whole, Part> {
       });
     });
   }
+
+  PathArrow<Whole, Part> censor(Func<IList<String>, IList<String>> f) {
+    return PathArrow.fromRun((whole) {
+      return run(whole).map((key, value) => MapEntry(f(key), value));
+    });
+  }
 }
