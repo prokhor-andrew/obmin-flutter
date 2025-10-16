@@ -103,7 +103,7 @@ final class ListArrow<Whole, Part> {
     });
   }
 
-  static ListArrow<Whole, (int, Part)> altAllLeftBiased<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
+  static ListArrow<Whole, (int, Part)> altAllLeftBiasedTagged<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
     return list.indexed.fold<ListArrow<Whole, (int, Part)>>(ListArrow.fromRun<Whole, (int, Part)>((_) => <(int, Part)>[].lock), (current, element) {
       final (index, option) = element;
       final arrow = option.rmap<(int, Part)>((value) => (index, value));
@@ -113,7 +113,11 @@ final class ListArrow<Whole, Part> {
     });
   }
 
-  static ListArrow<Whole, (int, Part)> altAllConcat<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
+  static ListArrow<Whole, Part> altAllLeftBiased<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
+    return altAllLeftBiasedTagged(list).rmap((tuple) => tuple.$2);
+  }
+
+  static ListArrow<Whole, (int, Part)> altAllConcatTagged<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
     return list.indexed.fold(ListArrow.fromRun<Whole, (int, Part)>((_) => <(int, Part)>[].lock), (current, element) {
       final (index, option) = element;
       final arrow = option.rmap<(int, Part)>((value) => (index, value));
@@ -121,6 +125,10 @@ final class ListArrow<Whole, Part> {
         return either.value();
       });
     });
+  }
+
+  static ListArrow<Whole, Part> altAllConcat<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
+    return altAllConcatTagged(list).rmap((tuple) => tuple.$2);
   }
 
   ListArrow<(A, Whole), (A, Part)> strong<A>() {

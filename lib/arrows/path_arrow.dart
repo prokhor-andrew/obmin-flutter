@@ -262,7 +262,7 @@ final class PathArrow<K, A, B> {
     });
   }
 
-  static PathArrow<K, A, (int, B)> altAllLeftBiased<K, A, B>(IList<PathArrow<K, A, B>> list) {
+  static PathArrow<K, A, (int, B)> altAllLeftBiasedTagged<K, A, B>(IList<PathArrow<K, A, B>> list) {
     return list.indexed.fold<PathArrow<K, A, (int, B)>>(PathArrow.zero<K, A>(), (current, element) {
       final (index, arrow) = element;
       final arr = arrow.rmap<(int, B)>((value) => (index, value));
@@ -272,7 +272,11 @@ final class PathArrow<K, A, B> {
     });
   }
 
-  static PathArrow<K, A, (int, B)> altAllMerge<K, A, B>(IList<PathArrow<K, A, B>> list) {
+  static PathArrow<K, A, B> altAllLeftBiased<K, A, B>(IList<PathArrow<K, A, B>> list) {
+    return altAllLeftBiasedTagged(list).rmap((tuple) => tuple.$2);
+  }
+
+  static PathArrow<K, A, (int, B)> altAllMergeTagged<K, A, B>(IList<PathArrow<K, A, B>> list) {
     return list.indexed.fold<PathArrow<K, A, (int, B)>>(PathArrow.zero<K, A>(), (current, element) {
       final (index, arrow) = element;
       final arr = arrow.rmap<(int, B)>((value) => (index, value));
@@ -280,6 +284,10 @@ final class PathArrow<K, A, B> {
         return either.value();
       });
     });
+  }
+
+  static PathArrow<K, A, B> altAllMerge<K, A, B>(IList<PathArrow<K, A, B>> list) {
+    return altAllMergeTagged(list).rmap((tuple) => tuple.$2);
   }
 
   PathArrow<K, (P, A), (P, B)> strong<P>() {

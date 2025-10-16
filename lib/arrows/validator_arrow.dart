@@ -90,7 +90,7 @@ final class ValidatorArrow<E, Whole, Part> {
     });
   }
 
-  static ValidatorArrow<E, Whole, (int, Part)> altAllConcat<E, Whole, Part>(IList<ValidatorArrow<E, Whole, Part>> list) {
+  static ValidatorArrow<E, Whole, (int, Part)> altAllConcatTagged<E, Whole, Part>(IList<ValidatorArrow<E, Whole, Part>> list) {
     return list.indexed.fold<ValidatorArrow<E, Whole, (int, Part)>>(ValidatorArrow.zero<E, Whole>(), (current, element) {
       final (index, option) = element;
       final indexedOption = option.rmap<(int, Part)>((value) => (index, value));
@@ -100,7 +100,11 @@ final class ValidatorArrow<E, Whole, Part> {
     });
   }
 
-  static ValidatorArrow<E, Whole, (int, Part)> altAllLeftBiased<E, Whole, Part>(IList<ValidatorArrow<E, Whole, Part>> list) {
+  static ValidatorArrow<E, Whole, Part> altAllConcat<E, Whole, Part>(IList<ValidatorArrow<E, Whole, Part>> list) {
+    return altAllConcatTagged(list).rmap((tuple) => tuple.$2);
+  }
+
+  static ValidatorArrow<E, Whole, (int, Part)> altAllLeftBiasedTagged<E, Whole, Part>(IList<ValidatorArrow<E, Whole, Part>> list) {
     return list.indexed.fold<ValidatorArrow<E, Whole, (int, Part)>>(ValidatorArrow.zero<E, Whole>(), (current, element) {
       final (index, option) = element;
       final indexedOption = option.rmap<(int, Part)>((value) => (index, value));
@@ -108,6 +112,10 @@ final class ValidatorArrow<E, Whole, Part> {
         return either.value();
       });
     });
+  }
+
+  static ValidatorArrow<E, Whole, Part> altAllLeftBiased<E, Whole, Part>(IList<ValidatorArrow<E, Whole, Part>> list) {
+    return altAllLeftBiasedTagged(list).rmap((tuple) => tuple.$2);
   }
 
   ValidatorArrow<E, (A, Whole), (A, Part)> strong<A>() {

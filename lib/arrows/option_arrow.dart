@@ -214,7 +214,7 @@ final class OptionArrow<Whole, Part> {
     });
   }
 
-  static OptionArrow<Whole, (int, Part)> altAll<Whole, Part>(IList<OptionArrow<Whole, Part>> list) {
+  static OptionArrow<Whole, (int, Part)> altAllTagged<Whole, Part>(IList<OptionArrow<Whole, Part>> list) {
     return list.indexed.fold<OptionArrow<Whole, (int, Part)>>(OptionArrow.fromRun<Whole, (int, Part)>((_) => Option.none<(int, Part)>()), (current, element) {
       final (index, option) = element;
       final indexedOption = option.rmap<(int, Part)>((value) => (index, value));
@@ -222,6 +222,10 @@ final class OptionArrow<Whole, Part> {
         return either.value();
       });
     });
+  }
+
+  static OptionArrow<Whole, Part> altAll<Whole, Part>(IList<OptionArrow<Whole, Part>> list) {
+    return altAllTagged(list).rmap((tuple) => tuple.$2);
   }
 
   ListArrow<Whole, Part> asListArrow() {

@@ -134,7 +134,7 @@ final class Validator<E, A> {
     });
   }
 
-  static Validator<E, (int, Part)> altAllConcat<E, Part>(IList<Validator<E, Part>> list) {
+  static Validator<E, (int, Part)> altAllConcatTagged<E, Part>(IList<Validator<E, Part>> list) {
     return list.indexed.fold<Validator<E, (int, Part)>>(Validator.errors<E, (int, Part)>(IList<E>.empty()), (current, element) {
       final (index, option) = element;
       final validator = option.rmap<(int, Part)>((value) => (index, value));
@@ -144,7 +144,11 @@ final class Validator<E, A> {
     });
   }
 
-  static Validator<E, (int, Part)> altAllLeftBiased<E, Part>(IList<Validator<E, Part>> list) {
+  static Validator<E, Part> altAllConcat<E, Part>(IList<Validator<E, Part>> list) {
+    return altAllConcatTagged(list).rmap((tuple) => tuple.$2);
+  }
+
+  static Validator<E, (int, Part)> altAllLeftBiasedTagged<E, Part>(IList<Validator<E, Part>> list) {
     return list.indexed.fold<Validator<E, (int, Part)>>(Validator.errors<E, (int, Part)>(IList<E>.empty()), (current, element) {
       final (index, option) = element;
       final validator = option.rmap<(int, Part)>((value) => (index, value));
@@ -152,6 +156,10 @@ final class Validator<E, A> {
         return either.value();
       });
     });
+  }
+
+  static Validator<E, Part> altAllLeftBiased<E, Part>(IList<Validator<E, Part>> list) {
+    return altAllConcatTagged(list).rmap((tuple) => tuple.$2);
   }
 
   Either<IList<E>, A> asEither() => _either;

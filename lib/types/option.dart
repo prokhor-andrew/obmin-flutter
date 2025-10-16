@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/types/either.dart';
 import 'package:obmin/func.dart';
+import 'package:obmin/types/either.dart';
 import 'package:obmin/types/these.dart';
 import 'package:obmin/types/validator.dart';
 
@@ -104,7 +104,7 @@ final class Option<T> {
     });
   }
 
-  static Option<(int, Part)> altAll<Part>(IList<Option<Part>> list) {
+  static Option<(int, Part)> altAllTagged<Part>(IList<Option<Part>> list) {
     return list.indexed.fold<Option<(int, Part)>>(Option.none<(int, Part)>(), (current, element) {
       final (index, option) = element;
       final indexedOption = option.rmap<(int, Part)>((value) => (index, value));
@@ -112,6 +112,10 @@ final class Option<T> {
         return either.value();
       });
     });
+  }
+
+  static Option<Part> altAll<Part>(IList<Option<Part>> list) {
+    return altAllTagged(list).rmap((tuple) => tuple.$2);
   }
 
   Validator<(), T> asValidator() {
