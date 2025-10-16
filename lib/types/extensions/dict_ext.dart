@@ -7,6 +7,7 @@ import 'package:obmin/arrows/option_arrow.dart';
 import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/optics/optic.dart';
 import 'package:obmin/types/option.dart';
+import 'package:obmin/types/path.dart';
 
 extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
   Optic<S, A> each() {
@@ -27,23 +28,21 @@ extension IMapOpticExtension<Key, S, A> on Optic<S, IMap<Key, A>> {
   }
 }
 
-extension IMapPathArrowExtension<Key, Whole, A> on PathArrow<Whole, IMap<Key, A>> {
-  PathArrow<Whole, A> each() {
+extension IMapPathArrowExtension<Key, Whole, A> on PathArrow<String, Whole, IMap<Key, A>> {
+  PathArrow<String, Whole, A> each() {
     return then<A>(PathArrow.dict<Key, A>());
   }
 
-  PathArrow<Whole, A> at(Key key) {
-    return then<A>(PathArrow.fromRun<IMap<Key, A>, A>((tuple) {
+  PathArrow<String, Whole, A> at(Key key) {
+    return then<A>(PathArrow.fromRun<String, IMap<Key, A>, A>((tuple) {
       final (map) = tuple;
       if (!map.containsKey(key)) {
-        return IMap<IList<String>, A>.empty();
+        return Path.empty<String, A>();
       }
 
       final element = map.get(key) as A;
 
-      return {
-        ["${key.toString()}"].lock: element
-      }.lock;
+      return Path.fromKeyValue("${key.toString()}", element);
     }));
   }
 }

@@ -16,12 +16,12 @@ extension TupleOpticExtension<S, A, B> on Optic<S, (A, B)> {
   }
 }
 
-extension TuplePathArrowExtension<Whole, A, B> on PathArrow<Whole, (A, B)> {
-  PathArrow<Whole, A> left() {
+extension TuplePathArrowExtension<Whole, A, B> on PathArrow<String, Whole, (A, B)> {
+  PathArrow<String, Whole, A> left() {
     return then<A>(PathArrow.tupleLeft<B, A>());
   }
 
-  PathArrow<Whole, B> right() {
+  PathArrow<String, Whole, B> right() {
     return then<B>(PathArrow.tupleRight<A, B>());
   }
 }

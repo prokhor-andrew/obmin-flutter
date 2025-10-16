@@ -9,6 +9,7 @@ import 'package:obmin/func.dart' show Func;
 import 'package:obmin/optics/optic.dart';
 import 'package:obmin/types/list.dart';
 import 'package:obmin/types/option.dart';
+import 'package:obmin/types/path.dart';
 
 extension IListOpticExtension<S, A> on Optic<S, IList<A>> {
   Optic<S, A> each() {
@@ -38,25 +39,23 @@ extension IListOpticExtension<S, A> on Optic<S, IList<A>> {
   }
 }
 
-extension IListPathArrowExtension<Whole, A> on PathArrow<Whole, IList<A>> {
-  PathArrow<Whole, A> each() {
+extension IListPathArrowExtension<Whole, A> on PathArrow<String, Whole, IList<A>> {
+  PathArrow<String, Whole, A> each() {
     return then<A>(PathArrow.list<A>());
   }
 
-  PathArrow<Whole, A> at(int index) {
-    return then<A>(PathArrow.fromRun<IList<A>, A>((tuple) {
+  PathArrow<String, Whole, A> at(int index) {
+    return then<A>(PathArrow.fromRun<String, IList<A>, A>((tuple) {
       final (list) = tuple;
       if (index < 0 || index >= list.length) {
-        return IMap<IList<String>, A>.empty();
+        return Path.empty<String, A>();
       }
 
-      return {
-        ["$index"].lock: (list[index])
-      }.lock;
+      return Path.fromKeyValue("$index", list[index]);
     }));
   }
 
-  PathArrow<Whole, A> where(Func<A, bool> predicate) {
+  PathArrow<String, Whole, A> where(Func<A, bool> predicate) {
     return rmap((list) => list.where(predicate).toIList()).then<A>(PathArrow.list<A>());
   }
 }

@@ -17,12 +17,12 @@ extension TheseOpticExtension<S, A, B> on Optic<S, These<A, B>> {
   }
 }
 
-extension ThesePathArrowExtension<Whole, A, B> on PathArrow<Whole, These<A, B>> {
-  PathArrow<Whole, A> left() {
+extension ThesePathArrowExtension<Whole, A, B> on PathArrow<String, Whole, These<A, B>> {
+  PathArrow<String, Whole, A> left() {
     return then<A>(PathArrow.theseLeft<B, A>());
   }
 
-  PathArrow<Whole, B> right() {
+  PathArrow<String, Whole, B> right() {
     return then<B>(PathArrow.theseRight<A, B>());
   }
 }

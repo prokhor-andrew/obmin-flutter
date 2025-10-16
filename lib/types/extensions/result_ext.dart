@@ -17,12 +17,12 @@ extension ResultOpticExtension<S, A, B> on Optic<S, Result<A, B>> {
   }
 }
 
-extension ResultPathArrowExtension<Whole, A, B> on PathArrow<Whole, Result<A, B>> {
-  PathArrow<Whole, A> failure() {
+extension ResultPathArrowExtension<Whole, A, B> on PathArrow<String, Whole, Result<A, B>> {
+  PathArrow<String, Whole, A> failure() {
     return then<A>(PathArrow.resultFailure<B, A>());
   }
 
-  PathArrow<Whole, B> success() {
+  PathArrow<String, Whole, B> success() {
     return then<B>(PathArrow.resultSuccess<A, B>());
   }
 }

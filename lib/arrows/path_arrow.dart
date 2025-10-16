@@ -5,405 +5,299 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/func.dart';
 import 'package:obmin/types/call.dart';
-import 'package:obmin/types/dict.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/logger.dart';
 import 'package:obmin/types/option.dart';
+import 'package:obmin/types/path.dart';
 import 'package:obmin/types/result.dart';
 import 'package:obmin/types/these.dart';
 import 'package:obmin/types/validator.dart';
 import 'package:obmin/types/writer.dart';
 
-final class PathArrow<Whole, Part> {
-  final Func<Whole, IMap<IList<String>, Part>> run;
+final class PathArrow<K, A, B> {
+  final Func<A, Path<K, B>> run;
 
   const PathArrow._(this.run);
 
-  static PathArrow<Whole, Part> fromRun<Whole, Part>(
-    Func<Whole, IMap<IList<String>, Part>> run,
-  ) {
-    return PathArrow._(run);
+  static PathArrow<K, A, B> fromRun<K, A, B>(Func<A, Path<K, B>> run) => PathArrow._(run);
+
+  static PathArrow<K, A, B> fromFunc<K, A, B>(Func<A, B> f) {
+    return PathArrow.fromRun<K, A, B>((a) => Path.of<K, B>(f(a)));
   }
 
-  static PathArrow<Whole, Part> fromFunc<Whole, Part>(Func<Whole, Part> f) {
-    return PathArrow.fromRun<Whole, Part>((whole) {
-      final part = f(whole);
-      return PathArrow.id<Part>().run(part);
-    });
-  }
-
-  static PathArrow<Either<E, Part>, Part> eitherRight<E, Part>() {
-    return PathArrow.fromRun<Either<E, Part>, Part>((either) {
-      return either.match<IMap<IList<String>, Part>>(
-        constfunc(IMap<IList<String>, Part>.empty()),
+  static PathArrow<String, Either<E, B>, B> eitherRight<E, B>() {
+    return PathArrow.fromRun<String, Either<E, B>, B>((either) {
+      return either.match<Path<String, B>>(
+        constfunc(Path.empty<String, B>()),
         (value) {
-          return {
-            ["right"].lock: value
-          }.lock;
+          return Path.fromKeyValue<String, B>("right", value);
         },
       );
     });
   }
 
-  static PathArrow<Either<Part, E>, Part> eitherLeft<E, Part>() {
-    return PathArrow.fromRun<Either<Part, E>, Part>((either) {
-      return either.match<IMap<IList<String>, Part>>(
+  static PathArrow<String, Either<B, E>, B> eitherLeft<E, B>() {
+    return PathArrow.fromRun<String, Either<B, E>, B>((either) {
+      return either.match<Path<String, B>>(
         (value) {
-          return {
-            ["left"].lock: value
-          }.lock;
+          return Path.fromKeyValue<String, B>("left", value);
         },
-        constfunc(IMap<IList<String>, Part>.empty()),
+        constfunc(Path.empty<String, B>()),
       );
     });
   }
 
-  static PathArrow<Call<E, Part>, Part> callReturned<E, Part>() {
-    return PathArrow.fromRun<Call<E, Part>, Part>((call) {
-      return call.match<IMap<IList<String>, Part>>(
-        constfunc(IMap<IList<String>, Part>.empty()),
+  static PathArrow<String, Call<E, B>, B> callReturned<E, B>() {
+    return PathArrow.fromRun<String, Call<E, B>, B>((call) {
+      return call.match<Path<String, B>>(
+        constfunc(Path.empty<String, B>()),
         (value) {
-          return {
-            ["returned"].lock: value
-          }.lock;
+          return Path.fromKeyValue("returned", value);
         },
       );
     });
   }
 
-  static PathArrow<Call<Part, E>, Part> callLaunched<E, Part>() {
-    return PathArrow.fromRun<Call<Part, E>, Part>((call) {
-      return call.match<IMap<IList<String>, Part>>(
+  static PathArrow<String, Call<B, E>, B> callLaunched<E, B>() {
+    return PathArrow.fromRun<String, Call<B, E>, B>((call) {
+      return call.match<Path<String, B>>(
         (value) {
-          return {
-            ["launched"].lock: value
-          }.lock;
+          return Path.fromKeyValue("launched", value);
         },
-        constfunc(IMap<IList<String>, Part>.empty()),
+        constfunc(Path.empty<String, B>()),
       );
     });
   }
 
-  static PathArrow<Result<E, Part>, Part> resultSuccess<E, Part>() {
-    return PathArrow.fromRun<Result<E, Part>, Part>((result) {
-      return result.match<IMap<IList<String>, Part>>(
-        constfunc(IMap<IList<String>, Part>.empty()),
+  static PathArrow<String, Result<E, B>, B> resultSuccess<E, B>() {
+    return PathArrow.fromRun<String, Result<E, B>, B>((result) {
+      return result.match<Path<String, B>>(
+        constfunc(Path.empty<String, B>()),
         (value) {
-          return {
-            ["success"].lock: value
-          }.lock;
+          return Path.fromKeyValue("success", value);
         },
       );
     });
   }
 
-  static PathArrow<Result<Part, E>, Part> resultFailure<E, Part>() {
-    return PathArrow.fromRun<Result<Part, E>, Part>((result) {
-      return result.match<IMap<IList<String>, Part>>(
+  static PathArrow<String, Result<B, E>, B> resultFailure<E, B>() {
+    return PathArrow.fromRun<String, Result<B, E>, B>((result) {
+      return result.match<Path<String, B>>(
         (value) {
-          return {
-            ["failure"].lock: value
-          }.lock;
+          return Path.fromKeyValue("failure", value);
         },
-        constfunc(IMap<IList<String>, Part>.empty()),
+        constfunc(Path.empty<String, B>()),
       );
     });
   }
 
-  static PathArrow<Writer<E, Part>, Part> writerValue<E, Part>() {
-    return PathArrow.fromRun<Writer<E, Part>, Part>((writer) {
-      return {
-        ["value"].lock: writer.value()
-      }.lock;
+  static PathArrow<String, Writer<E, B>, B> writerValue<E, B>() {
+    return PathArrow.fromRun<String, Writer<E, B>, B>((writer) {
+      return Path.fromKeyValue("value", writer.value());
     });
   }
 
-  static PathArrow<Writer<Part, E>, IList<Part>> writerList<E, Part>() {
-    return PathArrow.fromRun<Writer<Part, E>, IList<Part>>((writer) {
-      return {
-        ["list"].lock: writer.list()
-      }.lock;
+  static PathArrow<String, Writer<B, E>, IList<B>> writerList<E, B>() {
+    return PathArrow.fromRun<String, Writer<B, E>, IList<B>>((writer) {
+      return Path.fromKeyValue("list", writer.list());
     });
   }
 
-  static PathArrow<Validator<E, Part>, Part> validatorValue<E, Part>() {
-    return PathArrow.fromRun<Validator<E, Part>, Part>((validator) {
-      return validator.match(constfunc(IMap<IList<String>, Part>.empty()), (value) {
-        return {
-          ["value"].lock: value
-        }.lock;
+  static PathArrow<String, Validator<E, B>, B> validatorValue<E, B>() {
+    return PathArrow.fromRun<String, Validator<E, B>, B>((validator) {
+      return validator.match(constfunc(Path.empty<String, B>()), (value) {
+        return Path.fromKeyValue("value", value);
       });
     });
   }
 
-  static PathArrow<Validator<Part, E>, IList<Part>> validatorErrors<E, Part>() {
-    return PathArrow.fromRun<Validator<Part, E>, IList<Part>>((validator) {
-      return validator.match<IMap<IList<String>, IList<Part>>>((errors) {
-        return {
-          ["errors"].lock: errors
-        }.lock;
-      }, constfunc(IMap<IList<String>, IList<Part>>.empty()));
+  static PathArrow<String, Validator<B, E>, IList<B>> validatorErrors<E, B>() {
+    return PathArrow.fromRun<String, Validator<B, E>, IList<B>>((validator) {
+      return validator.match<Path<String, IList<B>>>((errors) {
+        return Path.fromKeyValue("errors", errors);
+      }, constfunc(Path.empty<String, IList<B>>()));
     });
   }
 
-  static PathArrow<Logger<Part>, Part> logger<Part>() {
-    return PathArrow.fromRun<Logger<Part>, Part>((logger) {
-      return {
-        ["value"].lock: logger.value()
-      }.lock;
+  static PathArrow<String, Logger<B>, B> logger<B>() {
+    return PathArrow.fromRun<String, Logger<B>, B>((logger) {
+      return Path.fromKeyValue("value", logger.value());
     });
   }
 
-  static PathArrow<Option<Part>, Part> option<Part>() {
-    return PathArrow.fromRun<Option<Part>, Part>((option) {
+  static PathArrow<String, Option<B>, B> option<B>() {
+    return PathArrow.fromRun<String, Option<B>, B>((option) {
       return option.match(
-        IMap<IList<String>, Part>.empty,
+        Path.empty<String, B>,
         (value) {
-          return {
-            ["some"].lock: value
-          }.lock;
+          return Path.fromKeyValue("some", value);
         },
       );
     });
   }
 
-  static PathArrow<IList<Part>, Part> list<Part>() {
-    return PathArrow.fromRun<IList<Part>, Part>((list) {
-      IMap<IList<String>, Part> result = IMap<IList<String>, Part>.empty();
+  static PathArrow<String, IList<B>, B> list<B>() {
+    return PathArrow.fromRun<String, IList<B>, B>((list) {
+      IMap<IList<String>, B> result = IMap<IList<String>, B>.empty();
 
       list.indexed.forEach((tuple) {
         final (index, value) = tuple;
         result = result.add(["$index"].lock, value);
       });
 
-      return result;
+      return Path.fromMap(result);
     });
   }
 
-  static PathArrow<IMap<Key, Part>, Part> dict<Key, Part>() {
-    return PathArrow.fromRun<IMap<Key, Part>, Part>((map) {
-      return map.map<IList<String>, Part>((key, value) => MapEntry([key.toString()].lock, value));
+  static PathArrow<String, IMap<Key, B>, B> dict<Key, B>() {
+    return PathArrow.fromRun<String, IMap<Key, B>, B>((map) {
+      return Path.fromMap(map.map<IList<String>, B>((key, value) => MapEntry([key.toString()].lock, value)));
     });
   }
 
-  static PathArrow<(E, Part), Part> tupleRight<E, Part>() {
-    return PathArrow.fromRun<(E, Part), Part>((tuple) {
-      return {
-        ["right"].lock: tuple.$2,
-      }.lock;
+  static PathArrow<String, (E, B), B> tupleRight<E, B>() {
+    return PathArrow.fromRun<String, (E, B), B>((tuple) {
+      return Path.fromKeyValue("right", tuple.$2);
     });
   }
 
-  static PathArrow<(Part, E), Part> tupleLeft<E, Part>() {
-    return PathArrow.fromRun<(Part, E), Part>((tuple) {
-      return {
-        ["left"].lock: tuple.$1,
-      }.lock;
+  static PathArrow<String, (B, E), B> tupleLeft<E, B>() {
+    return PathArrow.fromRun<String, (B, E), B>((tuple) {
+      return Path.fromKeyValue("left", tuple.$1);
     });
   }
 
-  static PathArrow<These<E, Part>, Part> theseRight<E, Part>() {
-    return PathArrow.fromRun<These<E, Part>, Part>((these) {
-      return these.match<IMap<IList<String>, Part>>(
-        (left) => IMap<IList<String>, Part>.empty(),
+  static PathArrow<String, These<E, B>, B> theseRight<E, B>() {
+    return PathArrow.fromRun<String, These<E, B>, B>((these) {
+      return these.match<Path<String, B>>(
+        (left) => Path.empty<String, B>(),
         (right) {
-          return {
-            ["right"].lock: right
-          }.lock;
+          return Path.fromKeyValue("right", right);
         },
         (_, right) {
-          return {
-            ["right"].lock: right
-          }.lock;
+          return Path.fromKeyValue("right", right);
         },
       );
     });
   }
 
-  static PathArrow<These<Part, E>, Part> theseLeft<E, Part>() {
-    return PathArrow.fromRun<These<Part, E>, Part>((these) {
-      return these.match<IMap<IList<String>, Part>>(
+  static PathArrow<String, These<B, E>, B> theseLeft<E, B>() {
+    return PathArrow.fromRun<String, These<B, E>, B>((these) {
+      return these.match<Path<String, B>>(
         (left) {
-          return {
-            ["left"].lock: left
-          }.lock;
+          return Path.fromKeyValue("left", left);
         },
-        (right) => IMap<IList<String>, Part>.empty(),
+        (right) => Path.empty<String, B>(),
         (left, _) {
-          return {
-            ["left"].lock: left
-          }.lock;
+          return Path.fromKeyValue("left", left);
         },
       );
     });
   }
 
-  PathArrow<Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
-    return PathArrow.fromRun<Whole, Part2>((tuple) {
-      return run(tuple).map<IList<String>, Part2>((key, value) => MapEntry(key, f(value)));
+  PathArrow<K, A, B2> rmap<B2>(Func<B, B2> f) {
+    return PathArrow.fromRun<K, A, B2>((tuple) {
+      return run(tuple).rmap<B2>(f);
     });
   }
 
-  PathArrow<Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return PathArrow.fromRun<Whole2, Part>((tuple) {
+  PathArrow<K, A2, B> cmap<A2>(Func<A2, A> f) {
+    return PathArrow.fromRun<K, A2, B>((tuple) {
       return run(f(tuple));
     });
   }
 
-  PathArrow<Whole2, Part2> promap<Whole2, Part2>(Func<Whole2, Whole> lf, Func<Part, Part2> rf) {
-    return cmap<Whole2>(lf).rmap<Part2>(rf);
+  PathArrow<K, A2, B2> promap<A2, B2>(Func<A2, A> lf, Func<B, B2> rf) {
+    return cmap<A2>(lf).rmap<B2>(rf);
   }
 
-  static PathArrow<A, A> id<A>() {
-    return PathArrow.fromRun<A, A>((tuple) {
-      return {const IList<String>.empty(): tuple}.lock;
+  static PathArrow<K, A, A> id<K, A>() => PathArrow.fromRun(Path.of);
+
+  PathArrow<K, A, Sub> then<Sub>(PathArrow<K, B, Sub> other) {
+    return PathArrow.fromRun<K, A, Sub>((a) {
+      return run(a).bind(other.run);
     });
   }
 
-  PathArrow<Whole, Sub> then<Sub>(PathArrow<Part, Sub> other) {
-    return PathArrow.fromRun<Whole, Sub>((tuple) {
-      IMap<IList<String>, Sub> result = IMap<IList<String>, Sub>.empty();
+  PathArrow<K, A2, B> after<A2>(PathArrow<K, A2, A> other) {
+    return other.then<B>(this);
+  }
 
-      final outerMap = run(tuple);
-      for (final entry in outerMap.entries) {
-        final outerKey = entry.key;
-        final outerValue = entry.value;
+  static PathArrow<K, A, ()> unit<K, A>() {
+    return PathArrow.fromRun<K, A, ()>(constfunc(Path.unit<K>()));
+  }
 
-        final IMap<IList<String>, Sub> innerMap = other.run(outerValue);
-        final IMap<IList<String>, Sub> transformedMap = innerMap.map<IList<String>, Sub>((key, Sub value) => MapEntry(outerKey.addAll(key).toIList(), value));
-
-        result = result.addAll(transformedMap);
-      }
-
-      return result;
+  PathArrow<K, A, (B, B2)> zip<B2>(PathArrow<K, A, B2> other) {
+    return PathArrow.fromRun<K, A, (B, B2)>((a) {
+      return run(a).zip(other.run(a));
     });
   }
 
-  PathArrow<Whole2, Part> after<Whole2>(PathArrow<Whole2, Whole> other) {
-    return other.then<Part>(this);
-  }
-
-  static PathArrow<Whole, ()> unit<Whole>() {
-    return PathArrow.fromRun<Whole, ()>((tuple) {
-      return {const IList<String>.empty(): ()}.lock;
+  static PathArrow<K, A, IList<B>> zipAll<K, A, B>(IList<PathArrow<K, A, B>> list) {
+    return list.fold<PathArrow<K, A, IList<B>>>(PathArrow.fromRun<K, A, IList<B>>((_) => Path.empty<K, IList<B>>()), (current, element) {
+      final arrow = element.rmap<IList<B>>((value) => [value].lock);
+      return current.zip<IList<B>>(arrow).rmap<IList<B>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
-  PathArrow<Whole, (Part, Part2)> zipPointIndex<Part2>(PathArrow<Whole, Part2> other) {
-    return PathArrow.fromRun((whole) {
-      IMap<IList<String>, (Part, Part2)> out = IMap<IList<String>, (Part, Part2)>.empty();
-      final map1 = run(whole);
-      final map2 = other.run(whole);
+  static PathArrow<K, A, Never> zero<K, A>() {
+    return PathArrow.fromRun<K, A, Never>(constfunc(Path.zero<K>()));
+  }
 
-      map1.forEach((k, element1) {
-        final element2 = map2.get(k);
-        if (element2 == null) {
-          return;
-        }
+  PathArrow<K, A, Either<B, B2>> altMerge<B2>(PathArrow<K, A, B2> other) {
+    return PathArrow.fromRun<K, A, Either<B, B2>>((a) {
+      final path1 = run(a);
+      final path2 = other.run(a);
 
-        out = out.add(k, (element1, element2));
-      });
-      return out;
+      return path1.altMerge(path2);
     });
   }
 
-  PathArrow<Whole, (Part, Part2)> zipCrossJoin<Part2>(PathArrow<Whole, Part2> other) {
-    return PathArrow.fromRun<Whole, (Part, Part2)>((whole) {
-      IMap<IList<String>, (Part, Part2)> out = IMap<IList<String>, (Part, Part2)>.empty();
-      for (final w1 in run(whole).entries) {
-        final (log1, p1) = (w1.key, w1.value);
-        for (final w2 in other.run(whole).entries) {
-          final (log2, p2) = (w2.key, w2.value);
-          out = out.add(log1.addAll(log2), (p1, p2));
-        }
-      }
-      return out;
+  PathArrow<K, A, Either<B, B2>> altLeftBiased<B2>(PathArrow<K, A, B2> other) {
+    return PathArrow.fromRun<K, A, Either<B, B2>>((a) {
+      final path1 = run(a);
+      final path2 = other.run(a);
+
+      return path1.altLeftBiased(path2);
     });
   }
 
-  static PathArrow<Whole, IList<Part>> zipAllCrossJoin<Whole, Part>(IList<PathArrow<Whole, Part>> list) {
-    return list.fold<PathArrow<Whole, IList<Part>>>(PathArrow.fromRun<Whole, IList<Part>>((_) => {const IList<String>.empty(): IList<Part>.empty()}.lock), (current, element) {
-      final arrow = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zipCrossJoin<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
-    });
-  }
-
-  static PathArrow<Whole, IList<Part>> zipAllPointIndex<Whole, Part>(IList<PathArrow<Whole, Part>> list) {
-    return list.fold<PathArrow<Whole, IList<Part>>>(PathArrow.fromRun<Whole, IList<Part>>((_) => {const IList<String>.empty(): IList<Part>.empty()}.lock), (current, element) {
-      final arrow = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zipPointIndex<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
-    });
-  }
-
-  static PathArrow<Whole, Never> zero<Whole>() {
-    return PathArrow.fromRun<Whole, Never>(constfunc<Whole, IMap<IList<String>, Never>>(const IMap<IList<String>, Never>.empty()));
-  }
-
-  PathArrow<Whole, Either<Part, Part2>> altMerge<Part2>(PathArrow<Whole, Part2> other) {
-    return PathArrow.fromRun<Whole, Either<Part, Part2>>((tuple) {
-      final arr1 = rmap(Either.left<Part, Part2>);
-      final arr2 = other.rmap(Either.right<Part, Part2>);
-
-      final map1 = arr1.run(tuple);
-      final map2 = arr2.run(tuple);
-
-      return map1.addAll(map2);
-    });
-  }
-
-  PathArrow<Whole, Either<Part, Part2>> altLeftBiased<Part2>(PathArrow<Whole, Part2> other) {
-    return PathArrow.fromRun<Whole, Either<Part, Part2>>((tuple) {
-      final map = rmap(Either.left<Part, Part2>).run(tuple);
-      if (map.isNotEmpty) {
-        return map;
-      }
-
-      return other.rmap(Either.right<Part, Part2>).run(tuple);
-    });
-  }
-
-  static PathArrow<Whole, (int, Part)> altAllLeftBiased<Whole, Part>(IList<PathArrow<Whole, Part>> list) {
-    return list.indexed.fold<PathArrow<Whole, (int, Part)>>(PathArrow.zero<Whole>(), (current, element) {
+  static PathArrow<K, A, (int, B)> altAllLeftBiased<K, A, B>(IList<PathArrow<K, A, B>> list) {
+    return list.indexed.fold<PathArrow<K, A, (int, B)>>(PathArrow.zero<K, A>(), (current, element) {
       final (index, arrow) = element;
-      final arr = arrow.rmap<(int, Part)>((value) => (index, value));
-      return current.altLeftBiased<(int, Part)>(arr).rmap<(int, Part)>((either) {
+      final arr = arrow.rmap<(int, B)>((value) => (index, value));
+      return current.altLeftBiased<(int, B)>(arr).rmap<(int, B)>((either) {
         return either.value();
       });
     });
   }
 
-  static PathArrow<Whole, (int, Part)> altAllMerge<Whole, Part>(IList<PathArrow<Whole, Part>> list) {
-    return list.indexed.fold<PathArrow<Whole, (int, Part)>>(PathArrow.zero<Whole>(), (current, element) {
+  static PathArrow<K, A, (int, B)> altAllMerge<K, A, B>(IList<PathArrow<K, A, B>> list) {
+    return list.indexed.fold<PathArrow<K, A, (int, B)>>(PathArrow.zero<K, A>(), (current, element) {
       final (index, arrow) = element;
-      final arr = arrow.rmap<(int, Part)>((value) => (index, value));
-      return current.altMerge<(int, Part)>(arr).rmap<(int, Part)>((either) {
+      final arr = arrow.rmap<(int, B)>((value) => (index, value));
+      return current.altMerge<(int, B)>(arr).rmap<(int, B)>((either) {
         return either.value();
       });
     });
   }
 
-  PathArrow<(A, Whole), (A, Part)> strong<A>() {
-    return PathArrow.fromRun<(A, Whole), (A, Part)>((tuple) {
-      final (a, whole) = tuple;
-      final functor = run(whole);
-      return functor.rmap<(A, Part)>((part) => (a, part));
+  PathArrow<K, (P, A), (P, B)> strong<P>() {
+    return PathArrow.fromRun<K, (P, A), (P, B)>((tuple) {
+      final (p, a) = tuple;
+      final functor = run(a);
+      return functor.rmap<(P, B)>((b) => (p, b));
     });
   }
 
-  PathArrow<Either<A, Whole>, Either<A, Part>> choice<A>() {
-    return PathArrow.fromRun<Either<A, Whole>, Either<A, Part>>((either) {
-      return either.match<IMap<IList<String>, Either<A, Part>>>((a) {
-        return PathArrow.id<Either<A, Part>>().run(Either.left<A, Part>(a));
-      }, (whole) {
-        final functor = run(whole);
-        return functor.rmap<Either<A, Part>>((part) => Either.right<A, Part>(part));
+  PathArrow<K, Either<P, A>, Either<P, B>> choice<P>() {
+    return PathArrow.fromRun<K, Either<P, A>, Either<P, B>>((either) {
+      return either.match<Path<K, Either<P, B>>>((p) {
+        return PathArrow.id<K, Either<P, B>>().run(Either.left<P, B>(p));
+      }, (a) {
+        final functor = run(a);
+        return functor.rmap<Either<P, B>>((b) => Either.right<P, B>(b));
       });
-    });
-  }
-
-  PathArrow<Whole, Part> censor(Func<IList<String>, IList<String>> f) {
-    return PathArrow.fromRun((whole) {
-      return run(whole).map((key, value) => MapEntry(f(key), value));
     });
   }
 }

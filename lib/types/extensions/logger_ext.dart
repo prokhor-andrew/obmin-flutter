@@ -13,8 +13,8 @@ extension LoggerOpticExtension<S, A> on Optic<S, Logger<A>> {
   }
 }
 
-extension LoggerPathArrowExtension<Whole, A> on PathArrow<Whole, Logger<A>> {
-  PathArrow<Whole, A> value() {
+extension LoggerPathArrowExtension<Whole, A> on PathArrow<String, Whole, Logger<A>> {
+  PathArrow<String, Whole, A> value() {
     return then<A>(PathArrow.logger<A>());
   }
 }

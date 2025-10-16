@@ -13,8 +13,8 @@ extension OptionOpticExtension<S, A> on Optic<S, Option<A>> {
   }
 }
 
-extension OptionPathArrowExtension<Whole, A> on PathArrow<Whole, Option<A>> {
-  PathArrow<Whole, A> some() {
+extension OptionPathArrowExtension<Whole, A> on PathArrow<String, Whole, Option<A>> {
+  PathArrow<String, Whole, A> some() {
     return then<A>(PathArrow.option<A>());
   }
 }

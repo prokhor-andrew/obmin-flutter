@@ -18,12 +18,12 @@ extension ValidatorOpticExtension<S, A, B> on Optic<S, Validator<A, B>> {
   }
 }
 
-extension WriterPathArrowExtension<Whole, A, B> on PathArrow<Whole, Validator<A, B>> {
-  PathArrow<Whole, IList<A>> errors() {
+extension WriterPathArrowExtension<Whole, A, B> on PathArrow<String, Whole, Validator<A, B>> {
+  PathArrow<String, Whole, IList<A>> errors() {
     return then<IList<A>>(PathArrow.validatorErrors<B, A>());
   }
 
-  PathArrow<Whole, B> value() {
+  PathArrow<String, Whole, B> value() {
     return then<B>(PathArrow.validatorValue<A, B>());
   }
 }

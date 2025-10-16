@@ -7,10 +7,10 @@ import 'dart:async';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/arrows/path_arrow.dart';
 import 'package:obmin/channel/channel_lib.dart';
+import 'package:obmin/func.dart';
 import 'package:obmin/machine/mealy.dart';
 import 'package:obmin/machine/plan.dart';
 import 'package:obmin/types/either.dart';
-import 'package:obmin/func.dart';
 import 'package:obmin/types/option.dart';
 
 final class Machine<Input, Output> {
@@ -354,23 +354,23 @@ final class Machine<Input, Output> {
     );
   }
 
-  static Machine<State, Func<State, State>> fromPoolX<State, Helper>({
+  static Machine<State, Endo<State>> fromPoolX<State, Helper>({
     required Future<Helper> Function() onCreateHelper,
     required Future<void> Function(Helper helper) onDestroyHelper,
     required State initial,
-    required PathArrow<(Helper, State), Machine<Never, Func<State, State>>> arrow,
+    required PathArrow<String, (Helper, State), Machine<Never, Endo<State>>> arrow,
     bool isDistinctUntilChangedOn = true,
     bool shouldWaitOnEffects = true,
     ChannelBufferStrategy<State>? inputBufferStrategy,
-    ChannelBufferStrategy<Func<State, State>>? outputBufferStrategy,
-    ChannelBufferStrategy<Either<Func<State, State>, State>>? internalBufferStrategy,
+    ChannelBufferStrategy<Endo<State>>? outputBufferStrategy,
+    ChannelBufferStrategy<Either<Endo<State>, State>>? internalBufferStrategy,
   }) {
-    IMap<String, Machine<Never, Func<State, State>>> _mapping(Helper helper, State state) {
-      final map = arrow.run((helper, state));
+    IMap<String, Machine<Never, Endo<State>>> _mapping(Helper helper, State state) {
+      final map = arrow.run((helper, state)).asMap();
       return map.map((key, value) => MapEntry(key.join("/"), value));
     }
 
-    final machine = Machine.fromPool<State, Func<State, State>, Helper>(
+    final machine = Machine.fromPool<State, Endo<State>, Helper>(
       onCreateHelper: onCreateHelper,
       onDestroyHelper: onDestroyHelper,
       initial: (helper) {
