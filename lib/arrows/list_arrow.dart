@@ -61,15 +61,9 @@ final class ListArrow<Whole, Part> {
     return other.then<Part>(this);
   }
 
-  ListArrow<Whole, (Part, Part2)> zipCrossJoin<Part2>(ListArrow<Whole, Part2> other) {
+  ListArrow<Whole, (Part, Part2)> zip<Part2>(ListArrow<Whole, Part2> other) {
     return ListArrow.fromRun<Whole, (Part, Part2)>((whole) {
-      return run(whole).zipCrossJoin<Part2>(other.run(whole));
-    });
-  }
-
-  ListArrow<Whole, (Part, Part2)> zipPointIndex<Part2>(ListArrow<Whole, Part2> other) {
-    return ListArrow.fromRun<Whole, (Part, Part2)>((whole) {
-      return run(whole).zipPointIndex<Part2>(other.run(whole));
+      return run(whole).rzip<Part2>(other.run(whole));
     });
   }
 
@@ -89,17 +83,10 @@ final class ListArrow<Whole, Part> {
     });
   }
 
-  static ListArrow<Whole, IList<Part>> zipAllCrossJoin<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
+  static ListArrow<Whole, IList<Part>> zipAll<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
     return list.fold<ListArrow<Whole, IList<Part>>>(ListArrow.fromRun<Whole, IList<Part>>((_) => [IList<Part>.empty()].lock), (current, element) {
       final arrow = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zipCrossJoin<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
-    });
-  }
-
-  static ListArrow<Whole, IList<Part>> zipAllPointIndex<Whole, Part>(IList<ListArrow<Whole, Part>> list) {
-    return list.fold<ListArrow<Whole, IList<Part>>>(ListArrow.fromRun<Whole, IList<Part>>((_) => [IList<Part>.empty()].lock), (current, element) {
-      final arrow = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zipCrossJoin<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
+      return current.zip<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
