@@ -7,70 +7,70 @@ import 'package:obmin/func.dart';
 import 'package:obmin/types/either.dart';
 import 'package:obmin/types/zip_list.dart';
 
-final class ZipListArrow<Whole, Part> {
-  final Func<Whole, ZipList<Part>> run;
+final class ZipListArrow<A, B> {
+  final Func<A, ZipList<B>> run;
 
   const ZipListArrow._(this.run);
 
-  static ZipListArrow<Whole, Part> fromRun<Whole, Part>(Func<Whole, ZipList<Part>> run) {
+  static ZipListArrow<A, B> fromRun<A, B>(Func<A, ZipList<B>> run) {
     return ZipListArrow._(run);
   }
 
-  static ZipListArrow<Whole, Part> fromFunc<Whole, Part>(Func<Whole, Part> f) {
-    return fromRun<Whole, Part>((whole) {
-      final part = f(whole);
-      return ZipList.infinite(part);
+  static ZipListArrow<A, B> fromFunc<A, B>(Func<A, B> f) {
+    return ZipListArrow.fromRun<A, B>((a) {
+      final b = f(a);
+      return ZipList.infinite(b);
     });
   }
 
-  static ZipListArrow<Whole, ()> unit<Whole>() {
-    return ZipListArrow.fromRun<Whole, ()>(constfunc(ZipList.unit()));
+  static ZipListArrow<A, ()> unit<A>() {
+    return ZipListArrow.fromRun<A, ()>(constfunc(ZipList.unit()));
   }
 
-  ZipListArrow<Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
-    return ZipListArrow.fromRun<Whole, Part2>((whole) {
-      return run(whole).rmap<Part2>(f);
+  ZipListArrow<A, B2> rmap<B2>(Func<B, B2> f) {
+    return ZipListArrow.fromRun<A, B2>((a) {
+      return run(a).rmap<B2>(f);
     });
   }
 
-  ZipListArrow<Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return ZipListArrow.fromRun<Whole2, Part>((whole2) {
-      return run(f(whole2));
+  ZipListArrow<A2, B> cmap<A2>(Func<A2, A> f) {
+    return ZipListArrow.fromRun<A2, B>((a2) {
+      return run(f(a2));
     });
   }
 
-  ZipListArrow<Whole2, Part2> promap<Whole2, Part2>(Func<Whole2, Whole> lf, Func<Part, Part2> rf) {
-    return cmap<Whole2>(lf).rmap<Part2>(rf);
+  ZipListArrow<A2, B2> promap<A2, B2>(Func<A2, A> lf, Func<B, B2> rf) {
+    return cmap<A2>(lf).rmap<B2>(rf);
   }
 
-  ZipListArrow<Whole, (Part, Part2)> zip<Part2>(ZipListArrow<Whole, Part2> other) {
-    return ZipListArrow.fromRun<Whole, (Part, Part2)>((whole) {
-      return run(whole).zip<Part2>(other.run(whole));
+  ZipListArrow<A, (B, B2)> zip<B2>(ZipListArrow<A, B2> other) {
+    return ZipListArrow.fromRun<A, (B, B2)>((a) {
+      return run(a).zip<B2>(other.run(a));
     });
   }
 
-  static ZipListArrow<Whole, IList<Part>> zipAll<Whole, Part>(IList<ZipListArrow<Whole, Part>> list) {
-    return list.fold<ZipListArrow<Whole, IList<Part>>>(ZipListArrow.fromRun<Whole, IList<Part>>((_) => ZipList.infinite(IList<Part>.empty())), (current, element) {
-      final arrow = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zip<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
+  static ZipListArrow<A, IList<B>> zipAll<A, B>(IList<ZipListArrow<A, B>> list) {
+    return list.fold<ZipListArrow<A, IList<B>>>(ZipListArrow.fromRun<A, IList<B>>((_) => ZipList.infinite(IList<B>.empty())), (current, element) {
+      final arrow = element.rmap<IList<B>>((value) => [value].lock);
+      return current.zip<IList<B>>(arrow).rmap<IList<B>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
-  ZipListArrow<(A, Whole), (A, Part)> strong<A>() {
-    return ZipListArrow.fromRun<(A, Whole), (A, Part)>((tuple) {
-      final (a, whole) = tuple;
-      final functor = run(whole);
-      return functor.rmap<(A, Part)>((part) => (a, part));
+  ZipListArrow<(P, A), (P, B)> strong<P>() {
+    return ZipListArrow.fromRun<(P, A), (P, B)>((tuple) {
+      final (p, a) = tuple;
+      final functor = run(a);
+      return functor.rmap<(P, B)>((b) => (p, b));
     });
   }
 
-  ZipListArrow<Either<A, Whole>, Either<A, Part>> choice<A>() {
-    return ZipListArrow.fromRun<Either<A, Whole>, Either<A, Part>>((either) {
+  ZipListArrow<Either<P, A>, Either<P, B>> choice<P>() {
+    return ZipListArrow.fromRun<Either<P, A>, Either<P, B>>((either) {
       return either
-          .lmap(Either.left<A, Part>)
+          .lmap(Either.left<P, B>)
           .lmap(ZipList.infinite)
           .rmap(run)
-          .rmap((list) => list.rmap(Either.right<A, Part>)) //
+          .rmap((list) => list.rmap(Either.right<P, B>)) //
           .value();
     });
   }
