@@ -137,7 +137,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
   for (final caseE in cases) {
     final caseName = caseE.displayName;
 
-    buffer.writeln("extension ${caseName}ObminPathArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<Whole, $caseName$generics> "
+    buffer.writeln("extension ${caseName}ObminPathArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<String, Whole, $caseName$generics> "
         "{");
 
     for (final field in caseE.fields) {
@@ -147,7 +147,7 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement element, List<C
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln('  PathArrow<Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((val) => { ["$fieldName"].lock : val.$fieldName }.lock));');
+        buffer.writeln('  PathArrow<String, Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((val) => Path.fromKeyValue("$fieldName", val.$fieldName)));');
       }
     }
 
@@ -244,7 +244,7 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
     generics = "<$params>";
   }
 
-  buffer.writeln("extension ${className}ObminPathArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<Whole, "
+  buffer.writeln("extension ${className}ObminPathArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<String, Whole, "
       "$className$generics> {");
 
   for (final caseE in cases) {
@@ -253,9 +253,9 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement element, List<Class
     buffer.writeln("");
 
     buffer.writeln(
-        "PathArrow<Whole, $caseName$generics> ${_lowercaseFirstCharacter(caseName)}() => then(PathArrow.fromRun((val) => val.${_lowercaseFirstCharacter(caseName)}OrNone().match(() => const IMap"
-        ".empty(), "
-        "(value) => { [\"${caseName}\"].lock : value }.lock)));");
+        "PathArrow<String, Whole, $caseName$generics> ${_lowercaseFirstCharacter(caseName)}() => then(PathArrow.fromRun((val) => val.${_lowercaseFirstCharacter(caseName)}OrNone().match(() => "
+            "Path.empty(), "
+        "(value) => Path.fromKeyValue(\"${caseName}\", value))));");
   }
 
   buffer.writeln('}');
@@ -338,7 +338,7 @@ void _generateForPathArrow(StringBuffer buffer, ClassElement element) {
     generics = "<$params>";
   }
 
-  buffer.writeln("extension ${className}PathArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<Whole, "
+  buffer.writeln("extension ${className}PathArrowExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on PathArrow<String, Whole, "
       "$className$generics> "
       "{");
 
@@ -349,7 +349,7 @@ void _generateForPathArrow(StringBuffer buffer, ClassElement element) {
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln('  PathArrow<Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((val) => { ["$fieldName"].lock : val.$fieldName }.lock));');
+      buffer.writeln('  PathArrow<String, Whole, $fieldType> $fieldName() => then(PathArrow.fromRun((val) => Path.fromKeyValue ("$fieldName", val.$fieldName)));');
     }
   }
 
