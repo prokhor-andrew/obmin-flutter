@@ -1,118 +1,118 @@
 // Copyright (c) 2024 Andrii Prokhorenko
-// This file is part of Obmin, licensed under the MIT License.
+// This file is b of Obmin, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/func.dart';
 import 'package:obmin/types/either.dart';
 
-final class EitherArrow<E, Whole, Part> {
-  final Func<Whole, Either<E, Part>> run;
+final class EitherArrow<E, A, B> {
+  final Func<A, Either<E, B>> run;
 
   const EitherArrow._(this.run);
 
-  static EitherArrow<E, Whole, Part> fromRun<E, Whole, Part>(Func<Whole, Either<E, Part>> run) {
+  static EitherArrow<E, A, B> fromRun<E, A, B>(Func<A, Either<E, B>> run) {
     return EitherArrow._(run);
   }
 
-  static EitherArrow<E, Whole, Part> fromFunc<E, Whole, Part>(Func<Whole, Part> f) {
-    return EitherArrow.fromRun<E, Whole, Part>((whole) {
-      final part = f(whole);
-      return EitherArrow.id<E, Part>().run(part);
+  static EitherArrow<E, A, B> fromFunc<E, A, B>(Func<A, B> f) {
+    return EitherArrow.fromRun<E, A, B>((a) {
+      final b = f(a);
+      return EitherArrow.id<E, B>().run(b);
     });
   }
 
-  static EitherArrow<E, Whole, ()> unit<E, Whole>() {
-    return EitherArrow.fromRun<E, Whole, ()>(constfunc(Either.right<E, ()>(())));
+  static EitherArrow<E, A, ()> unit<E, A>() {
+    return EitherArrow.fromRun<E, A, ()>(constfunc(Either.right<E, ()>(())));
   }
 
   static EitherArrow<E, A, A> id<E, A>() {
     return EitherArrow.fromRun<E, A, A>(Either.right<E, A>);
   }
 
-  EitherArrow<E, Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
-    return EitherArrow.fromRun<E, Whole, Part2>((whole) {
-      return run(whole).rmap<Part2>(f);
+  EitherArrow<E, A, B2> rmap<B2>(Func<B, B2> f) {
+    return EitherArrow.fromRun<E, A, B2>((a) {
+      return run(a).rmap<B2>(f);
     });
   }
 
-  EitherArrow<E2, Whole, Part> lmap<E2>(Func<E, E2> f) {
-    return EitherArrow.fromRun<E2, Whole, Part>((whole) {
-      return run(whole).lmap<E2>(f);
+  EitherArrow<E2, A, B> lmap<E2>(Func<E, E2> f) {
+    return EitherArrow.fromRun<E2, A, B>((a) {
+      return run(a).lmap<E2>(f);
     });
   }
 
-  EitherArrow<E2, Whole, Part2> bimap<E2, Part2>(Func<E, E2> lf, Func<Part, Part2> rf) {
-    return lmap<E2>(lf).rmap<Part2>(rf);
+  EitherArrow<E2, A, B2> bimap<E2, B2>(Func<E, E2> lf, Func<B, B2> rf) {
+    return lmap<E2>(lf).rmap<B2>(rf);
   }
 
-  EitherArrow<E, Whole2, Part2> promap<Whole2, Part2>(Func<Whole2, Whole> lf, Func<Part, Part2> rf) {
-    return cmap<Whole2>(lf).rmap<Part2>(rf);
+  EitherArrow<E, A2, B2> promap<A2, B2>(Func<A2, A> lf, Func<B, B2> rf) {
+    return cmap<A2>(lf).rmap<B2>(rf);
   }
 
-  EitherArrow<E, Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return EitherArrow.fromRun<E, Whole2, Part>((whole2) {
-      return run(f(whole2));
+  EitherArrow<E, A2, B> cmap<A2>(Func<A2, A> f) {
+    return EitherArrow.fromRun<E, A2, B>((a2) {
+      return run(f(a2));
     });
   }
 
-  EitherArrow<E, Whole, Sub> then<Sub>(EitherArrow<E, Part, Sub> other) {
-    return EitherArrow.fromRun<E, Whole, Sub>((whole) {
-      return run(whole).bind<Sub>(other.run);
+  EitherArrow<E, A, Sub> then<Sub>(EitherArrow<E, B, Sub> other) {
+    return EitherArrow.fromRun<E, A, Sub>((a) {
+      return run(a).bind<Sub>(other.run);
     });
   }
 
-  EitherArrow<E, Whole2, Part> after<Whole2>(EitherArrow<E, Whole2, Whole> other) {
-    return other.then<Part>(this);
+  EitherArrow<E, A2, B> after<A2>(EitherArrow<E, A2, A> other) {
+    return other.then<B>(this);
   }
 
-  EitherArrow<E, Whole, (Part, Part2)> zip<Part2>(EitherArrow<E, Whole, Part2> other) {
-    return EitherArrow.fromRun<E, Whole, (Part, Part2)>((whole) {
-      return run(whole).zip<Part2>(other.run(whole));
+  EitherArrow<E, A, (B, B2)> zip<B2>(EitherArrow<E, A, B2> other) {
+    return EitherArrow.fromRun<E, A, (B, B2)>((a) {
+      return run(a).zip<B2>(other.run(a));
     });
   }
 
-  EitherArrow<E2, Whole, Part> recover<E2>(EitherArrow<E2, E, Part> other) {
-    return EitherArrow.fromRun<E2, Whole, Part>((whole) {
-      return run(whole).rescue<E2>(other.run);
+  EitherArrow<E2, A, B> recover<E2>(EitherArrow<E2, E, B> other) {
+    return EitherArrow.fromRun<E2, A, B>((a) {
+      return run(a).rescue<E2>(other.run);
     });
   }
 
-  EitherArrow<E, Whole, Part> orElseArrow(EitherArrow<E, Whole, Part> fallback) {
+  EitherArrow<E, A, B> orElseArrow(EitherArrow<E, A, B> fallback) {
     return orElseFunc<E>(constfunc(fallback));
   }
 
-  EitherArrow<E2, Whole, Part> orElseFunc<E2>(Func<E, EitherArrow<E2, Whole, Part>> f) {
-    return EitherArrow.fromRun<E2, Whole, Part>((whole) {
-      return run(whole).match<Either<E2, Part>>(
-        (e) => f(e).run(whole),
-        Either.right<E2, Part>,
+  EitherArrow<E2, A, B> orElseFunc<E2>(Func<E, EitherArrow<E2, A, B>> f) {
+    return EitherArrow.fromRun<E2, A, B>((a) {
+      return run(a).match<Either<E2, B>>(
+        (e) => f(e).run(a),
+        Either.right<E2, B>,
       );
     });
   }
 
-  static EitherArrow<E, Whole, IList<Part>> zipAll<E, Whole, Part>(IList<EitherArrow<E, Whole, Part>> list) {
-    return list.fold<EitherArrow<E, Whole, IList<Part>>>(EitherArrow.fromRun<E, Whole, IList<Part>>((_) => Either.right<E, IList<Part>>(IList<Part>.empty())), (current, element) {
-      final arrow = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zip<IList<Part>>(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
+  static EitherArrow<E, A, IList<B>> zipAll<E, A, B>(IList<EitherArrow<E, A, B>> list) {
+    return list.fold<EitherArrow<E, A, IList<B>>>(EitherArrow.fromRun<E, A, IList<B>>((_) => Either.right<E, IList<B>>(IList<B>.empty())), (current, element) {
+      final arrow = element.rmap<IList<B>>((value) => [value].lock);
+      return current.zip<IList<B>>(arrow).rmap<IList<B>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
-  EitherArrow<E, (A, Whole), (A, Part)> strong<A>() {
-    return EitherArrow.fromRun<E, (A, Whole), (A, Part)>((tuple) {
-      final (a, whole) = tuple;
-      final functor = run(whole);
-      return functor.rmap<(A, Part)>((part) => (a, part));
+  EitherArrow<E, (P, A), (P, B)> strong<P>() {
+    return EitherArrow.fromRun<E, (P, A), (P, B)>((tuple) {
+      final (p, a) = tuple;
+      final functor = run(a);
+      return functor.rmap<(P, B)>((b) => (p, b));
     });
   }
 
-  EitherArrow<E, Either<A, Whole>, Either<A, Part>> choice<A>() {
-    return EitherArrow.fromRun<E, Either<A, Whole>, Either<A, Part>>((either) {
-      return either.match<Either<E, Either<A, Part>>>((a) {
-        return id<E, Either<A, Part>>().run(Either.left<A, Part>(a));
-      }, (whole) {
-        final functor = run(whole);
-        return functor.rmap<Either<A, Part>>((part) => Either.right<A, Part>(part));
+  EitherArrow<E, Either<P, A>, Either<P, B>> choice<P>() {
+    return EitherArrow.fromRun<E, Either<P, A>, Either<P, B>>((either) {
+      return either.match<Either<E, Either<P, B>>>((p) {
+        return id<E, Either<P, B>>().run(Either.left<P, B>(p));
+      }, (a) {
+        final functor = run(a);
+        return functor.rmap<Either<P, B>>((b) => Either.right<P, B>(b));
       });
     });
   }

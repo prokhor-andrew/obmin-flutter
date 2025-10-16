@@ -127,38 +127,38 @@ final class Validator<E, A> {
     run((_) {}, function);
   }
 
-  static Validator<E, IList<Part>> zipAll<E, Part>(IList<Validator<E, Part>> list) {
-    return list.fold<Validator<E, IList<Part>>>(Validator.of<E, IList<Part>>(IList<Part>.empty()), (current, element) {
-      final validator = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zip<IList<Part>>(validator).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
+  static Validator<E, IList<A>> zipAll<E, A>(IList<Validator<E, A>> list) {
+    return list.fold<Validator<E, IList<A>>>(Validator.of<E, IList<A>>(IList<A>.empty()), (current, element) {
+      final validator = element.rmap<IList<A>>((value) => [value].lock);
+      return current.zip<IList<A>>(validator).rmap<IList<A>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
-  static Validator<E, (int, Part)> altAllConcatTagged<E, Part>(IList<Validator<E, Part>> list) {
-    return list.indexed.fold<Validator<E, (int, Part)>>(Validator.errors<E, (int, Part)>(IList<E>.empty()), (current, element) {
+  static Validator<E, (int, A)> altAllConcatTagged<E, A>(IList<Validator<E, A>> list) {
+    return list.indexed.fold<Validator<E, (int, A)>>(Validator.errors<E, (int, A)>(IList<E>.empty()), (current, element) {
       final (index, option) = element;
-      final validator = option.rmap<(int, Part)>((value) => (index, value));
-      return current.altConcat<(int, Part)>(validator).rmap<(int, Part)>((either) {
+      final validator = option.rmap<(int, A)>((value) => (index, value));
+      return current.altConcat<(int, A)>(validator).rmap<(int, A)>((either) {
         return either.value();
       });
     });
   }
 
-  static Validator<E, Part> altAllConcat<E, Part>(IList<Validator<E, Part>> list) {
+  static Validator<E, A> altAllConcat<E, A>(IList<Validator<E, A>> list) {
     return altAllConcatTagged(list).rmap((tuple) => tuple.$2);
   }
 
-  static Validator<E, (int, Part)> altAllLeftBiasedTagged<E, Part>(IList<Validator<E, Part>> list) {
-    return list.indexed.fold<Validator<E, (int, Part)>>(Validator.errors<E, (int, Part)>(IList<E>.empty()), (current, element) {
+  static Validator<E, (int, A)> altAllLeftBiasedTagged<E, A>(IList<Validator<E, A>> list) {
+    return list.indexed.fold<Validator<E, (int, A)>>(Validator.errors<E, (int, A)>(IList<E>.empty()), (current, element) {
       final (index, option) = element;
-      final validator = option.rmap<(int, Part)>((value) => (index, value));
-      return current.altLeftBiased<(int, Part)>(validator).rmap<(int, Part)>((either) {
+      final validator = option.rmap<(int, A)>((value) => (index, value));
+      return current.altLeftBiased<(int, A)>(validator).rmap<(int, A)>((either) {
         return either.value();
       });
     });
   }
 
-  static Validator<E, Part> altAllLeftBiased<E, Part>(IList<Validator<E, Part>> list) {
+  static Validator<E, A> altAllLeftBiased<E, A>(IList<Validator<E, A>> list) {
     return altAllConcatTagged(list).rmap((tuple) => tuple.$2);
   }
 

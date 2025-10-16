@@ -70,21 +70,21 @@ final class LoggerArrow<Whole, Part> {
     });
   }
 
-  LoggerArrow<(A, Whole), (A, Part)> strong<A>() {
-    return LoggerArrow.fromRun<(A, Whole), (A, Part)>((tuple) {
-      final (a, whole) = tuple;
+  LoggerArrow<(P, Whole), (P, Part)> strong<P>() {
+    return LoggerArrow.fromRun<(P, Whole), (P, Part)>((tuple) {
+      final (p, whole) = tuple;
       final functor = run(whole);
-      return functor.rmap<(A, Part)>((part) => (a, part));
+      return functor.rmap<(P, Part)>((part) => (p, part));
     });
   }
 
-  LoggerArrow<Either<A, Whole>, Either<A, Part>> choice<A>() {
-    return LoggerArrow.fromRun<Either<A, Whole>, Either<A, Part>>((either) {
-      return either.match<Logger<Either<A, Part>>>((a) {
-        return id<Either<A, Part>>().run(Either.left<A, Part>(a));
+  LoggerArrow<Either<P, Whole>, Either<P, Part>> choice<P>() {
+    return LoggerArrow.fromRun<Either<P, Whole>, Either<P, Part>>((either) {
+      return either.match<Logger<Either<P, Part>>>((p) {
+        return id<Either<P, Part>>().run(Either.left<P, Part>(p));
       }, (whole) {
         final functor = run(whole);
-        return functor.rmap<Either<A, Part>>((part) => Either.right<A, Part>(part));
+        return functor.rmap<Either<P, Part>>((part) => Either.right<P, Part>(part));
       });
     });
   }

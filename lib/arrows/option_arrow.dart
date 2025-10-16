@@ -15,125 +15,125 @@ import 'package:obmin/types/these.dart';
 import 'package:obmin/types/validator.dart';
 import 'package:obmin/types/writer.dart';
 
-final class OptionArrow<Whole, Part> {
-  final Func<Whole, Option<Part>> run;
+final class OptionArrow<A, B> {
+  final Func<A, Option<B>> run;
 
   const OptionArrow._(this.run);
 
-  static OptionArrow<Whole, Part> fromRun<Whole, Part>(Func<Whole, Option<Part>> run) {
+  static OptionArrow<A, B> fromRun<A, B>(Func<A, Option<B>> run) {
     return OptionArrow._(run);
   }
 
-  static OptionArrow<Whole, Part> fromFunc<Whole, Part>(Func<Whole, Part> f) {
-    return fromRun<Whole, Part>((whole) {
-      final part = f(whole);
-      return OptionArrow.id<Part>().run(part);
+  static OptionArrow<A, B> fromFunc<A, B>(Func<A, B> f) {
+    return fromRun<A, B>((a) {
+      final b = f(a);
+      return OptionArrow.id<B>().run(b);
     });
   }
 
-  static OptionArrow<Either<E, Part>, Part> eitherRight<E, Part>() {
-    return OptionArrow.fromRun<Either<E, Part>, Part>((either) {
-      return either.match<Option<Part>>(
+  static OptionArrow<Either<E, B>, B> eitherRight<E, B>() {
+    return OptionArrow.fromRun<Either<E, B>, B>((either) {
+      return either.match<Option<B>>(
         constfunc(Option.none()),
         Option.some,
       );
     });
   }
 
-  static OptionArrow<Either<Part, E>, Part> eitherLeft<E, Part>() {
-    return OptionArrow.fromRun<Either<Part, E>, Part>((either) {
-      return either.match<Option<Part>>(
+  static OptionArrow<Either<B, E>, B> eitherLeft<E, B>() {
+    return OptionArrow.fromRun<Either<B, E>, B>((either) {
+      return either.match<Option<B>>(
         Option.some,
         constfunc(Option.none()),
       );
     });
   }
 
-  static OptionArrow<Call<E, Part>, Part> callReturned<E, Part>() {
-    return OptionArrow.fromRun<Call<E, Part>, Part>((call) {
-      return call.match<Option<Part>>(
+  static OptionArrow<Call<E, B>, B> callReturned<E, B>() {
+    return OptionArrow.fromRun<Call<E, B>, B>((call) {
+      return call.match<Option<B>>(
         constfunc(Option.none()),
         Option.some,
       );
     });
   }
 
-  static OptionArrow<Call<Part, E>, Part> callLaunched<E, Part>() {
-    return OptionArrow.fromRun<Call<Part, E>, Part>((call) {
-      return call.match<Option<Part>>(
+  static OptionArrow<Call<B, E>, B> callLaunched<E, B>() {
+    return OptionArrow.fromRun<Call<B, E>, B>((call) {
+      return call.match<Option<B>>(
         Option.some,
         constfunc(Option.none()),
       );
     });
   }
 
-  static OptionArrow<Result<E, Part>, Part> resultSuccess<E, Part>() {
-    return OptionArrow.fromRun<Result<E, Part>, Part>((result) {
-      return result.match<Option<Part>>(
+  static OptionArrow<Result<E, B>, B> resultSuccess<E, B>() {
+    return OptionArrow.fromRun<Result<E, B>, B>((result) {
+      return result.match<Option<B>>(
         constfunc(Option.none()),
         Option.some,
       );
     });
   }
 
-  static OptionArrow<Result<Part, E>, Part> resultFailure<E, Part>() {
-    return OptionArrow.fromRun<Result<Part, E>, Part>((result) {
-      return result.match<Option<Part>>(
+  static OptionArrow<Result<B, E>, B> resultFailure<E, B>() {
+    return OptionArrow.fromRun<Result<B, E>, B>((result) {
+      return result.match<Option<B>>(
         Option.some,
         constfunc(Option.none()),
       );
     });
   }
 
-  static OptionArrow<Writer<E, Part>, Part> writerValue<E, Part>() {
-    return OptionArrow.fromRun<Writer<E, Part>, Part>((writer) {
+  static OptionArrow<Writer<E, B>, B> writerValue<E, B>() {
+    return OptionArrow.fromRun<Writer<E, B>, B>((writer) {
       return Option.some(writer.value());
     });
   }
 
-  static OptionArrow<Writer<Part, E>, IList<Part>> writerList<E, Part>() {
-    return OptionArrow.fromRun<Writer<Part, E>, IList<Part>>((writer) {
+  static OptionArrow<Writer<B, E>, IList<B>> writerList<E, B>() {
+    return OptionArrow.fromRun<Writer<B, E>, IList<B>>((writer) {
       return Option.some(writer.list());
     });
   }
 
-  static OptionArrow<Validator<E, Part>, Part> validatorValue<E, Part>() {
-    return OptionArrow.fromRun<Validator<E, Part>, Part>((validator) {
+  static OptionArrow<Validator<E, B>, B> validatorValue<E, B>() {
+    return OptionArrow.fromRun<Validator<E, B>, B>((validator) {
       return validator.match(constfunc(Option.none()), Option.some);
     });
   }
 
-  static OptionArrow<Validator<Part, E>, IList<Part>> validatorErrors<E, Part>() {
-    return OptionArrow.fromRun<Validator<Part, E>, IList<Part>>((validator) {
+  static OptionArrow<Validator<B, E>, IList<B>> validatorErrors<E, B>() {
+    return OptionArrow.fromRun<Validator<B, E>, IList<B>>((validator) {
       return validator.match(Option.some, constfunc(Option.none()));
     });
   }
 
-  static OptionArrow<Logger<Part>, Part> logger<Part>() {
-    return OptionArrow.fromRun<Logger<Part>, Part>((logger) {
+  static OptionArrow<Logger<B>, B> logger<B>() {
+    return OptionArrow.fromRun<Logger<B>, B>((logger) {
       return Option.some(logger.value());
     });
   }
 
-  static OptionArrow<Option<Part>, Part> option<Part>() {
-    return OptionArrow.fromRun<Option<Part>, Part>(idfunc);
+  static OptionArrow<Option<B>, B> option<B>() {
+    return OptionArrow.fromRun<Option<B>, B>(idfunc);
   }
 
-  static OptionArrow<(E, Part), Part> tupleRight<E, Part>() {
-    return OptionArrow.fromRun<(E, Part), Part>((tuple) {
+  static OptionArrow<(E, B), B> tupleRight<E, B>() {
+    return OptionArrow.fromRun<(E, B), B>((tuple) {
       return Option.some(tuple.$2);
     });
   }
 
-  static OptionArrow<(Part, E), Part> tupleLeft<E, Part>() {
-    return OptionArrow.fromRun<(Part, E), Part>((tuple) {
+  static OptionArrow<(B, E), B> tupleLeft<E, B>() {
+    return OptionArrow.fromRun<(B, E), B>((tuple) {
       return Option.some(tuple.$1);
     });
   }
 
-  static OptionArrow<These<E, Part>, Part> theseRight<E, Part>() {
-    return OptionArrow.fromRun<These<E, Part>, Part>((these) {
-      return these.match<Option<Part>>(
+  static OptionArrow<These<E, B>, B> theseRight<E, B>() {
+    return OptionArrow.fromRun<These<E, B>, B>((these) {
+      return these.match<Option<B>>(
         constfunc(Option.none()),
         Option.some,
         (_, right) {
@@ -143,9 +143,9 @@ final class OptionArrow<Whole, Part> {
     });
   }
 
-  static OptionArrow<These<Part, E>, Part> theseLeft<E, Part>() {
-    return OptionArrow.fromRun<These<Part, E>, Part>((these) {
-      return these.match<Option<Part>>(
+  static OptionArrow<These<B, E>, B> theseLeft<E, B>() {
+    return OptionArrow.fromRun<These<B, E>, B>((these) {
+      return these.match<Option<B>>(
         Option.some,
         constfunc(Option.none()),
         (left, _) {
@@ -159,102 +159,102 @@ final class OptionArrow<Whole, Part> {
     return OptionArrow.fromRun<A, A>(Option.some);
   }
 
-  static OptionArrow<Whole, ()> unit<Whole>() {
-    return OptionArrow.fromRun<Whole, ()>(constfunc<Whole, Option<()>>(Option.some(())));
+  static OptionArrow<A, ()> unit<A>() {
+    return OptionArrow.fromRun<A, ()>(constfunc<A, Option<()>>(Option.some(())));
   }
 
-  static OptionArrow<Whole, Never> zero<Whole>() {
-    return OptionArrow.fromRun<Whole, Never>(constfunc<Whole, Option<Never>>(Option.none()));
+  static OptionArrow<A, Never> zero<A>() {
+    return OptionArrow.fromRun<A, Never>(constfunc<A, Option<Never>>(Option.none()));
   }
 
-  OptionArrow<Whole, Part2> rmap<Part2>(Func<Part, Part2> f) {
-    return OptionArrow.fromRun<Whole, Part2>((whole) {
-      return run(whole).rmap<Part2>(f);
+  OptionArrow<A, B2> rmap<B2>(Func<B, B2> f) {
+    return OptionArrow.fromRun<A, B2>((a) {
+      return run(a).rmap<B2>(f);
     });
   }
 
-  OptionArrow<Whole2, Part> cmap<Whole2>(Func<Whole2, Whole> f) {
-    return OptionArrow.fromRun<Whole2, Part>((whole2) {
-      return run(f(whole2));
+  OptionArrow<A2, B> cmap<A2>(Func<A2, A> f) {
+    return OptionArrow.fromRun<A2, B>((a2) {
+      return run(f(a2));
     });
   }
 
-  OptionArrow<Whole2, Part2> promap<Whole2, Part2>(Func<Whole2, Whole> lf, Func<Part, Part2> rf) {
-    return cmap<Whole2>(lf).rmap<Part2>(rf);
+  OptionArrow<A2, B2> promap<A2, B2>(Func<A2, A> lf, Func<B, B2> rf) {
+    return cmap<A2>(lf).rmap<B2>(rf);
   }
 
-  OptionArrow<Whole, Sub> then<Sub>(OptionArrow<Part, Sub> other) {
-    return OptionArrow.fromRun<Whole, Sub>((whole) {
-      return run(whole).bind<Sub>(other.run);
+  OptionArrow<A, Sub> then<Sub>(OptionArrow<B, Sub> other) {
+    return OptionArrow.fromRun<A, Sub>((a) {
+      return run(a).bind<Sub>(other.run);
     });
   }
 
-  OptionArrow<Whole2, Part> after<Whole2>(OptionArrow<Whole2, Whole> other) {
-    return other.then<Part>(this);
+  OptionArrow<A2, B> after<A2>(OptionArrow<A2, A> other) {
+    return other.then<B>(this);
   }
 
-  OptionArrow<Whole, (Part, Part2)> zip<Part2>(OptionArrow<Whole, Part2> other) {
-    return OptionArrow.fromRun<Whole, (Part, Part2)>((whole) {
-      return run(whole).zip<Part2>(other.run(whole));
+  OptionArrow<A, (B, B2)> zip<B2>(OptionArrow<A, B2> other) {
+    return OptionArrow.fromRun<A, (B, B2)>((a) {
+      return run(a).zip<B2>(other.run(a));
     });
   }
 
-  OptionArrow<Whole, Either<Part, Part2>> alt<Part2>(OptionArrow<Whole, Part2> other) {
-    return OptionArrow.fromRun<Whole, Either<Part, Part2>>((whole) {
-      final part = run(whole);
-      final part2 = other.run(whole);
-      return part.alt<Part2>(part2);
+  OptionArrow<A, Either<B, B2>> alt<B2>(OptionArrow<A, B2> other) {
+    return OptionArrow.fromRun<A, Either<B, B2>>((a) {
+      final b = run(a);
+      final b2 = other.run(a);
+      return b.alt<B2>(b2);
     });
   }
 
-  static OptionArrow<Whole, IList<Part>> zipAll<Whole, Part>(IList<OptionArrow<Whole, Part>> list) {
-    return list.fold<OptionArrow<Whole, IList<Part>>>(OptionArrow.fromRun<Whole, IList<Part>>((_) => Option.some<IList<Part>>(IList<Part>.empty())), (current, element) {
-      final arrow = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zip(arrow).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
+  static OptionArrow<A, IList<B>> zipAll<A, B>(IList<OptionArrow<A, B>> list) {
+    return list.fold<OptionArrow<A, IList<B>>>(OptionArrow.fromRun<A, IList<B>>((_) => Option.some<IList<B>>(IList<B>.empty())), (current, element) {
+      final arrow = element.rmap<IList<B>>((value) => [value].lock);
+      return current.zip(arrow).rmap<IList<B>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
-  static OptionArrow<Whole, (int, Part)> altAllTagged<Whole, Part>(IList<OptionArrow<Whole, Part>> list) {
-    return list.indexed.fold<OptionArrow<Whole, (int, Part)>>(OptionArrow.fromRun<Whole, (int, Part)>((_) => Option.none<(int, Part)>()), (current, element) {
+  static OptionArrow<A, (int, B)> altAllTagged<A, B>(IList<OptionArrow<A, B>> list) {
+    return list.indexed.fold<OptionArrow<A, (int, B)>>(OptionArrow.fromRun<A, (int, B)>((_) => Option.none<(int, B)>()), (current, element) {
       final (index, option) = element;
-      final indexedOption = option.rmap<(int, Part)>((value) => (index, value));
-      return current.alt(indexedOption).rmap<(int, Part)>((either) {
+      final indexedOption = option.rmap<(int, B)>((value) => (index, value));
+      return current.alt(indexedOption).rmap<(int, B)>((either) {
         return either.value();
       });
     });
   }
 
-  static OptionArrow<Whole, Part> altAll<Whole, Part>(IList<OptionArrow<Whole, Part>> list) {
+  static OptionArrow<A, B> altAll<A, B>(IList<OptionArrow<A, B>> list) {
     return altAllTagged(list).rmap((tuple) => tuple.$2);
   }
 
-  ListArrow<Whole, Part> asListArrow() {
-    return ListArrow.fromRun<Whole, Part>((whole) {
-      return run(whole).match<IList<Part>>(IList<Part>.empty, (value) => [value].lock);
+  ListArrow<A, B> asListArrow() {
+    return ListArrow.fromRun<A, B>((a) {
+      return run(a).match<IList<B>>(IList<B>.empty, (value) => [value].lock);
     });
   }
 
-  EitherArrow<(), Whole, Part> asEitherArrow() {
-    return EitherArrow.fromRun<(), Whole, Part>((whole) {
-      return run(whole).match<Either<(), Part>>(() => Either.left<(), Part>(()), Either.right<(), Part>);
+  EitherArrow<(), A, B> asEitherArrow() {
+    return EitherArrow.fromRun<(), A, B>((a) {
+      return run(a).match<Either<(), B>>(() => Either.left<(), B>(()), Either.right<(), B>);
     });
   }
 
-  OptionArrow<(A, Whole), (A, Part)> strong<A>() {
-    return OptionArrow.fromRun<(A, Whole), (A, Part)>((tuple) {
-      final (a, whole) = tuple;
-      final functor = run(whole);
-      return functor.rmap<(A, Part)>((part) => (a, part));
+  OptionArrow<(P, A), (P, B)> strong<P>() {
+    return OptionArrow.fromRun<(P, A), (P, B)>((tuple) {
+      final (p, a) = tuple;
+      final functor = run(a);
+      return functor.rmap<(P, B)>((b) => (p, b));
     });
   }
 
-  OptionArrow<Either<A, Whole>, Either<A, Part>> choice<A>() {
-    return OptionArrow.fromRun<Either<A, Whole>, Either<A, Part>>((either) {
-      return either.match<Option<Either<A, Part>>>((a) {
-        return OptionArrow.id<Either<A, Part>>().run(Either.left<A, Part>(a));
-      }, (whole) {
-        final functor = run(whole);
-        return functor.rmap<Either<A, Part>>((part) => Either.right<A, Part>(part));
+  OptionArrow<Either<P, A>, Either<P, B>> choice<P>() {
+    return OptionArrow.fromRun<Either<P, A>, Either<P, B>>((either) {
+      return either.match<Option<Either<P, B>>>((p) {
+        return OptionArrow.id<Either<P, B>>().run(Either.left<P, B>(p));
+      }, (a) {
+        final functor = run(a);
+        return functor.rmap<Either<P, B>>((b) => Either.right<P, B>(b));
       });
     });
   }

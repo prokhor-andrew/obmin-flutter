@@ -41,10 +41,10 @@ final class Writer<A, B> {
     return Writer(newList, (_value, other._value));
   }
 
-  static Writer<E, IList<Part>> zipAll<E, Part>(IList<Writer<E, Part>> list) {
-    return list.fold<Writer<E, IList<Part>>>(Writer.of<E, IList<Part>>(IList<Part>.empty()), (current, element) {
-      final writer = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zip<IList<Part>>(writer).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
+  static Writer<E, IList<B>> zipAll<E, B>(IList<Writer<E, B>> list) {
+    return list.fold<Writer<E, IList<B>>>(Writer.of<E, IList<B>>(IList<B>.empty()), (current, element) {
+      final writer = element.rmap<IList<B>>((value) => [value].lock);
+      return current.zip<IList<B>>(writer).rmap<IList<B>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 

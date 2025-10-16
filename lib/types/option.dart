@@ -97,24 +97,24 @@ final class Option<T> {
     );
   }
 
-  static Option<IList<Part>> zipAll<Part>(IList<Option<Part>> list) {
-    return list.fold<Option<IList<Part>>>(Option.some<IList<Part>>(IList<Part>.empty()), (current, element) {
-      final option = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zip<IList<Part>>(option).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
+  static Option<IList<T>> zipAll<T>(IList<Option<T>> list) {
+    return list.fold<Option<IList<T>>>(Option.some<IList<T>>(IList<T>.empty()), (current, element) {
+      final option = element.rmap<IList<T>>((value) => [value].lock);
+      return current.zip<IList<T>>(option).rmap<IList<T>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
-  static Option<(int, Part)> altAllTagged<Part>(IList<Option<Part>> list) {
-    return list.indexed.fold<Option<(int, Part)>>(Option.none<(int, Part)>(), (current, element) {
+  static Option<(int, T)> altAllTagged<T>(IList<Option<T>> list) {
+    return list.indexed.fold<Option<(int, T)>>(Option.none<(int, T)>(), (current, element) {
       final (index, option) = element;
-      final indexedOption = option.rmap<(int, Part)>((value) => (index, value));
-      return current.alt<(int, Part)>(indexedOption).rmap<(int, Part)>((either) {
+      final indexedOption = option.rmap<(int, T)>((value) => (index, value));
+      return current.alt<(int, T)>(indexedOption).rmap<(int, T)>((either) {
         return either.value();
       });
     });
   }
 
-  static Option<Part> altAll<Part>(IList<Option<Part>> list) {
+  static Option<T> altAll<T>(IList<Option<T>> list) {
     return altAllTagged(list).rmap((tuple) => tuple.$2);
   }
 

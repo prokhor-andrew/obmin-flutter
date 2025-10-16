@@ -123,10 +123,10 @@ final class Either<A, B> {
     swapped().runIfLeft(function);
   }
 
-  static Either<E, IList<Part>> zipAll<E, Part>(IList<Either<E, Part>> list) {
-    return list.fold<Either<E, IList<Part>>>(Either.right<E, IList<Part>>(IList<Part>.empty()), (current, element) {
-      final either = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zip<IList<Part>>(either).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
+  static Either<E, IList<B>> zipAll<E, B>(IList<Either<E, B>> list) {
+    return list.fold<Either<E, IList<B>>>(Either.right<E, IList<B>>(IList<B>.empty()), (current, element) {
+      final either = element.rmap<IList<B>>((value) => [value].lock);
+      return current.zip<IList<B>>(either).rmap<IList<B>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 

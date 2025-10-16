@@ -81,10 +81,10 @@ final class Result<A, B> {
     _either.runIfRight(f);
   }
 
-  static Result<E, IList<Part>> zipAll<E, Part>(IList<Result<E, Part>> list) {
-    return list.fold<Result<E, IList<Part>>>(Result.success<E, IList<Part>>(IList<Part>.empty()), (current, element) {
-      final result = element.rmap<IList<Part>>((value) => [value].lock);
-      return current.zip<IList<Part>>(result).rmap<IList<Part>>((tuple) => tuple.$1.addAll(tuple.$2));
+  static Result<E, IList<B>> zipAll<E, B>(IList<Result<E, B>> list) {
+    return list.fold<Result<E, IList<B>>>(Result.success<E, IList<B>>(IList<B>.empty()), (current, element) {
+      final result = element.rmap<IList<B>>((value) => [value].lock);
+      return current.zip<IList<B>>(result).rmap<IList<B>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
