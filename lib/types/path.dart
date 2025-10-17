@@ -26,7 +26,7 @@ final class Path<K, T> {
 
   static Path<K, T> empty<K, T>() => Path.zero<K>().rmap(absurd<T>);
 
-  Path<K, T2> rmap<T2>(Func<T, T2> f) => Path.fromMap(_map.map((key, value) => MapEntry(key, f(value))));
+  Path<K, T2> rmap<T2>(Func<T, T2> f) => Path.fromMap(_map.rmap(f));
 
   Path<K, (T, T2)> zip<T2>(Path<K, T2> other) => bind((val) => other.rmap((val2) => (val, val2)));
 
