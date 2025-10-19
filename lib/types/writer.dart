@@ -54,13 +54,8 @@ final class Writer<A, B> {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-
-    if (other is! Writer<A, B>) {
-      return false;
-    }
+    if (identical(this, other)) return true;
+    if (other is! Writer<A, B>) return false;
 
     return _list == other._list && _value == other._value;
   }

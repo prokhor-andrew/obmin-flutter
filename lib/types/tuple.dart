@@ -5,6 +5,13 @@
 import 'package:obmin/func.dart';
 
 extension TupleExtensions<A, B> on (A, B) {
+
+  B extract() => $2;
+
+  (A, (A, B)) duplicate() => ($1, this);
+
+  (A, B2) extend<B2>(Func<(A, B), B2> f) => ($1, f(this));
+
   (A2, B) lmap<A2>(Func<A, A2> f) {
     return (f($1), $2);
   }
