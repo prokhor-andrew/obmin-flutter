@@ -17,20 +17,20 @@ final class ZipPath<K, T> {
 
   static ZipPath<K, ()> unit<K>() => ZipPath._(Either.left(()));
 
-  static ZipPath<K, T> infinite<K, T>(T value) => unit<K>().rmap(constfunc(value));
+  static ZipPath<K, T> repeating<K, T>(T value) => unit<K>().rmap(constfunc(value));
 
   static ZipPath<K, T> fromMap<K, T>(IMap<IList<K>, T> map) => ZipPath._(Either.right(map));
 
   ZipPath<K, (T, T2)> zip<T2>(ZipPath<K, T2> other) {
-    return _mapOrNone.match((infiniteValue) {
-      return other._mapOrNone.match((infiniteValue2) {
-        return ZipPath._(Either.left((infiniteValue, infiniteValue2)));
+    return _mapOrNone.match((repeatingValue) {
+      return other._mapOrNone.match((repeatingValue2) {
+        return ZipPath._(Either.left((repeatingValue, repeatingValue2)));
       }, (map2) {
-        return ZipPath._(Either.right(map2.rmap((value2) => (infiniteValue, value2))));
+        return ZipPath._(Either.right(map2.rmap((value2) => (repeatingValue, value2))));
       });
     }, (map) {
-      return other._mapOrNone.match((infiniteValue2) {
-        return ZipPath._(Either.right(map.rmap((value) => (value, infiniteValue2))));
+      return other._mapOrNone.match((repeatingValue2) {
+        return ZipPath._(Either.right(map.rmap((value) => (value, repeatingValue2))));
       }, (map2) {
         IMap<IList<K>, (T, T2)> result = IMap<IList<K>, (T, T2)>.empty();
 
@@ -48,7 +48,7 @@ final class ZipPath<K, T> {
   }
 
   static ZipPath<K, IList<T>> zipAll<K, T>(IList<ZipPath<K, T>> list) {
-    return list.fold<ZipPath<K, IList<T>>>(ZipPath.infinite<K, IList<T>>(IList<T>.empty()), (current, element) {
+    return list.fold<ZipPath<K, IList<T>>>(ZipPath.repeating<K, IList<T>>(IList<T>.empty()), (current, element) {
       final path = element.rmap<IList<T>>((value) => [value].lock);
       return current.zip<IList<T>>(path).rmap<IList<T>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
@@ -69,9 +69,9 @@ final class ZipPath<K, T> {
     if (identical(this, other)) return true;
     if (other is! ZipPath<K, T>) return false;
 
-    return _mapOrNone.match((infiniteValue) {
+    return _mapOrNone.match((repeatingValue) {
       return other._mapOrNone.match(
-        (infiniteValue2) => infiniteValue == infiniteValue2,
+        (repeatingValue2) => repeatingValue == repeatingValue2,
         constfunc(false),
         //
       );
@@ -85,11 +85,11 @@ final class ZipPath<K, T> {
   }
 
   @override
-  int get hashCode => _mapOrNone.match((infiniteValue) => infiniteValue.hashCode, (map) => map.hashCode);
+  int get hashCode => _mapOrNone.match((repeatingValue) => repeatingValue.hashCode, (map) => map.hashCode);
 
-  Option<int> lengthOrInfinite() => _mapOrNone.match(constfunc(Option.none()), (map) => Option.some(map.length));
+  Option<int> lengthOrRepeating() => _mapOrNone.match(constfunc(Option.none()), (map) => Option.some(map.length));
 
-  bool isInfinite() => _mapOrNone.isLeft();
+  bool isRepeating() => _mapOrNone.isLeft();
 
-  bool isFinite() => !isInfinite();
+  bool isNonRepeating() => !isRepeating();
 }

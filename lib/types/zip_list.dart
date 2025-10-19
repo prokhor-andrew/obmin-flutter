@@ -19,20 +19,20 @@ final class ZipList<T> {
 
   static ZipList<()> unit() => ZipList._(Either.left(()));
 
-  static ZipList<T> infinite<T>(T value) => unit().rmap(constfunc(value));
+  static ZipList<T> repeating<T>(T value) => unit().rmap(constfunc(value));
 
   static ZipList<T> fromList<T>(IList<T> list) => ZipList._(Either.right(list));
 
   ZipList<(T, T2)> zip<T2>(ZipList<T2> other) {
-    return _listOrNone.match((infiniteValue) {
-      return other._listOrNone.match((infiniteValue2) {
-        return ZipList._(Either.left((infiniteValue, infiniteValue2)));
+    return _listOrNone.match((repeatingValue) {
+      return other._listOrNone.match((repeatingValue2) {
+        return ZipList._(Either.left((repeatingValue, repeatingValue2)));
       }, (list2) {
-        return ZipList._(Either.right(list2.rmap((value2) => (infiniteValue, value2))));
+        return ZipList._(Either.right(list2.rmap((value2) => (repeatingValue, value2))));
       });
     }, (list) {
-      return other._listOrNone.match((infiniteValue2) {
-        return ZipList._(Either.right(list.rmap((value) => (value, infiniteValue2))));
+      return other._listOrNone.match((repeatingValue2) {
+        return ZipList._(Either.right(list.rmap((value) => (value, repeatingValue2))));
       }, (list2) {
         IList<(T, T2)> result = IList<(T, T2)>.empty();
         final int len = min(list.length, list2.length);
@@ -49,7 +49,7 @@ final class ZipList<T> {
   }
 
   static ZipList<IList<T>> zipAll<T>(IList<ZipList<T>> list) {
-    return list.fold<ZipList<IList<T>>>(ZipList.infinite<IList<T>>(IList<T>.empty()), (current, element) {
+    return list.fold<ZipList<IList<T>>>(ZipList.repeating<IList<T>>(IList<T>.empty()), (current, element) {
       final path = element.rmap<IList<T>>((value) => [value].lock);
       return current.zip<IList<T>>(path).rmap<IList<T>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
@@ -73,9 +73,9 @@ final class ZipList<T> {
     if (identical(this, other)) return true;
     if (other is! ZipList<T>) return false;
 
-    return _listOrNone.match((infiniteValue) {
+    return _listOrNone.match((repeatingValue) {
       return other._listOrNone.match(
-        (infiniteValue2) => infiniteValue == infiniteValue2,
+        (repeatingValue2) => repeatingValue == repeatingValue2,
         constfunc(false),
         //
       );
@@ -89,11 +89,11 @@ final class ZipList<T> {
   }
 
   @override
-  int get hashCode => _listOrNone.match((infiniteValue) => infiniteValue.hashCode, (list) => list.hashCode);
+  int get hashCode => _listOrNone.match((repeatingValue) => repeatingValue.hashCode, (list) => list.hashCode);
 
-  Option<int> lengthOrInfinite() => _listOrNone.match(constfunc(Option.none()), (list) => Option.some(list.length));
+  Option<int> lengthOrRepeating() => _listOrNone.match(constfunc(Option.none()), (list) => Option.some(list.length));
 
-  bool isInfinite() => _listOrNone.isLeft();
+  bool isRepeating() => _listOrNone.isLeft();
 
-  bool isFinite() => !isInfinite();
+  bool isNonRepeating() => !isRepeating();
 }

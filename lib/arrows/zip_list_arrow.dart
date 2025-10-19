@@ -19,7 +19,7 @@ final class ZipListArrow<A, B> {
   static ZipListArrow<A, B> fromFunc<A, B>(Func<A, B> f) {
     return ZipListArrow.fromRun<A, B>((a) {
       final b = f(a);
-      return ZipList.infinite(b);
+      return ZipList.repeating(b);
     });
   }
 
@@ -50,7 +50,7 @@ final class ZipListArrow<A, B> {
   }
 
   static ZipListArrow<A, IList<B>> zipAll<A, B>(IList<ZipListArrow<A, B>> list) {
-    return list.fold<ZipListArrow<A, IList<B>>>(ZipListArrow.fromRun<A, IList<B>>((_) => ZipList.infinite(IList<B>.empty())), (current, element) {
+    return list.fold<ZipListArrow<A, IList<B>>>(ZipListArrow.fromRun<A, IList<B>>((_) => ZipList.repeating(IList<B>.empty())), (current, element) {
       final arrow = element.rmap<IList<B>>((value) => [value].lock);
       return current.zip<IList<B>>(arrow).rmap<IList<B>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
@@ -68,7 +68,7 @@ final class ZipListArrow<A, B> {
     return ZipListArrow.fromRun<Either<P, A>, Either<P, B>>((either) {
       return either
           .lmap(Either.left<P, B>)
-          .lmap(ZipList.infinite)
+          .lmap(ZipList.repeating)
           .rmap(run)
           .rmap((list) => list.rmap(Either.right<P, B>)) //
           .value();
