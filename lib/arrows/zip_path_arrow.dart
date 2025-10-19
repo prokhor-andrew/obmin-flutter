@@ -5,6 +5,7 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:obmin/func.dart';
 import 'package:obmin/types/either.dart';
+import 'package:obmin/types/option.dart';
 import 'package:obmin/types/zip_path.dart';
 
 final class ZipPathArrow<K, A, B> {
@@ -53,6 +54,19 @@ final class ZipPathArrow<K, A, B> {
     return list.fold<ZipPathArrow<K, A, IList<B>>>(ZipPathArrow.fromRun<K, A, IList<B>>((_) => ZipPath.repeating(IList<B>.empty())), (current, element) {
       final arrow = element.rmap<IList<B>>((value) => [value].lock);
       return current.zip<IList<B>>(arrow).rmap<IList<B>>((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  ZipPathArrow<K, A, (B, B2)> zipJoinKey<B2>(ZipPathArrow<K, A, B2> other, BiFunc<IList<K>, IList<K>, Option<IList<K>>> joinKeyFunc) {
+    return ZipPathArrow.fromRun<K, A, (B, B2)>((a) {
+      return run(a).zipJoinKey<B2>(other.run(a), joinKeyFunc);
+    });
+  }
+
+  static ZipPathArrow<K, A, IList<B>> zipAllJoinKey<K, A, B>(IList<ZipPathArrow<K, A, B>> list, BiFunc<IList<K>, IList<K>, Option<IList<K>>> joinKeyFunc) {
+    return list.fold<ZipPathArrow<K, A, IList<B>>>(ZipPathArrow.fromRun<K, A, IList<B>>((_) => ZipPath.repeating(IList<B>.empty())), (current, element) {
+      final arrow = element.rmap<IList<B>>((value) => [value].lock);
+      return current.zipJoinKey<IList<B>>(arrow, joinKeyFunc).rmap<IList<B>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 

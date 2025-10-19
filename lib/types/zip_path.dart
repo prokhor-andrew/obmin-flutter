@@ -21,6 +21,35 @@ final class ZipPath<K, T> {
 
   static ZipPath<K, T> fromMap<K, T>(IMap<IList<K>, T> map) => ZipPath._(Either.right(map));
 
+  ZipPath<K, (T, T2)> zipJoinKey<T2>(ZipPath<K, T2> other, BiFunc<IList<K>, IList<K>, Option<IList<K>>> joinKeyFunc) {
+    return _mapOrNone.match((repeatingValue) {
+      return other._mapOrNone.match((repeatingValue2) {
+        return ZipPath._(Either.left((repeatingValue, repeatingValue2)));
+      }, (map2) {
+        return ZipPath._(Either.right(map2.rmap((value2) => (repeatingValue, value2))));
+      });
+    }, (map) {
+      return other._mapOrNone.match(
+        (repeatingValue2) {
+          return ZipPath._(Either.right(map.rmap((value) => (value, repeatingValue2))));
+        },
+        (map2) {
+          IMap<IList<K>, (T, T2)> result = IMap<IList<K>, (T, T2)>.empty();
+
+          map.forEach((k, v) {
+            map2.forEach((k2, v2) {
+              joinKeyFunc(k, k2).runIfSome((resultKey) {
+                result = result.add(resultKey, (v, v2));
+              });
+            });
+          });
+
+          return ZipPath._(Either.right(result));
+        },
+      );
+    });
+  }
+
   ZipPath<K, (T, T2)> zip<T2>(ZipPath<K, T2> other) {
     return _mapOrNone.match((repeatingValue) {
       return other._mapOrNone.match((repeatingValue2) {
@@ -51,6 +80,13 @@ final class ZipPath<K, T> {
     return list.fold<ZipPath<K, IList<T>>>(ZipPath.repeating<K, IList<T>>(IList<T>.empty()), (current, element) {
       final path = element.rmap<IList<T>>((value) => [value].lock);
       return current.zip<IList<T>>(path).rmap<IList<T>>((tuple) => tuple.$1.addAll(tuple.$2));
+    });
+  }
+
+  static ZipPath<K, IList<T>> zipAllJoinKey<K, T>(IList<ZipPath<K, T>> list, BiFunc<IList<K>, IList<K>, Option<IList<K>>> joinKeyFunc) {
+    return list.fold<ZipPath<K, IList<T>>>(ZipPath.repeating<K, IList<T>>(IList<T>.empty()), (current, element) {
+      final path = element.rmap<IList<T>>((value) => [value].lock);
+      return current.zipJoinKey<IList<T>>(path, joinKeyFunc).rmap<IList<T>>((tuple) => tuple.$1.addAll(tuple.$2));
     });
   }
 
