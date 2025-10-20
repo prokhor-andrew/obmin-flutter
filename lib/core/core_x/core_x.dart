@@ -3,10 +3,8 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/core/core.dart';
-import 'package:obmin/machine/machine.dart';
-import 'package:obmin/machine/plan.dart';
-import 'package:obmin/types/either.dart';
+import 'package:obmin/obmin.dart';
+import 'package:obmin_flutter/core/core.dart';
 
 Core<State, State, Event> CoreX<State, Event>({
   required State Function() state,

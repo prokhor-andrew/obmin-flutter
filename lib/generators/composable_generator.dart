@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:obmin/annotations/composable.dart';
+import 'package:obmin_flutter/annotations/composable.dart';
 import 'package:source_gen/source_gen.dart';
 
 final class ComposableGenerator extends GeneratorForAnnotation<Composable> {

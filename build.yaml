@@ -1,13 +1,13 @@
 targets:
   $default:
     builders:
-      obmin|composable:
+      obmin_flutter|composable:
         enabled: true
 
 builders:
   composable:
-    target: ":obmin"
-    import: "package:obmin/generators/builder.dart"
+    target: ":obmin-flutter"
+    import: "package:obmin_flutter/generators/builder.dart"
     builder_factories: ["composableGeneratorFactory"]
     build_extensions: {".dart": [".composable.g.part"]}
     auto_apply: dependents

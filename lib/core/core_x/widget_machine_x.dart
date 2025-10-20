@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:obmin/core/core_widget.dart';
-import 'package:obmin/types/option.dart';
+import 'package:obmin/obmin.dart';
+import 'package:obmin_flutter/core/core_widget.dart';
 
 WidgetMachine<State, State, Event> WidgetMachineX<State, Event>({
   required Widget Function(BuildContext context, ValueListenable<(State state, Option<void Function(Event event)> update)>) builder,

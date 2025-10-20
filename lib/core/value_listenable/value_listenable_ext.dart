@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:flutter/foundation.dart';
-import 'package:obmin/func.dart';
+import 'package:obmin/obmin.dart';
 
 extension ValueListenableExtension<T> on ValueListenable<T> {
   ValueListenable<R> rmap<R>(Func<T, R> transform) => _MappedValueListenable(this, transform);

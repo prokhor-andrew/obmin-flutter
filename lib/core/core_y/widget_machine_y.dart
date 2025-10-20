@@ -4,10 +4,9 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:obmin/core/core_widget.dart';
-import 'package:obmin/core/core_x/widget_machine_x.dart';
-import 'package:obmin/func.dart';
-import 'package:obmin/types/option.dart';
+import 'package:obmin/obmin.dart';
+import 'package:obmin_flutter/core/core_widget.dart';
+import 'package:obmin_flutter/core/core_x/widget_machine_x.dart';
 
 WidgetMachine<State, State, Endo<State>> _WidgetMachineY<State>({
   required Widget Function(BuildContext context, ValueListenable<(State state, Option<void Function(Endo<State> transition)>)> notifier) builder,

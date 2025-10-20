@@ -3,8 +3,7 @@
 // See the LICENSE file in the project root for license information.
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:obmin/machine/machine.dart';
-import 'package:obmin/machine/plan.dart';
+import 'package:obmin/obmin.dart';
 
 final class Core<State, Input, Output> {
   final Plan<State, Output, Input, Never, Never> Function() plan;

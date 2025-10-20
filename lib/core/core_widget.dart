@@ -4,9 +4,9 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:obmin/core/core.dart';
-import 'package:obmin/core/value_listenable/value_listenable_ext.dart';
-import 'package:obmin/machine/machine.dart';
+import 'package:obmin_flutter/core/core.dart';
+import 'package:obmin_flutter/core/value_listenable/value_listenable_ext.dart';
+import 'package:obmin/obmin.dart';
 
 final class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
   final Core<DomainState, Input, Output> _initialCore;

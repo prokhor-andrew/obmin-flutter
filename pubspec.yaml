@@ -1,5 +1,5 @@
-name: obmin
-description: "Obmin"
+name: obmin_flutter
+description: Obmin Flutter
 version: 0.0.1
 homepage: https://github.com/prokhor-andrew/obmin-flutter.git
 
@@ -10,9 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  uuid: ^4.4.0
-  fast_immutable_collections: ^11.0.4
 
+  obmin:
+    git:
+      url: https://github.com/prokhor-andrew/obmin-dart.git
+      ref: main
 
 dev_dependencies:
   flutter_test:
