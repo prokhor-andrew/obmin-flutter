@@ -4,9 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:obmin_flutter/core/core.dart';
-import 'package:obmin_flutter/core/value_listenable/value_listenable_ext.dart';
 import 'package:obmin/obmin.dart';
+import 'package:obmin_flutter/core/core.dart';
+import 'package:obmin_flutter/core/value_listenable_ext.dart';
+import 'package:obmin_flutter/core/value_notifier_holder.dart';
 
 final class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
   final Core<DomainState, Input, Output> _initialCore;
@@ -20,6 +21,26 @@ final class CoreWidget<DomainState, Input, Output> extends StatefulWidget {
 
   @override
   State<CoreWidget<DomainState, Input, Output>> createState() => _CoreWidgetState<DomainState, Input, Output>();
+
+  static CoreWidget<S, S, Event> createX<S, Event>({
+    required Core<S, S, Event> core,
+    required WidgetMachine<S, S, Event> uiMachine,
+  }) {
+    return CoreWidget<S, S, Event>(
+      core: core,
+      uiMachine: uiMachine,
+    );
+  }
+
+  static CoreWidget<S, S, Endo<S>> createY<S>({
+    required Core<S, S, Endo<S>> core,
+    required WidgetMachine<S, S, Endo<S>> uiMachine,
+  }) {
+    return createX<S, Endo<S>>(
+      core: core,
+      uiMachine: uiMachine,
+    );
+  }
 }
 
 final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidget<DomainState, Input, Output>> {
@@ -62,20 +83,20 @@ final class _CoreWidgetState<DomainState, Input, Output> extends State<CoreWidge
   }
 }
 
-final class WidgetMachine<State, Input, Output> {
-  final Object Function(State state) _init;
+final class WidgetMachine<S, Input, Output> {
+  final Object Function(S state) _init;
   final Machine<Input, Output> Function(void Function(Object Function(Object)) setState) _machine;
   final Widget Function(BuildContext context, ValueListenable<Object> notifier) _build;
 
   const WidgetMachine._({
-    required Object Function(State state) init,
+    required Object Function(S state) init,
     required Machine<Input, Output> Function(void Function(Object Function(Object)) setState) machine,
     required Widget Function(BuildContext context, ValueListenable<Object> notifier) build,
   })  : _init = init,
         _machine = machine,
         _build = build;
 
-  WidgetMachine<State, RInput, ROutput> transform<RInput, ROutput>(Machine<RInput, ROutput> Function(Machine<Input, Output> machine) function) {
+  WidgetMachine<S, RInput, ROutput> transform<RInput, ROutput>(Machine<RInput, ROutput> Function(Machine<Input, Output> machine) function) {
     return WidgetMachine._(
       init: _init,
       build: _build,
@@ -85,13 +106,13 @@ final class WidgetMachine<State, Input, Output> {
     );
   }
 
-  static WidgetMachine<State, Input, Output> create<UiState, State, Input, Output>({
-    required UiState Function(State state) init,
+  static WidgetMachine<S, Input, Output> create<UiState, S, Input, Output>({
+    required UiState Function(S state) init,
     required UiState Function(UiState state, void Function(Output output) callback) activate,
     required UiState Function(UiState state, Input input) process,
     required Widget Function(BuildContext context, ValueListenable<UiState> notifier) build,
   }) {
-    return WidgetMachine<State, Input, Output>._(
+    return WidgetMachine<S, Input, Output>._(
       init: (state) {
         return init(state) as Object;
       },
@@ -119,6 +140,50 @@ final class WidgetMachine<State, Input, Output> {
       build: (context, notifier) {
         return build(context, notifier.rmap((value) => value as UiState));
       },
+    );
+  }
+
+  static WidgetMachine<S, S, Event> widgetMachineX<S, Event>({
+    required Widget Function(BuildContext context, ValueListenable<(S state, Option<void Function(Event event)> update)>) builder,
+    bool isDistinctUntilChanged = true,
+  }) {
+    return WidgetMachine.create<(S, Option<void Function(Event event)>), S, S, Event>(
+      init: (state) {
+        return (state, Option.none());
+      },
+      activate: (initial, update) {
+        return (initial.$1, Option.some(update));
+      },
+      process: (cur, input) {
+        return (input, cur.$2);
+      },
+      build: (context, notifier) {
+        return builder(context, notifier);
+      },
+    ).transform((machine) {
+      return isDistinctUntilChanged ? machine.distinctUntilChangedInput(shouldWaitOnEffects: false) : machine;
+    });
+  }
+
+  static WidgetMachine<S, S, Endo<S>> _widgetMachineY<S>({
+    required Widget Function(BuildContext context, ValueListenable<(S state, Option<void Function(Endo<S> transition)>)> notifier) builder,
+    required bool isDistinctUntilChanged,
+  }) {
+    return widgetMachineX<S, Endo<S>>(
+      builder: builder,
+      isDistinctUntilChanged: isDistinctUntilChanged,
+    );
+  }
+
+  static WidgetMachine<S, S, Endo<S>> createY<S>({
+    required Widget Function(BuildContext context) builder,
+    bool isDistinctUntilChanged = true,
+  }) {
+    return _widgetMachineY<S>(
+      builder: (context, listenable) {
+        return ValueNotifierHolder.create<S>(listenable, child: builder(context));
+      },
+      isDistinctUntilChanged: isDistinctUntilChanged,
     );
   }
 }

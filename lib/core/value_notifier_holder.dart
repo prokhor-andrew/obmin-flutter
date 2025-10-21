@@ -5,40 +5,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:obmin/obmin.dart';
-import 'package:obmin_flutter/core/core_widget.dart';
-import 'package:obmin_flutter/core/core_x/widget_machine_x.dart';
-
-WidgetMachine<State, State, Endo<State>> _WidgetMachineY<State>({
-  required Widget Function(BuildContext context, ValueListenable<(State state, Option<void Function(Endo<State> transition)>)> notifier) builder,
-  required bool isDistinctUntilChanged,
-}) {
-  return WidgetMachineX<State, Endo<State>>(
-    builder: builder,
-    isDistinctUntilChanged: isDistinctUntilChanged,
-  );
-}
-
-WidgetMachine<State, State, Endo<State>> WidgetMachineY<State>({
-  required Widget Function(BuildContext context) builder,
-  bool isDistinctUntilChanged = true,
-}) {
-  return _WidgetMachineY<State>(
-    builder: (context, listenable) {
-      return ValueNotifierHolder.create<State>(listenable, child: builder(context));
-    },
-    isDistinctUntilChanged: isDistinctUntilChanged,
-  );
-}
 
 final class ValueNotifierHolder<T> extends InheritedWidget {
   final ValueListenable<T> _listenable;
   final void Function(Endo<T>) _callback;
 
-  const ValueNotifierHolder._({required super.child, required ValueListenable<T> listenable, required void Function(Endo<T>) callback})
-      : _listenable = listenable,
+  const ValueNotifierHolder._({
+    required super.child,
+    required ValueListenable<T> listenable,
+    required void Function(Endo<T>) callback,
+    //
+  })  : _listenable = listenable,
         _callback = callback;
 
-  static Widget create<T>(ValueListenable<(T, Option<void Function(Endo<T> transition)>)> listenable, {required Widget child}) {
+  static Widget create<T>(
+    ValueListenable<(T, Option<void Function(Endo<T> transition)>)> listenable, {
+    required Widget child,
+    //
+  }) {
     return ValueListenableBuilder(
       valueListenable: listenable,
       builder: (context, value, _) {
