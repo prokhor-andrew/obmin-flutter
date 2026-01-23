@@ -4,16 +4,18 @@
 
 import 'dart:async';
 
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:obmin/annotations/optic.dart';
 import 'package:source_gen/source_gen.dart';
 
 final class OpticGenerator extends GeneratorForAnnotation<Optic> {
   @override
-  FutureOr<String> generateForAnnotatedElement(Element2 element, ConstantReader annotation, BuildStep buildStep) {
-    if (element is! ClassElement2) {
-      throw InvalidGenerationSourceError('Generator cannot target `${element.runtimeType}`.');
+  FutureOr<String> generateForAnnotatedElement(
+      Element element, ConstantReader annotation, BuildStep buildStep) {
+    if (element is! ClassElement) {
+      throw InvalidGenerationSourceError(
+          'Generator cannot target `${element.runtimeType}`.');
     }
 
     if (!_isSubClassOfObject(element)) {
@@ -21,40 +23,46 @@ final class OpticGenerator extends GeneratorForAnnotation<Optic> {
     }
 
     if (_isClassFinal(element)) {
-      if (element.fields2.isEmpty) {
-        throw InvalidGenerationSourceError('Annotated final class must have stored properties.');
+      if (element.fields.isEmpty) {
+        throw InvalidGenerationSourceError(
+            'Annotated final class must have stored properties.');
       } else {
         bool isValid = false;
-        for (final field in element.fields2) {
+        for (final field in element.fields) {
           if (!_isComputedProperty(field)) {
             isValid = true;
             break;
           }
         }
         if (!isValid) {
-          throw InvalidGenerationSourceError('Annotated final class must have stored properties.');
+          throw InvalidGenerationSourceError(
+              'Annotated final class must have stored properties.');
         }
       }
 
       return _generateFinalClass(element).toString();
     } else if (_isClassSealed(element)) {
-      if (element.fields2.isNotEmpty) {
-        throw InvalidGenerationSourceError('Annotated sealed class must not have properties.');
+      if (element.fields.isNotEmpty) {
+        throw InvalidGenerationSourceError(
+            'Annotated sealed class must not have properties.');
       }
 
       final cases = _findSubclasses(element);
 
       if (cases.isEmpty) {
-        throw InvalidGenerationSourceError('Annotated sealed class must have at least one subclass.');
+        throw InvalidGenerationSourceError(
+            'Annotated sealed class must have at least one subclass.');
       }
 
       for (final caseE in cases) {
-        if (caseE.fields2.isEmpty) {
-          throw InvalidGenerationSourceError('Classes that extend annotated sealed class must have properties.');
+        if (caseE.fields.isEmpty) {
+          throw InvalidGenerationSourceError(
+              'Classes that extend annotated sealed class must have properties.');
         }
 
         if (!_isClassFinal(caseE)) {
-          throw InvalidGenerationSourceError('Classes that extend annotated sealed class must be final.');
+          throw InvalidGenerationSourceError(
+              'Classes that extend annotated sealed class must be final.');
         }
       }
 
@@ -65,7 +73,8 @@ final class OpticGenerator extends GeneratorForAnnotation<Optic> {
   }
 }
 
-StringBuffer _generateSealedClass(ClassElement2 element, List<ClassElement2> cases) {
+StringBuffer _generateSealedClass(
+    ClassElement element, List<ClassElement> cases) {
   final StringBuffer buffer = StringBuffer();
 
   _generateSealedClassCases(buffer, element, cases);
@@ -77,13 +86,15 @@ StringBuffer _generateSealedClass(ClassElement2 element, List<ClassElement2> cas
   return buffer;
 }
 
-void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<ClassElement2> cases) {
+void _generateSealedClassCases(
+    StringBuffer buffer, ClassElement element, List<ClassElement> cases) {
   final String generics;
 
-  if (element.typeParameters2.isEmpty) {
+  if (element.typeParameters.isEmpty) {
     generics = "";
   } else {
-    final params = _dropLastChar(element.typeParameters2.fold("", (acc, element) {
+    final params =
+        _dropLastChar(element.typeParameters.fold("", (acc, element) {
       return "$acc$element,";
     }));
     generics = "<$params>";
@@ -92,13 +103,14 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
   for (final caseE in cases) {
     final caseName = caseE.displayName;
 
-    buffer.writeln("extension Optic${caseName}UtilsExtension$generics on $caseName$generics {");
+    buffer.writeln(
+        "extension Optic${caseName}UtilsExtension$generics on $caseName$generics {");
 
     String arguments = "";
     String compares = "";
     String hashes = "";
 
-    for (final field in caseE.fields2) {
+    for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
         final type = field.type;
         final name = field.displayName;
@@ -106,21 +118,25 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
         final bool isAnyIterableSubclass = type.isDartCoreIterable;
 
         arguments += " $name=\$$name,";
-        compares += "&& ${isAnyIterableSubclass ? "const IterableEquality().equals(other.$name, $name)" : "other.$name == $name"}";
-        hashes += "${isAnyIterableSubclass ? "const IterableEquality().hash($name)" : name},";
+        compares +=
+            "&& ${isAnyIterableSubclass ? "const IterableEquality().equals(other.$name, $name)" : "other.$name == $name"}";
+        hashes +=
+            "${isAnyIterableSubclass ? "const IterableEquality().hash($name)" : name},";
       }
     }
 
     buffer.writeln("  String _toString() {");
-    buffer.writeln("    return \"$caseName${caseE.typeParameters2.isEmpty ? "" : "<${_dropLastChar(caseE.typeParameters2.fold("", (acc, element) {
-        return "$acc\$$element,";
-      }))}>"} {${_dropLastChar(arguments)} }\";");
+    buffer.writeln(
+        "    return \"$caseName${caseE.typeParameters.isEmpty ? "" : "<${_dropLastChar(caseE.typeParameters.fold("", (acc, element) {
+            return "$acc\$$element,";
+          }))}>"} {${_dropLastChar(arguments)} }\";");
     buffer.writeln("  }");
 
     buffer.writeln("");
     buffer.writeln("");
 
-    buffer.writeln("  // you need \"collection:\" package if you want to use Iterable in your class");
+    buffer.writeln(
+        "  // you need \"collection:\" package if you want to use Iterable in your class");
     buffer.writeln("  bool _equals(Object other) {");
     buffer.writeln("    if (identical(this, other)) return true;");
     buffer.writeln("    return other is $caseName$generics");
@@ -141,10 +157,11 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
 
     String constructObject(String modified) {
       String result = "$caseName(";
-      if (caseE.fields2.isNotEmpty) {
-        for (final field in caseE.fields2) {
+      if (caseE.fields.isNotEmpty) {
+        for (final field in caseE.fields) {
           if (!_isComputedProperty(field)) {
-            result += "${field.displayName}: ${field.displayName == modified ? "function(${field.displayName})" : field.displayName},";
+            result +=
+                "${field.displayName}: ${field.displayName == modified ? "function(${field.displayName})" : field.displayName},";
           }
         }
       }
@@ -154,22 +171,26 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
       return result;
     }
 
-    buffer.writeln("extension ${caseName}ObminOpticToolMethodsExtension$generics on $caseName$generics {");
+    buffer.writeln(
+        "extension ${caseName}ObminOpticToolMethodsExtension$generics on $caseName$generics {");
 
     buffer.writeln("");
 
-    for (final field in caseE.fields2) {
+    for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
         final String fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln("    $caseName$generics copyUpdate${_uppercaseFirstCharacter(fieldName)}($fieldType Function($fieldType $fieldName) function) {");
+        buffer.writeln(
+            "    $caseName$generics copyUpdate${_uppercaseFirstCharacter(fieldName)}($fieldType Function($fieldType $fieldName) function) {");
         buffer.writeln("        return ${constructObject(fieldName)}");
         buffer.writeln("    }");
         buffer.writeln("");
 
-        buffer.writeln("    $caseName$generics copySet${_uppercaseFirstCharacter(fieldName)}($fieldType $fieldName) {");
-        buffer.writeln("        return copyUpdate${_uppercaseFirstCharacter(fieldName)}((_) => $fieldName);");
+        buffer.writeln(
+            "    $caseName$generics copySet${_uppercaseFirstCharacter(fieldName)}($fieldType $fieldName) {");
+        buffer.writeln(
+            "        return copyUpdate${_uppercaseFirstCharacter(fieldName)}((_) => $fieldName);");
         buffer.writeln("    }");
         buffer.writeln("");
       }
@@ -185,16 +206,18 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
 
     buffer.writeln('}');
 
-    buffer.writeln("extension ${caseName}ObminOpticEqvExtension$generics on Eqv<$caseName$generics> {");
+    buffer.writeln(
+        "extension ${caseName}ObminOpticEqvExtension$generics on Eqv<$caseName$generics> {");
 
-    for (final field in caseE.fields2) {
+    for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln('  Getter<$caseName$generics, $fieldType> get $fieldName => asGetter().$fieldName;');
+        buffer.writeln(
+            '  Getter<$caseName$generics, $fieldType> get $fieldName => asGetter().$fieldName;');
       }
     }
 
@@ -203,14 +226,15 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
     buffer.writeln(
         "extension ${caseName}ObminOpticGetterExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Getter<Whole, $caseName$generics> {");
 
-    for (final field in caseE.fields2) {
+    for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln('  Getter<Whole, $fieldType> get $fieldName => compose(Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName));');
+        buffer.writeln(
+            '  Getter<Whole, $fieldType> get $fieldName => compose(Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName));');
       }
     }
 
@@ -219,15 +243,15 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
     buffer.writeln(
         "extension ${caseName}ObminOpticPreviewExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Preview<Whole, $caseName$generics> {");
 
-    for (final field in caseE.fields2) {
+    for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer
-            .writeln('  Preview<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName));');
+        buffer.writeln(
+            '  Preview<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName));');
       }
     }
 
@@ -236,14 +260,15 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
     buffer.writeln(
         "extension ${caseName}ObminOpticFoldExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Fold<Whole, $caseName$generics> {");
 
-    for (final field in caseE.fields2) {
+    for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln('  Fold<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName));');
+        buffer.writeln(
+            '  Fold<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName));');
       }
     }
 
@@ -252,17 +277,20 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
     buffer.writeln(
         "extension ${caseName}ObminOpticMutatorExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Mutator<Whole, $caseName$generics> {");
 
-    for (final field in caseE.fields2) {
+    for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => compose(");
+        buffer
+            .writeln("  Mutator<Whole, $fieldType> get $fieldName => compose(");
         buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
-        buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
-        buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+        buffer.writeln(
+            "      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
+        buffer.writeln(
+            "      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
         buffer.writeln("    ),");
         buffer.writeln("  );");
       }
@@ -273,17 +301,20 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
     buffer.writeln(
         "extension ${caseName}ObminOpticIsoExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Iso<Whole, $caseName$generics> {");
 
-    for (final field in caseE.fields2) {
+    for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
+        buffer.writeln(
+            "  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
         buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
-        buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
-        buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+        buffer.writeln(
+            "      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
+        buffer.writeln(
+            "      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
         buffer.writeln("    ),");
         buffer.writeln("  );");
       }
@@ -294,17 +325,20 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
     buffer.writeln(
         "extension ${caseName}ObminOpticPrismExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Prism<Whole, $caseName$generics> {");
 
-    for (final field in caseE.fields2) {
+    for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
+        buffer.writeln(
+            "  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
         buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
-        buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
-        buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+        buffer.writeln(
+            "      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
+        buffer.writeln(
+            "      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
         buffer.writeln("    ),");
         buffer.writeln("  );");
       }
@@ -315,17 +349,20 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
     buffer.writeln(
         "extension ${caseName}ObminOpticReflectorExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Reflector<Whole, $caseName$generics> {");
 
-    for (final field in caseE.fields2) {
+    for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
+        buffer.writeln(
+            "  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
         buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
-        buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
-        buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+        buffer.writeln(
+            "      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
+        buffer.writeln(
+            "      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
         buffer.writeln("    ),");
         buffer.writeln("  );");
       }
@@ -336,17 +373,20 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
     buffer.writeln(
         "extension ${caseName}ObminOpticBiPreviewExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on BiPreview<Whole, $caseName$generics> {");
 
-    for (final field in caseE.fields2) {
+    for (final field in caseE.fields) {
       if (!_isComputedProperty(field)) {
         buffer.writeln("");
 
         final fieldName = field.displayName;
         final fieldType = field.type;
 
-        buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
+        buffer.writeln(
+            "  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
         buffer.writeln("    Mutator.lens<$caseName$generics, $fieldType>(");
-        buffer.writeln("      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
-        buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+        buffer.writeln(
+            "      Getter<$caseName$generics, $fieldType>((whole) => whole.$fieldName),");
+        buffer.writeln(
+            "      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
         buffer.writeln("    ),");
         buffer.writeln("  );");
       }
@@ -356,21 +396,24 @@ void _generateSealedClassCases(StringBuffer buffer, ClassElement2 element, List<
   }
 }
 
-void _generateSealedOptics(StringBuffer buffer, ClassElement2 element, List<ClassElement2> cases) {
+void _generateSealedOptics(
+    StringBuffer buffer, ClassElement element, List<ClassElement> cases) {
   final String className = element.displayName;
 
   final String generics;
 
-  if (element.typeParameters2.isEmpty) {
+  if (element.typeParameters.isEmpty) {
     generics = "";
   } else {
-    final params = _dropLastChar(element.typeParameters2.fold("", (acc, element) {
+    final params =
+        _dropLastChar(element.typeParameters.fold("", (acc, element) {
       return "$acc$element,";
     }));
     generics = "<$params>";
   }
 
-  buffer.writeln("extension ${className}ObminOpticEqvExtension$generics on Eqv<$className$generics> {");
+  buffer.writeln(
+      "extension ${className}ObminOpticEqvExtension$generics on Eqv<$className$generics> {");
 
   for (final caseE in cases) {
     final caseName = caseE.displayName;
@@ -443,10 +486,13 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement2 element, List<Clas
   for (final caseE in cases) {
     final caseName = caseE.displayName;
 
-    buffer.writeln("  Mutator<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
+    buffer.writeln(
+        "  Mutator<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
     buffer.writeln("    Prism<$className$generics, $caseName$generics>(");
-    buffer.writeln("      Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone),");
-    buffer.writeln("      Getter<$caseName$generics, $className$generics>((part) => part),");
+    buffer.writeln(
+        "      Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone),");
+    buffer.writeln(
+        "      Getter<$caseName$generics, $className$generics>((part) => part),");
     buffer.writeln("    ),");
     buffer.writeln("  );");
   }
@@ -462,10 +508,13 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement2 element, List<Clas
   for (final caseE in cases) {
     final caseName = caseE.displayName;
 
-    buffer.writeln("  Prism<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
+    buffer.writeln(
+        "  Prism<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
     buffer.writeln("    Prism<$className$generics, $caseName$generics>(");
-    buffer.writeln("      Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone),");
-    buffer.writeln("      Getter<$caseName$generics, $className$generics>((part) => part),");
+    buffer.writeln(
+        "      Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone),");
+    buffer.writeln(
+        "      Getter<$caseName$generics, $className$generics>((part) => part),");
     buffer.writeln("    ),");
     buffer.writeln("  );");
   }
@@ -481,10 +530,13 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement2 element, List<Clas
   for (final caseE in cases) {
     final caseName = caseE.displayName;
 
-    buffer.writeln("  Prism<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => compose(");
+    buffer.writeln(
+        "  Prism<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => compose(");
     buffer.writeln("    Prism<$className$generics, $caseName$generics>(");
-    buffer.writeln("      Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone),");
-    buffer.writeln("      Getter<$caseName$generics, $className$generics>((part) => part),");
+    buffer.writeln(
+        "      Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone),");
+    buffer.writeln(
+        "      Getter<$caseName$generics, $className$generics>((part) => part),");
     buffer.writeln("    ),");
     buffer.writeln("  );");
   }
@@ -500,10 +552,13 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement2 element, List<Clas
   for (final caseE in cases) {
     final caseName = caseE.displayName;
 
-    buffer.writeln("  BiPreview<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
+    buffer.writeln(
+        "  BiPreview<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
     buffer.writeln("    Prism<$className$generics, $caseName$generics>(");
-    buffer.writeln("      Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone),");
-    buffer.writeln("      Getter<$caseName$generics, $className$generics>((part) => part),");
+    buffer.writeln(
+        "      Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone),");
+    buffer.writeln(
+        "      Getter<$caseName$generics, $className$generics>((part) => part),");
     buffer.writeln("    ),");
     buffer.writeln("  );");
   }
@@ -519,10 +574,13 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement2 element, List<Clas
   for (final caseE in cases) {
     final caseName = caseE.displayName;
 
-    buffer.writeln("  BiPreview<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
+    buffer.writeln(
+        "  BiPreview<Whole, $caseName$generics> get ${_lowercaseFirstCharacter(caseName)} => composeWithPrism(");
     buffer.writeln("    Prism<$className$generics, $caseName$generics>(");
-    buffer.writeln("      Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone),");
-    buffer.writeln("      Getter<$caseName$generics, $className$generics>((part) => part),");
+    buffer.writeln(
+        "      Preview<$className$generics, $caseName$generics>((whole) => whole.${_lowercaseFirstCharacter(caseName)}OrNone),");
+    buffer.writeln(
+        "      Getter<$caseName$generics, $className$generics>((part) => part),");
     buffer.writeln("    ),");
     buffer.writeln("  );");
   }
@@ -530,21 +588,24 @@ void _generateSealedOptics(StringBuffer buffer, ClassElement2 element, List<Clas
   buffer.writeln('}');
 }
 
-void _generateSealedMapMethods(StringBuffer buffer, ClassElement2 element, List<ClassElement2> cases) {
+void _generateSealedMapMethods(
+    StringBuffer buffer, ClassElement element, List<ClassElement> cases) {
   final String className = element.displayName;
 
   final String generics;
 
-  if (element.typeParameters2.isEmpty) {
+  if (element.typeParameters.isEmpty) {
     generics = "";
   } else {
-    final params = _dropLastChar(element.typeParameters2.fold("", (acc, element) {
+    final params =
+        _dropLastChar(element.typeParameters.fold("", (acc, element) {
       return "$acc$element,";
     }));
     generics = "<$params>";
   }
 
-  buffer.writeln("extension ${className}ObminOpticToolMethodsExtension$generics on $className$generics {");
+  buffer.writeln(
+      "extension ${className}ObminOpticToolMethodsExtension$generics on $className$generics {");
 
   String foldArgs = "";
   String foldCases = "";
@@ -608,22 +669,27 @@ void _generateSealedMapMethods(StringBuffer buffer, ClassElement2 element, List<
 
     foldCases += "$caseName$generics() => if$caseName(value),";
 
-    buffer.writeln("$className$generics map$caseName($caseName$generics Function($caseName$generics value) function) {");
-    buffer.writeln("return fold<$className$generics>(${getMapArgs(caseName)});");
+    buffer.writeln(
+        "$className$generics map$caseName($caseName$generics Function($caseName$generics value) function) {");
+    buffer
+        .writeln("return fold<$className$generics>(${getMapArgs(caseName)});");
     buffer.writeln("}");
 
     buffer.writeln("");
     buffer.writeln("");
 
-    buffer.writeln("$className$generics map${caseName}To($caseName$generics value) {");
+    buffer.writeln(
+        "$className$generics map${caseName}To($caseName$generics value) {");
     buffer.writeln("return map$caseName((_) => value);");
     buffer.writeln("}");
 
     buffer.writeln("");
     buffer.writeln("");
 
-    buffer.writeln("$className$generics bind$caseName($className$generics Function($caseName$generics value) function) {");
-    buffer.writeln("return fold<$className$generics>(${getMapArgs(caseName)});");
+    buffer.writeln(
+        "$className$generics bind$caseName($className$generics Function($caseName$generics value) function) {");
+    buffer
+        .writeln("return fold<$className$generics>(${getMapArgs(caseName)});");
     buffer.writeln("}");
 
     buffer.writeln("");
@@ -635,14 +701,16 @@ void _generateSealedMapMethods(StringBuffer buffer, ClassElement2 element, List<
     buffer.writeln("");
     buffer.writeln("");
 
-    buffer.writeln("void executeIf$caseName(void Function($caseName$generics value) function) {");
+    buffer.writeln(
+        "void executeIf$caseName(void Function($caseName$generics value) function) {");
     buffer.writeln("fold<void Function()>(${getCaseExecuteArgs(caseName)})();");
     buffer.writeln("}");
 
     buffer.writeln("");
     buffer.writeln("");
 
-    buffer.writeln("bool get is$caseName => fold<bool>(${getIsCaseBoolArgs(caseName)});");
+    buffer.writeln(
+        "bool get is$caseName => fold<bool>(${getIsCaseBoolArgs(caseName)});");
 
     buffer.writeln("");
     buffer.writeln("");
@@ -661,7 +729,7 @@ void _generateSealedMapMethods(StringBuffer buffer, ClassElement2 element, List<
   buffer.writeln("}");
 }
 
-StringBuffer _generateFinalClass(ClassElement2 element) {
+StringBuffer _generateFinalClass(ClassElement element) {
   final StringBuffer buffer = StringBuffer();
   // generate plain old dart object
   _generateFinalPODO(buffer, element);
@@ -698,44 +766,48 @@ String _uppercaseFirstCharacter(String input) {
   return input[0].toUpperCase() + input.substring(1);
 }
 
-void _generateForEqv(StringBuffer buffer, ClassElement2 element) {
+void _generateForEqv(StringBuffer buffer, ClassElement element) {
   final String className = element.displayName;
 
   final String generics;
 
-  if (element.typeParameters2.isEmpty) {
+  if (element.typeParameters.isEmpty) {
     generics = "";
   } else {
-    final params = _dropLastChar(element.typeParameters2.fold("", (acc, element) {
+    final params =
+        _dropLastChar(element.typeParameters.fold("", (acc, element) {
       return "$acc$element,";
     }));
     generics = "<$params>";
   }
 
-  buffer.writeln("extension ${className}ObminOpticEqvExtension$generics on Eqv<$className$generics> {");
+  buffer.writeln(
+      "extension ${className}ObminOpticEqvExtension$generics on Eqv<$className$generics> {");
 
-  for (final field in element.fields2) {
+  for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln('  Getter<$className$generics, $fieldType> get $fieldName => asGetter().$fieldName;');
+      buffer.writeln(
+          '  Getter<$className$generics, $fieldType> get $fieldName => asGetter().$fieldName;');
     }
   }
 
   buffer.writeln('}');
 }
 
-void _generateForGetter(StringBuffer buffer, ClassElement2 element) {
+void _generateForGetter(StringBuffer buffer, ClassElement element) {
   final String className = element.displayName;
   final String generics;
 
-  if (element.typeParameters2.isEmpty) {
+  if (element.typeParameters.isEmpty) {
     generics = "";
   } else {
-    final params = _dropLastChar(element.typeParameters2.fold("", (acc, element) {
+    final params =
+        _dropLastChar(element.typeParameters.fold("", (acc, element) {
       return "$acc$element,";
     }));
     generics = "<$params>";
@@ -744,29 +816,31 @@ void _generateForGetter(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln(
       "extension ${className}ObminOpticGetterExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Getter<Whole, $className$generics> {");
 
-  for (final field in element.fields2) {
+  for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln('  Getter<Whole, $fieldType> get $fieldName => compose(Getter<$className$generics, $fieldType>((whole) => whole.$fieldName));');
+      buffer.writeln(
+          '  Getter<Whole, $fieldType> get $fieldName => compose(Getter<$className$generics, $fieldType>((whole) => whole.$fieldName));');
     }
   }
 
   buffer.writeln('}');
 }
 
-void _generateForPreview(StringBuffer buffer, ClassElement2 element) {
+void _generateForPreview(StringBuffer buffer, ClassElement element) {
   final String className = element.displayName;
 
   final String generics;
 
-  if (element.typeParameters2.isEmpty) {
+  if (element.typeParameters.isEmpty) {
     generics = "";
   } else {
-    final params = _dropLastChar(element.typeParameters2.fold("", (acc, element) {
+    final params =
+        _dropLastChar(element.typeParameters.fold("", (acc, element) {
       return "$acc$element,";
     }));
     generics = "<$params>";
@@ -775,29 +849,31 @@ void _generateForPreview(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln(
       "extension ${className}ObminOpticPreviewExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Preview<Whole, $className$generics> {");
 
-  for (final field in element.fields2) {
+  for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln('  Preview<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$className$generics, $fieldType>((whole) => whole.$fieldName));');
+      buffer.writeln(
+          '  Preview<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$className$generics, $fieldType>((whole) => whole.$fieldName));');
     }
   }
 
   buffer.writeln('}');
 }
 
-void _generateForFold(StringBuffer buffer, ClassElement2 element) {
+void _generateForFold(StringBuffer buffer, ClassElement element) {
   final String className = element.displayName;
 
   final String generics;
 
-  if (element.typeParameters2.isEmpty) {
+  if (element.typeParameters.isEmpty) {
     generics = "";
   } else {
-    final params = _dropLastChar(element.typeParameters2.fold("", (acc, element) {
+    final params =
+        _dropLastChar(element.typeParameters.fold("", (acc, element) {
       return "$acc$element,";
     }));
     generics = "<$params>";
@@ -806,29 +882,31 @@ void _generateForFold(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln(
       "extension ${className}ObminOpticFoldExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Fold<Whole, $className$generics> {");
 
-  for (final field in element.fields2) {
+  for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln('  Fold<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$className$generics, $fieldType>((whole) => whole.$fieldName));');
+      buffer.writeln(
+          '  Fold<Whole, $fieldType> get $fieldName => composeWithGetter(Getter<$className$generics, $fieldType>((whole) => whole.$fieldName));');
     }
   }
 
   buffer.writeln('}');
 }
 
-void _generateFinalMapMethods(StringBuffer buffer, ClassElement2 element) {
+void _generateFinalMapMethods(StringBuffer buffer, ClassElement element) {
   final String className = element.displayName;
 
   final String generics;
 
-  if (element.typeParameters2.isEmpty) {
+  if (element.typeParameters.isEmpty) {
     generics = "";
   } else {
-    final params = _dropLastChar(element.typeParameters2.fold("", (acc, element) {
+    final params =
+        _dropLastChar(element.typeParameters.fold("", (acc, element) {
       return "$acc$element,";
     }));
     generics = "<$params>";
@@ -836,10 +914,11 @@ void _generateFinalMapMethods(StringBuffer buffer, ClassElement2 element) {
 
   String constructObject(String modified) {
     String result = "$className(";
-    if (element.fields2.isNotEmpty) {
-      for (final field in element.fields2) {
+    if (element.fields.isNotEmpty) {
+      for (final field in element.fields) {
         if (!_isComputedProperty(field)) {
-          result += "${field.displayName}: ${field.displayName == modified ? "function(${field.displayName})" : field.displayName},";
+          result +=
+              "${field.displayName}: ${field.displayName == modified ? "function(${field.displayName})" : field.displayName},";
         }
       }
     }
@@ -849,22 +928,26 @@ void _generateFinalMapMethods(StringBuffer buffer, ClassElement2 element) {
     return result;
   }
 
-  buffer.writeln("extension ${className}ObminOpticToolMethodsExtension$generics on $className$generics {");
+  buffer.writeln(
+      "extension ${className}ObminOpticToolMethodsExtension$generics on $className$generics {");
 
   buffer.writeln("");
 
-  for (final field in element.fields2) {
+  for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
       final String fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln("    $className$generics copyUpdate${_uppercaseFirstCharacter(fieldName)}($fieldType Function($fieldType $fieldName) function) {");
+      buffer.writeln(
+          "    $className$generics copyUpdate${_uppercaseFirstCharacter(fieldName)}($fieldType Function($fieldType $fieldName) function) {");
       buffer.writeln("        return ${constructObject(fieldName)}");
       buffer.writeln("    }");
       buffer.writeln("");
 
-      buffer.writeln("    $className$generics copySet${_uppercaseFirstCharacter(fieldName)}($fieldType $fieldName) {");
-      buffer.writeln("        return copyUpdate${_uppercaseFirstCharacter(fieldName)}((_) => $fieldName);");
+      buffer.writeln(
+          "    $className$generics copySet${_uppercaseFirstCharacter(fieldName)}($fieldType $fieldName) {");
+      buffer.writeln(
+          "        return copyUpdate${_uppercaseFirstCharacter(fieldName)}((_) => $fieldName);");
       buffer.writeln("    }");
       buffer.writeln("");
     }
@@ -881,15 +964,16 @@ void _generateFinalMapMethods(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln('}');
 }
 
-void _generateForMutator(StringBuffer buffer, ClassElement2 element) {
+void _generateForMutator(StringBuffer buffer, ClassElement element) {
   final String className = element.displayName;
 
   final String generics;
 
-  if (element.typeParameters2.isEmpty) {
+  if (element.typeParameters.isEmpty) {
     generics = "";
   } else {
-    final params = _dropLastChar(element.typeParameters2.fold("", (acc, element) {
+    final params =
+        _dropLastChar(element.typeParameters.fold("", (acc, element) {
       return "$acc$element,";
     }));
     generics = "<$params>";
@@ -898,7 +982,7 @@ void _generateForMutator(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln(
       "extension ${className}ObminOpticMutatorExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Mutator<Whole, $className$generics> {");
 
-  for (final field in element.fields2) {
+  for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
@@ -907,8 +991,10 @@ void _generateForMutator(StringBuffer buffer, ClassElement2 element) {
 
       buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => compose(");
       buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
-      buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
-      buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+      buffer.writeln(
+          "      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
+      buffer.writeln(
+          "      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
       buffer.writeln("    ),");
       buffer.writeln("  );");
     }
@@ -919,17 +1005,20 @@ void _generateForMutator(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln(
       "extension ${className}ObminOpticIsoExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Iso<Whole, $className$generics> {");
 
-  for (final field in element.fields2) {
+  for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
+      buffer.writeln(
+          "  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
       buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
-      buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
-      buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+      buffer.writeln(
+          "      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
+      buffer.writeln(
+          "      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
       buffer.writeln("    ),");
       buffer.writeln("  );");
     }
@@ -940,17 +1029,20 @@ void _generateForMutator(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln(
       "extension ${className}ObminOpticPrismExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Prism<Whole, $className$generics> {");
 
-  for (final field in element.fields2) {
+  for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
+      buffer.writeln(
+          "  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
       buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
-      buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
-      buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+      buffer.writeln(
+          "      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
+      buffer.writeln(
+          "      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
       buffer.writeln("    ),");
       buffer.writeln("  );");
     }
@@ -961,17 +1053,20 @@ void _generateForMutator(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln(
       "extension ${className}ObminOpticReflectorExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on Reflector<Whole, $className$generics> {");
 
-  for (final field in element.fields2) {
+  for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
+      buffer.writeln(
+          "  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
       buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
-      buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
-      buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+      buffer.writeln(
+          "      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
+      buffer.writeln(
+          "      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
       buffer.writeln("    ),");
       buffer.writeln("  );");
     }
@@ -982,17 +1077,20 @@ void _generateForMutator(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln(
       "extension ${className}ObminOpticBiPreviewExtension<Whole${generics.isEmpty ? "" : ",${_dropFirstChar(_dropLastChar(generics))}"}> on BiPreview<Whole, $className$generics> {");
 
-  for (final field in element.fields2) {
+  for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
       buffer.writeln("");
 
       final fieldName = field.displayName;
       final fieldType = field.type;
 
-      buffer.writeln("  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
+      buffer.writeln(
+          "  Mutator<Whole, $fieldType> get $fieldName => asMutator().compose(");
       buffer.writeln("    Mutator.lens<$className$generics, $fieldType>(");
-      buffer.writeln("      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
-      buffer.writeln("      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
+      buffer.writeln(
+          "      Getter<$className$generics, $fieldType>((whole) => whole.$fieldName),");
+      buffer.writeln(
+          "      Getter((part) => Getter((whole) => whole.copySet${_uppercaseFirstCharacter(fieldName)}(part))),");
       buffer.writeln("    ),");
       buffer.writeln("  );");
     }
@@ -1001,27 +1099,29 @@ void _generateForMutator(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln('}');
 }
 
-void _generateFinalPODO(StringBuffer buffer, ClassElement2 element) {
+void _generateFinalPODO(StringBuffer buffer, ClassElement element) {
   final String className = element.displayName;
 
   final String generics;
 
-  if (element.typeParameters2.isEmpty) {
+  if (element.typeParameters.isEmpty) {
     generics = "";
   } else {
-    final params = _dropLastChar(element.typeParameters2.fold("", (acc, element) {
+    final params =
+        _dropLastChar(element.typeParameters.fold("", (acc, element) {
       return "$acc$element,";
     }));
     generics = "<$params>";
   }
 
-  buffer.writeln("extension Optic${className}UtilsExtension${generics} on $className$generics {");
+  buffer.writeln(
+      "extension Optic${className}UtilsExtension${generics} on $className$generics {");
 
   String arguments = "";
   String compares = "";
   String hashes = "";
 
-  for (final field in element.fields2) {
+  for (final field in element.fields) {
     if (!_isComputedProperty(field)) {
       final type = field.type;
       final name = field.displayName;
@@ -1029,8 +1129,10 @@ void _generateFinalPODO(StringBuffer buffer, ClassElement2 element) {
       final bool isAnyIterableSubclass = type.isDartCoreIterable;
 
       arguments += " $name=\$$name,";
-      compares += "&& ${isAnyIterableSubclass ? "const IterableEquality().equals(other.$name, $name)" : "other.$name == $name"}";
-      hashes += "${isAnyIterableSubclass ? "const IterableEquality().hash($name)" : name},";
+      compares +=
+          "&& ${isAnyIterableSubclass ? "const IterableEquality().equals(other.$name, $name)" : "other.$name == $name"}";
+      hashes +=
+          "${isAnyIterableSubclass ? "const IterableEquality().hash($name)" : name},";
     }
   }
 
@@ -1038,15 +1140,17 @@ void _generateFinalPODO(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln("");
 
   buffer.writeln("  String _toString() {");
-  buffer.writeln("    return \"$className${element.typeParameters2.isEmpty ? "" : "<${_dropLastChar(element.typeParameters2.fold("", (acc, element) {
-      return "$acc\$$element,";
-    }))}>"} {${_dropLastChar(arguments)} }\";");
+  buffer.writeln(
+      "    return \"$className${element.typeParameters.isEmpty ? "" : "<${_dropLastChar(element.typeParameters.fold("", (acc, element) {
+          return "$acc\$$element,";
+        }))}>"} {${_dropLastChar(arguments)} }\";");
   buffer.writeln("  }");
 
   buffer.writeln("");
   buffer.writeln("");
 
-  buffer.writeln("  // you need \"collection:\" package if you want to use Iterable in your class");
+  buffer.writeln(
+      "  // you need \"collection:\" package if you want to use Iterable in your class");
   buffer.writeln("  bool _equals(Object other) {");
   buffer.writeln("    if (identical(this, other)) return true;");
   buffer.writeln("    return other is $className$generics");
@@ -1066,11 +1170,11 @@ void _generateFinalPODO(StringBuffer buffer, ClassElement2 element) {
   buffer.writeln("}");
 }
 
-bool _isClassFinal(ClassElement2 element) {
+bool _isClassFinal(ClassElement element) {
   return element.toString().substring(0, 11).contains("final class");
 }
 
-bool _isSubClassOfObject(ClassElement2 element) {
+bool _isSubClassOfObject(ClassElement element) {
   final supertype = element.supertype;
 
   if (supertype == null) {
@@ -1094,19 +1198,19 @@ String _dropFirstChar(String input) {
   return input.substring(1, input.length);
 }
 
-bool _isClassSealed(ClassElement2 classElement) {
+bool _isClassSealed(ClassElement classElement) {
   return classElement.toString().substring(0, 12).contains("sealed class");
 }
 
-List<ClassElement2> _findSubclasses(ClassElement2 sealedClass) {
-  bool isDirectSubclassOf(ClassElement2 subclass, ClassElement2 superclass) {
-    return subclass.supertype?.element3 == superclass;
+List<ClassElement> _findSubclasses(ClassElement sealedClass) {
+  bool isDirectSubclassOf(ClassElement subclass, ClassElement superclass) {
+    return subclass.supertype?.element == superclass;
   }
 
-  final subclasses = <ClassElement2>[];
+  final subclasses = <ClassElement>[];
 
   // Traverse all elements in the library to find direct subclasses
-  final library = sealedClass.library2;
+  final library = sealedClass.library;
   for (final element in library.classes) {
     if (element != sealedClass) {
       if (isDirectSubclassOf(element, sealedClass)) {
@@ -1118,6 +1222,6 @@ List<ClassElement2> _findSubclasses(ClassElement2 sealedClass) {
   return subclasses;
 }
 
-bool _isComputedProperty(FieldElement2 field) {
-  return field.getter2 != null && field.setter2 == null && !field.isFinal;
+bool _isComputedProperty(FieldElement field) {
+  return field.getter != null && field.setter == null && !field.isFinal;
 }
